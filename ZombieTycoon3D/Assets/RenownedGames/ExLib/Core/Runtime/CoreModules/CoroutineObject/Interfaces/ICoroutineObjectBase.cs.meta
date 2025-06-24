@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 71bf1df3ca4ce4c499648eb20840143c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/ExLib/Core/Runtime/CoreModules/CoroutineObject/Interfaces/ICoroutineObjectBase.cs
+  uploadId: 715660

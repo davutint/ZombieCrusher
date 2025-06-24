@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 073a26ba69f6f484ea327ee715cc6dde
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Popups/Popup01_TabMenu.prefab
+  uploadId: 714557

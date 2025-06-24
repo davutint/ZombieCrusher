@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 40db3173a05ae3242b1c182a09b0a183
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/AIBot/Animations/StarterAssetsThirdPerson.controller
+  uploadId: 715660

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ac5e8870fc9494856a5eccd851c1c56f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_UI_Etc/InputField-Group.prefab
+  uploadId: 714557

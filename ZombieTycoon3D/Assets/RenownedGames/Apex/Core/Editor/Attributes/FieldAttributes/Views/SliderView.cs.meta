@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 16dfd66b53b33ac4880a7ffcbe637343
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/Attributes/FieldAttributes/Views/SliderView.cs
+  uploadId: 715660

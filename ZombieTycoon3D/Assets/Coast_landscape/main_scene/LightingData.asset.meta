@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f160cf8a925446e41ae5f35f5d70c0cc
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 6416
+  packageName: Coast Landscape Racing Track
+  packageVersion: 3.8
+  assetPath: Assets/Coast_landscape/main_scene/LightingData.asset
+  uploadId: 709106

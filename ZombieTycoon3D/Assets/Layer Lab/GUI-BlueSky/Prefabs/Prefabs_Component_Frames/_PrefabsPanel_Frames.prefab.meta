@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1e59bf8656574465b8cf1909a912c11e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Frames/_PrefabsPanel_Frames.prefab
+  uploadId: 714557

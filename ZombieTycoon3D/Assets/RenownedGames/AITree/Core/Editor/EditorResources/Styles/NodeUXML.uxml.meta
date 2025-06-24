@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: eb915e841316d9c4eb2f4849cb35df35
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/EditorResources/Styles/NodeUXML.uxml
+  uploadId: 715660

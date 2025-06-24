@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 85db91bbb5e9a454195a012c222fe0b5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/EditorMethodAttributes/Derived/OnObjectGUIChangedAttribute.cs
+  uploadId: 715660

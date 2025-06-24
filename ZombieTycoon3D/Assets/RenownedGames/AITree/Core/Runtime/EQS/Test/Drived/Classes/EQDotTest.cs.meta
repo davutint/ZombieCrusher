@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 321eff353cb6f3f4f81aff3d94a73d6a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/EQS/Test/Drived/Classes/EQDotTest.cs
+  uploadId: 715660

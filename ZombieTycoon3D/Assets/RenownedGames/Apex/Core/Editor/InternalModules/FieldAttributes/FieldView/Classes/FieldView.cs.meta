@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c7c8aa8f6f673495e9c82be6873fc0b0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/InternalModules/FieldAttributes/FieldView/Classes/FieldView.cs
+  uploadId: 715660

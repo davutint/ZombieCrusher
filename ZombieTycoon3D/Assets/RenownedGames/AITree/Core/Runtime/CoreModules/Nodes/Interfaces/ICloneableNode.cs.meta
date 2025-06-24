@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ceac855f3f8ddea4aa1fcfcb05b93081
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/Nodes/Interfaces/ICloneableNode.cs
+  uploadId: 715660

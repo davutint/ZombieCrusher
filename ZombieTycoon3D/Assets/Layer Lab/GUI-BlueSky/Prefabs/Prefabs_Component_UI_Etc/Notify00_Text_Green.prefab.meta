@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c4fc754db833d4472abb0ebc8d896a5a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_UI_Etc/Notify00_Text_Green.prefab
+  uploadId: 714557

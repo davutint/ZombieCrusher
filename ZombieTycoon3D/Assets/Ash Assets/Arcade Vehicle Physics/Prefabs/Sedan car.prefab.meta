@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d9a231df7003ffd4688c25c36b65c296
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 193251
+  packageName: Arcade Vehicle Physics
+  packageVersion: 1.3
+  assetPath: Assets/Ash Assets/Arcade Vehicle Physics/Prefabs/Sedan car.prefab
+  uploadId: 716228

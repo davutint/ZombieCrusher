@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f0453b0206049bd4a8c6586b104b059e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ViewAttribute/Derived/TogglePropertyAttribute.cs
+  uploadId: 715660

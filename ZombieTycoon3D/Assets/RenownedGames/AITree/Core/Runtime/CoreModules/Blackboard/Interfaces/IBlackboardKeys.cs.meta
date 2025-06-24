@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c399af85c0da8cf4ab336165edb56730
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/Blackboard/Interfaces/IBlackboardKeys.cs
+  uploadId: 715660

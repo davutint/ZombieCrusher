@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 964805a19fa244ee7b575c8715455a0f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Sliders/_PrefabsPanel_Sliders.prefab
+  uploadId: 714557

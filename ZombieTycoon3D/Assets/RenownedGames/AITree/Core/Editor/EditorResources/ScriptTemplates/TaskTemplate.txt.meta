@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 537378c233f9f6446b71f9f30f1f50b0
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/EditorResources/ScriptTemplates/TaskTemplate.txt
+  uploadId: 715660

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8a7437817844dce4894b049de73b75f2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Prefabs/Ramp_Prefab.prefab
+  uploadId: 715660

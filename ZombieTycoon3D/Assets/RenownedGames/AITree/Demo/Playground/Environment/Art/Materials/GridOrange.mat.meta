@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b848996117e34a64a962a22171b82caa
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Art/Materials/GridOrange.mat
+  uploadId: 715660

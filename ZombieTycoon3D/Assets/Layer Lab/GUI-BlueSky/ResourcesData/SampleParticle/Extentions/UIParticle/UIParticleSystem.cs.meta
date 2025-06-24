@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fbeff74297cb84edcaecd09428d8e4e7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/ResourcesData/SampleParticle/Extentions/UIParticle/UIParticleSystem.cs
+  uploadId: 714557

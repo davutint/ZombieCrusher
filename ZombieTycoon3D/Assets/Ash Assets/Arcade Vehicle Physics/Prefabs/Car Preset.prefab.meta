@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b645066e3f4574e438eadecd9d295b19
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 193251
+  packageName: Arcade Vehicle Physics
+  packageVersion: 1.3
+  assetPath: Assets/Ash Assets/Arcade Vehicle Physics/Prefabs/Car Preset.prefab
+  uploadId: 716228

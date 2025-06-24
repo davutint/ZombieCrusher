@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 155c38fc76b5d47cfa851f421a2b4525
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_UI_Etc/Label00_Purple.prefab
+  uploadId: 714557

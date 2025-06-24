@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: bf9e7340399414314967702e4661a861
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Sliders/SliderGroup_UserInfoSlider02_White.prefab
+  uploadId: 714557

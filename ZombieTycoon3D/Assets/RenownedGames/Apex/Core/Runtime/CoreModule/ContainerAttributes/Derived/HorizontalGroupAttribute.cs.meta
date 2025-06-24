@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9bfc211605fce49558d4b8a75968658b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ContainerAttributes/Derived/HorizontalGroupAttribute.cs
+  uploadId: 715660

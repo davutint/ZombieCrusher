@@ -1,0 +1,14 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+# Tüm dosya ve klasörleri ignore et
+/*
+
+# Assets klasörünü dahil et
+!Assets/
+
+# Unity'nin meta dosyalarını da dahil et
+!Assets/**/*.cs.meta
+# Aşağıdaki Unity ile ilgili klasörleri ignore et
+Library/
+ProjectSettings/
+Packages/
+Temp/

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: cc36a5920988efd40a564fbbdc06085e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ManipulatorAttributes/Derived/AssetOnlyAttribute.cs
+  uploadId: 715660

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3caf1da0d39423f429009a20a54e5e1b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/DrawerAttributes/DrawerAttribute.cs
+  uploadId: 715660

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 876ced35c2c02465ab4a0354a45af024
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Popup_StageReady.prefab
+  uploadId: 714557

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 927760863e0fe4976916cad4d6209391
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 203399
+  packageName: GUI Pro - Simple Casual
+  packageVersion: 1.0.7
+  assetPath: Assets/Layer Lab/GUI Pro-SimpleCasual/ResourcesData/Fonts/Quicksand
+    - OFL.txt
+  uploadId: 714426

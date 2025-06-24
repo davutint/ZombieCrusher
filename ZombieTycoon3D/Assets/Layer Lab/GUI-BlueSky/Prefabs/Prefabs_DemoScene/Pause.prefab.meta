@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 48300b3100534413c9d0edb3e1a6c1c0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Pause.prefab
+  uploadId: 714557

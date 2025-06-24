@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9473b7858df73e24bb37d15f7bdadb31
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {fileID: 2800000, guid: 7f4e21119caa88b4f946d9a617ea7216, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/DevidedModules/Nodes/Tasks/GameObject/GOFindClosestTask.cs
+  uploadId: 715660

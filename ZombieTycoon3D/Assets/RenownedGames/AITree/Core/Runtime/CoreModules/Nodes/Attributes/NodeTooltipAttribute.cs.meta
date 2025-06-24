@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ac8aaae859e795a4ca8add449f7e8d75
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/Nodes/Attributes/NodeTooltipAttribute.cs
+  uploadId: 715660

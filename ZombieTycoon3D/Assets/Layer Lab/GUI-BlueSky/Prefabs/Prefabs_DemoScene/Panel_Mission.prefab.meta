@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ba6fafeded7a14546a4d4e3b0b2c6512
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Panel_Mission.prefab
+  uploadId: 714557

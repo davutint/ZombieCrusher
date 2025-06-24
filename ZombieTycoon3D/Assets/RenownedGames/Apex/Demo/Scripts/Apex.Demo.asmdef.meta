@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f6c75eb28c7d5a34b94a2fb81612d0ba
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Demo/Scripts/Apex.Demo.asmdef
+  uploadId: 715660

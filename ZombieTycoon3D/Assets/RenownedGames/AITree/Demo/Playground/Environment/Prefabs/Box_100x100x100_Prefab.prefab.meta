@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e5f4daf24146ee040b5a2d7a73b30aa0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Prefabs/Box_100x100x100_Prefab.prefab
+  uploadId: 715660

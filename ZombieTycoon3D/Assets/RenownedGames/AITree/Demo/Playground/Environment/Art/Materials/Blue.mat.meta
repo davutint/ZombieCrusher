@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 979aef027a1c86c42a15ce35fce366fa
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Art/Materials/Blue.mat
+  uploadId: 715660

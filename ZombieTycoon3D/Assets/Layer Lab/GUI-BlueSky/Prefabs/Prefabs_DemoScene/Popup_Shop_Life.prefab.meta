@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b6579304ad9ad4f1eaafb03ac7a21873
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Popup_Shop_Life.prefab
+  uploadId: 714557

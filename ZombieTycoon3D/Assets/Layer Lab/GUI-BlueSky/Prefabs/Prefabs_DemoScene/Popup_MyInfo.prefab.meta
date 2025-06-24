@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: dba64fe6754374a8ca060f5d94012632
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Popup_MyInfo.prefab
+  uploadId: 714557

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4ae4920310b0ea0449f1cb30d1f065c6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/MathOperation/Classes/LogicOperation.cs
+  uploadId: 715660

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 43714b68324cc2c409d534d9874f2a2b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/AIBot/Materials/M_Armature_Body.mat
+  uploadId: 715660

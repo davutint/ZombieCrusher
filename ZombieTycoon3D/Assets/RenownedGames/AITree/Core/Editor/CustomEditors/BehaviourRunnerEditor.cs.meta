@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b76b12bd441b4034198111cc65fb6ced
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/CustomEditors/BehaviourRunnerEditor.cs
+  uploadId: 715660

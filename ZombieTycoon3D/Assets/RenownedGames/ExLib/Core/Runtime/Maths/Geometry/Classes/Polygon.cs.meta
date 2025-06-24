@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 90259a22216d2ab4fa3d19f74a1b5f44
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/ExLib/Core/Runtime/Maths/Geometry/Classes/Polygon.cs
+  uploadId: 715660

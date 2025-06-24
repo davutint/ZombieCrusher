@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1e80df3ee600c614ea1bf0bcb9d1397d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ViewAttribute/Derived/BaseEnumAttribute.cs
+  uploadId: 715660

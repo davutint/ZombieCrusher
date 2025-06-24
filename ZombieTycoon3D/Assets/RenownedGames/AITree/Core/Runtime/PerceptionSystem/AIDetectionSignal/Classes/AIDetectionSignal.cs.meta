@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9c35aecb382991543ba5675633ccbe48
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/PerceptionSystem/AIDetectionSignal/Classes/AIDetectionSignal.cs
+  uploadId: 715660

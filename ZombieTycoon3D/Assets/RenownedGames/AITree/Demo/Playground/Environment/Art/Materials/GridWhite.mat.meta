@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dbf898c9f9c4a2d46aa6336e23caeb61
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Art/Materials/GridWhite.mat
+  uploadId: 715660

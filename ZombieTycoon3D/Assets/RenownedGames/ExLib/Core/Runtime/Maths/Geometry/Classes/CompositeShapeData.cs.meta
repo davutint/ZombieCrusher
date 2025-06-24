@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fa11321b1144740418ff64b560dd135c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/ExLib/Core/Runtime/Maths/Geometry/Classes/CompositeShapeData.cs
+  uploadId: 715660

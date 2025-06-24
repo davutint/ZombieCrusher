@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e76ede12fafcba74f82c34ac5bb0a7b4
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/EQS/AITree.EQS.asmdef
+  uploadId: 715660

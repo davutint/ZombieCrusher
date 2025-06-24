@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6426106d68efb4347b25e9ba2003340a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 6416
+  packageName: Coast Landscape Racing Track
+  packageVersion: 3.8
+  assetPath: Assets/Coast_landscape/Scripts/Flare.cs
+  uploadId: 709106

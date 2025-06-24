@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6a3bc58ebb3aa5b4297dcdc2e72a2f2e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/KeyReceiver/Classes/KeyReceiverGeneric.cs
+  uploadId: 715660

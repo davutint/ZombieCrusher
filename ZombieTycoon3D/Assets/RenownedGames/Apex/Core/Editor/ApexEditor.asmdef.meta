@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3c583a70120640c4bb70c2b72365e742
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/ApexEditor.asmdef
+  uploadId: 715660

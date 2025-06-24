@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 703dde2bd6f711c4ca6719eb323ee502
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/EditorWindows/TrackerWindow/Classes/TrackerWindowTitleAttribute.cs
+  uploadId: 715660

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 803eaf16a0cb60b4ebffbbe0865a8f64
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/InternalModules/SerializedProperty/Classes/SerializedCsProperty.cs
+  uploadId: 715660

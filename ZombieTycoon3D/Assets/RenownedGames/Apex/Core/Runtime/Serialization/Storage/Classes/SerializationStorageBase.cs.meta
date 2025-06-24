@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6f2a2e8f300e3724693b85052a786ce0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/Serialization/Storage/Classes/SerializationStorageBase.cs
+  uploadId: 715660

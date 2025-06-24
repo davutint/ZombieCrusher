@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b06dda8932aaf401e9b2b7e4e3b8ae81
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Buttons/Button_Rectangle02.prefab
+  uploadId: 714557

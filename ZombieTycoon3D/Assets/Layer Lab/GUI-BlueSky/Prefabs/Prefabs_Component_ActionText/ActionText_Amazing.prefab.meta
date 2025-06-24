@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ba06d27c1a0bb4da3a3354f9d13044a1
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_ActionText/ActionText_Amazing.prefab
+  uploadId: 714557

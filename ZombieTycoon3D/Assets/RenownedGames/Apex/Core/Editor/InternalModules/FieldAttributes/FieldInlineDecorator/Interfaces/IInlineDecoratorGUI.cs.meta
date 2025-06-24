@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8b6b98e685c048b48b575abd2a821205
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/InternalModules/FieldAttributes/FieldInlineDecorator/Interfaces/IInlineDecoratorGUI.cs
+  uploadId: 715660

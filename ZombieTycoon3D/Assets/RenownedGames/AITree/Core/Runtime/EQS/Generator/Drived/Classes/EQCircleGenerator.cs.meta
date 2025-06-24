@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e8ce3744d09b58746a7b890a22af0a55
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/EQS/Generator/Drived/Classes/EQCircleGenerator.cs
+  uploadId: 715660

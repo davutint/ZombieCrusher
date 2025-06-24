@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e800c55db6f5a4e9d9eebd161c4766f7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Sliders/Slider00_Green.prefab
+  uploadId: 714557

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4517efee4fd5c1f4fb3ec85f03b31662
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/EQS/Test/Drived/Classes/EQTraceTest.cs
+  uploadId: 715660

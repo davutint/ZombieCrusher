@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7bc3768156021426a94f6d25f1b41e46
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Scene/DemoScene_BlueSky.unity
+  uploadId: 714557

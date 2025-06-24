@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f64a7940b29024cef9cc07015a996dbd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ViewAttribute/Derived/MinMaxSliderAttribute.cs
+  uploadId: 715660

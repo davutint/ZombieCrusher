@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8a3cb05caf0f74ae2b82700e62a4775f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Buttons/Button_Rectangle05_BlueLine.prefab
+  uploadId: 714557

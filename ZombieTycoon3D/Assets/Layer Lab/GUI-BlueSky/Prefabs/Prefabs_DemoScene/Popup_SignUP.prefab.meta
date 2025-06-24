@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2e3ad0c9dc87b4acf80a091f2c68f98f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Popup_SignUP.prefab
+  uploadId: 714557

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 619d94e2c71c2467392b1b575b25cb73
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Frames/StageFrame-Group.prefab
+  uploadId: 714557

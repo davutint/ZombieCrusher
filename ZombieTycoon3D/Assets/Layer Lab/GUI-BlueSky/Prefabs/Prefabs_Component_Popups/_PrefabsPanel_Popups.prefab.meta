@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b311839fe20e443f4b83dd594e3d4822
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Popups/_PrefabsPanel_Popups.prefab
+  uploadId: 714557

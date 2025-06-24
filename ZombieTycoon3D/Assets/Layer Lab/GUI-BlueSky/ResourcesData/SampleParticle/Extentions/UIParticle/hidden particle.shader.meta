@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 97ec53308dbf8472e90d7bbf7e739fc1
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/ResourcesData/SampleParticle/Extentions/UIParticle/hidden
+    particle.shader
+  uploadId: 714557

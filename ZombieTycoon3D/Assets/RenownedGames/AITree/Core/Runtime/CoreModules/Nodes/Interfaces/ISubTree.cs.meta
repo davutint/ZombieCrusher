@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: a4a564bdee8a5b5488f5d1afda4261c5
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/Nodes/Interfaces/ISubTree.cs
+  uploadId: 715660

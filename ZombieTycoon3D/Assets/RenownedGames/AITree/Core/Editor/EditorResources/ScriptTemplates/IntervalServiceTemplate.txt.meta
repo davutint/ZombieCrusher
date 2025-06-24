@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 96abb1f146cce314dbb1b31035f3a882
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/EditorResources/ScriptTemplates/IntervalServiceTemplate.txt
+  uploadId: 715660

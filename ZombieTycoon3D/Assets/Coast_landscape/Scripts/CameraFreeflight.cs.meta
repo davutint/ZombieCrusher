@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 10b30d39581307f4394e4dc93ae3f85a
+timeCreated: 1572304602
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 6416
+  packageName: Coast Landscape Racing Track
+  packageVersion: 3.8
+  assetPath: Assets/Coast_landscape/Scripts/CameraFreeflight.cs
+  uploadId: 709106

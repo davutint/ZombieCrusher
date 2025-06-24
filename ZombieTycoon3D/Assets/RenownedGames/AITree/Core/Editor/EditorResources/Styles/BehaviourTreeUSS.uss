@@ -1,0 +1,172 @@
+/* Variables */
+:root {
+  --border-color: rgb(35, 35, 35);
+}
+
+/* Grid uss */
+GridBackground {
+    --grid-background-color: rgb(40, 40, 40);
+    --line-color: rgba(255, 255, 255, 0.04);
+    --thick-line-color: rgba(0, 0, 0, .4);
+    --spacing: 15;
+}
+
+/* Toolbar */
+#toolbar-container {
+    flex-direction: row;
+}
+
+#toolbar-left {
+    flex-grow: 1;
+    justify-content: flex-start;
+}
+
+#toolbar-right {
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+ToolbarMenu {
+    border-left-width: 0px;
+    border-right-width: 0.5px;
+    margin-left: 0.5px;
+}
+
+ToolbarButton {
+    -unity-text-align: middle-center;
+    border-left-width: 0.5px;
+    border-right-width: 0.5px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+ToolbarToggle {
+    -unity-text-align: middle-center;
+    border-left-width: 0.5px;
+    border-right-width: 0.5px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+ToolbarButton:focus {
+    border-color: #292929;
+}
+
+#auto-save-toggle {
+    margin-right: -2px;
+}
+
+/* Tree Editor */
+#tree-container {    
+    flex-grow: 1;
+}
+
+#tree{
+    flex-grow: 1;
+}
+
+#simulating-border {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    margin: 10px;
+
+    border-color: rgba(169, 90, 0, .75);
+    border-width: 6px;
+    border-radius: 12px; 
+
+    display: none;
+}
+
+#simulating-lable {
+    position: absolute;
+
+    left: 10px;
+    top: 5px;
+
+    color: rgba(217, 217, 6, .2);
+    font-size: 50px;
+    -unity-font-style: bold;
+}
+
+#tree-name {
+    position: absolute;
+
+    right: 20px;
+    bottom: 15px;
+
+    color: rgba(255, 255, 255, .1);
+    font-size: 50px;
+    -unity-font-style: bold;
+}
+
+#node-description {
+    position: absolute;
+
+    left: 20px;
+    bottom: 20px;
+    width: 500px;
+
+    white-space: normal;
+    text-overflow: ellipsis;
+
+    color: rgba(255, 255, 255, .5);
+    font-size: 15px;
+    -unity-font-style: italic;
+}
+
+#overlay-inspector{
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    height: 300px;
+    width: 300px;
+    background-color: rgba(56, 56, 56, .75);
+    border-color: rgba(35, 35, 35, 1);
+    border-radius: 10px;
+}
+
+#overlay-inspector-title{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 13px;
+    align-self: center;
+    white-space: normal;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+#overlay-inspector-gui{
+    flex-grow: 1;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#overlay-inspector-hide-button{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 0;
+    top: 0;
+    margin: -1px;
+    border-top-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    padding-left: 10px;
+    background-color: rgba(56, 56, 56, .75);
+}
+
+#overlay-inspector-hide-button:enabled{
+    border-color: rgba(45, 45, 45, 1);
+}
+
+#overlay-inspector-hide-button:hover{
+    border-color: rgba(123, 174, 250, 0.5);
+}
+
+#overlay-inspector-hide-button:focus{
+    border-color: rgba(123, 174, 250, 1);
+}

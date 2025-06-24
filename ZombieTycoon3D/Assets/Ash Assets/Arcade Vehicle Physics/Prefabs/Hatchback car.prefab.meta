@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c9e904412020b334d85c8aec5b0b2711
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 193251
+  packageName: Arcade Vehicle Physics
+  packageVersion: 1.3
+  assetPath: Assets/Ash Assets/Arcade Vehicle Physics/Prefabs/Hatchback car.prefab
+  uploadId: 716228

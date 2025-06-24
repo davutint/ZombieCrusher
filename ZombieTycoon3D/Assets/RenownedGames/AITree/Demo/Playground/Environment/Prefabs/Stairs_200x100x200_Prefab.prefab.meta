@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 466621a4836aa504c87c15d88722d465
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Prefabs/Stairs_200x100x200_Prefab.prefab
+  uploadId: 715660

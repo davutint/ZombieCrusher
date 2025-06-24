@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b879cd9337221411ba5789513616b7de
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Popup_Shop_Coin.prefab
+  uploadId: 714557

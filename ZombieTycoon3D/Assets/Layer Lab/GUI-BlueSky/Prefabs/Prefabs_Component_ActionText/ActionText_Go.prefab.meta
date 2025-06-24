@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9c49999089c3b436c8daf1da2d9811b6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_ActionText/ActionText_Go.prefab
+  uploadId: 714557

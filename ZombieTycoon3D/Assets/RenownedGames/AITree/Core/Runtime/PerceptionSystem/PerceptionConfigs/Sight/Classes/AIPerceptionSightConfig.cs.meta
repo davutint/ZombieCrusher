@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b6a525e43b271ac4eab6d8f39f2a38a1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/PerceptionSystem/PerceptionConfigs/Sight/Classes/AIPerceptionSightConfig.cs
+  uploadId: 715660

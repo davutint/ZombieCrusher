@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 6251afdf51d323141b81eb3eaa4a2a8f
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 6416
+  packageName: Coast Landscape Racing Track
+  packageVersion: 3.8
+  assetPath: Assets/Coast_landscape/Scripts/TextureAnimator.cs
+  uploadId: 709106

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 816fcd5d405e9104db21af6829e0c181
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ValidatorAttributes/Derived/MaxVector3Attribute.cs
+  uploadId: 715660

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d38549c1d7eaa45799133fd9a10c3cb0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_DemoScene/Popup_Shop_Gem.prefab
+  uploadId: 714557

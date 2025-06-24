@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 775439ebbcbbd4be5a922538833535ff
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_ActionText/_PrefabsPanel_ActionTexts.prefab
+  uploadId: 714557

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: be9b513f6b7c944a699911cddd2a9858
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_UI_Etc/_PrefabsPanel_UI_Etc.prefab
+  uploadId: 714557

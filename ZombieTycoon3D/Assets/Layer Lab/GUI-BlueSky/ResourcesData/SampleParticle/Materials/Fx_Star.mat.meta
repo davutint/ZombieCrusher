@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 254ee109eab254e03b856360da4c1700
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/ResourcesData/SampleParticle/Materials/Fx_Star.mat
+  uploadId: 714557

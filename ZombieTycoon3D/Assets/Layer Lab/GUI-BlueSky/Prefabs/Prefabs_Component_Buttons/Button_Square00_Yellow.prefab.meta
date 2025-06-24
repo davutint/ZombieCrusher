@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8a16840f8919a4e16b57cae038ac341f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Buttons/Button_Square00_Yellow.prefab
+  uploadId: 714557

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e65f08b45ea72e742a57e444f3f5dfa1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Runtime/CoreModules/BlackboardSetup/Classes/BlackboardSetup.cs
+  uploadId: 715660

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c91e0b58091a4764e8ff9670d6446557
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/InternalModules/EditorWindows/ApexValidator/Classes/ApexValidatorWindow.cs
+  uploadId: 715660

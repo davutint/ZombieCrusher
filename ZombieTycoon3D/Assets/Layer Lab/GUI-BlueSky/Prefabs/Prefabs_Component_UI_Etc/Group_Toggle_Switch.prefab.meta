@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: afdf0e19f00cb49e192113459a37bfc9
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_UI_Etc/Group_Toggle_Switch.prefab
+  uploadId: 714557

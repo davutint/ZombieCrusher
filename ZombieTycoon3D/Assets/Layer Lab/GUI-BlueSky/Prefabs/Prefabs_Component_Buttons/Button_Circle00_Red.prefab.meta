@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1ecc39e6277c746fd88bdc101f688838
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Buttons/Button_Circle00_Red.prefab
+  uploadId: 714557

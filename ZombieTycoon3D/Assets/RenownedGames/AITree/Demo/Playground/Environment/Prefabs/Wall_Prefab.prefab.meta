@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9eb847ab97b24024588682c8601254cf
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Environment/Prefabs/Wall_Prefab.prefab
+  uploadId: 715660

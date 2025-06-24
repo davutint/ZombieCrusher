@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 49177d4c3e174604a836e165f1d2e63d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/EditorWindows/BehaviourTreeWindow/Classes/NodeView.cs
+  uploadId: 715660

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: cb643826af5786b469bf9f84a5e4a41d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Editor/InternalModules/MemberAttribute/MemberModificator/Interfaces/IManipulatorInitializaton.cs
+  uploadId: 715660

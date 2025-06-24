@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0226df74c36a54b588e6139cbcca4a4c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/DecoratorAttributes/Derived/HorizontalLineAttribute.cs
+  uploadId: 715660

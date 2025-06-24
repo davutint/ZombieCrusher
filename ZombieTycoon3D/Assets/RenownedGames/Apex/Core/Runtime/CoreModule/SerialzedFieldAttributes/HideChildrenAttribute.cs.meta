@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6df8869381983ac4d9b65f073259e91d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/SerialzedFieldAttributes/HideChildrenAttribute.cs
+  uploadId: 715660

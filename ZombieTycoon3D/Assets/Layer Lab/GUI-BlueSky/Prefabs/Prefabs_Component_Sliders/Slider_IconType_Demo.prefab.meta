@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1e4d76b2b481a4fbdbb2722df32cc4f2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Sliders/Slider_IconType_Demo.prefab
+  uploadId: 714557

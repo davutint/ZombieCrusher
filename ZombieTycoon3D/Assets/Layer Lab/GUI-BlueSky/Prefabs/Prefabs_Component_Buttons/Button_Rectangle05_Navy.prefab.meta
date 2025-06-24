@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 98e2595ed8f5349fabaeab27f3bdec2e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/Prefabs/Prefabs_Component_Buttons/Button_Rectangle05_Navy.prefab
+  uploadId: 714557

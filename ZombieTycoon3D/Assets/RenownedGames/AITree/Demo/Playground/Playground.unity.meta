@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4c98a911a3bdb7c4599a88432ef90bb9
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Demo/Playground/Playground.unity
+  uploadId: 715660

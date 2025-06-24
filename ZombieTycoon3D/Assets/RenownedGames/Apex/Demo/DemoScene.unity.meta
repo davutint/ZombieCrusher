@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 78f7ae98e685a8e46873b7ee9cf5af7e
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Demo/DemoScene.unity
+  uploadId: 715660

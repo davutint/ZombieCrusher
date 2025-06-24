@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b50e8a89827b86742839918101a6a06f
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/AITree/Core/Editor/EditorResources/ScriptTemplates/ServiceTemplate.txt
+  uploadId: 715660

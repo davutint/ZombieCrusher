@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fcc8d70c9b3c54f278e1ca99c625550f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177699
+  packageName: GUI - BlueSky
+  packageVersion: 2.1.2
+  assetPath: Assets/Layer Lab/GUI-BlueSky/ResourcesData/SampleParticle/Materials/fx_rotate_line.mat
+  uploadId: 714557

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 19dfbb4cc3563014f9ef6e690f2d4d6d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 229578
+  packageName: AI Tree - Behavior Trees for Unity
+  packageVersion: 1.11.1
+  assetPath: Assets/RenownedGames/Apex/Core/Runtime/CoreModule/ButtonAttributes/RepeatButtonAttribute.cs
+  uploadId: 715660
