@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e56ec0b9987b55e47941e327cbe748df
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 60072b568d64c40a485e0fc55012dc9f, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Editor/ShaderGraph/Rukhanka
+    Deformation.shadersubgraph
+  uploadId: 754107

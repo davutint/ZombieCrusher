@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: cd4b312feb4fdd549909e440d1ed93d5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Samples~/Samples/SampleAssets/Common/GPUAttachment
+    SimpleYellow.mat
+  uploadId: 754107

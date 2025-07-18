@@ -84,10 +84,10 @@ namespace ProjectDawn.Navigation.Editor
 
             DrawHorizontalLine();
 
-            ScriptingDefineToggleField.Draw(Styles.SonarTimeHorizon, "EXPERIMENTAL_SONAR_TIME");
+            ScriptingDefineToggleField.DrawInverted(Styles.SonarTimeHorizon, "DISABLE_SONAR_HORIZON");
             Rect controlRect = EditorGUILayout.GetControlRect();
             controlRect.height = 20;
-            EditorGUI.HelpBox(controlRect, $"This feature should result better sonar avoidance, but for now it is experimental! Make sure commit changes, before turning it on.", MessageType.Info);
+            EditorGUI.HelpBox(controlRect, $"This feature should result better sonar avoidance! Make sure commit changes, before turning it on.", MessageType.Info);
 
             ScriptingDefineToggleField.Draw(Styles.UseRegularUpdate, "AGENTS_NAVIGATION_REGULAR_UPDATE");
 

@@ -16,7 +16,14 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" style="flex-grow: 1; border-left-color: rgb(127, 127, 127); border-right-color: rgb(127, 127, 127); border-top-color: rgb(127, 127, 127); border-bottom-color: rgb(127, 127, 127); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; margin-top: 5px; padding-top: 3px; padding-right: 0; padding-bottom: 3px; padding-left: 0;">
-            <ui:Foldout text="Foldout" name="parametersFoldout" value="false" style="align-items: stretch;" />
+            <ui:MultiColumnListView name="parametersList" show-alternating-row-backgrounds="ContentOnly" show-foldout-header="true" header-title="Controller Parameters" allow-add="false" allow-remove="false" show-border="true" selection-type="None" show-bound-collection-size="true" virtualization-method="FixedHeight" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px;">
+                <ui:Columns stretch-mode="GrowAndFill" resize-preview="false">
+                    <ui:Column stretchable="true" title="Hash" name="hash" />
+                    <ui:Column title="Name" stretchable="true" name="name" />
+                    <ui:Column title="Type" stretchable="true" name="type" />
+                    <ui:Column title="Default Value" stretchable="true" name="defaultValue" />
+                </ui:Columns>
+            </ui:MultiColumnListView>
             <ui:Foldout text="Foldout" value="false" name="layersFoldout" />
         </ui:ScrollView>
         <ui:Label tabindex="-1" text="Related Entities" parse-escape-sequences="true" display-tooltip-when-elided="true" name="relatedEntitiesLabel" style="padding-top: 10px;" />

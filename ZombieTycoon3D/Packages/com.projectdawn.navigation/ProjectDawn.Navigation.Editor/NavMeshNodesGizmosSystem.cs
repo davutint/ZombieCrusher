@@ -14,8 +14,13 @@ namespace ProjectDawn.Navigation.Editor
     [UpdateAfter(typeof(NavMeshPathSystem))]
     public partial struct NavMeshNodesGizmosSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<NavMeshPath>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var navmesh = GetSingleton<NavMeshQuerySystem.Singleton>();
             var gizmos = GetSingletonRW<GizmosSystem.Singleton>();

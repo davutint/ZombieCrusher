@@ -14,7 +14,8 @@ GameObject:
   - component: {fileID: 7417395611900549628}
   - component: {fileID: 8735175082909066979}
   - component: {fileID: 6377201033186526514}
-  m_Layer: 0
+  - component: {fileID: 128608306001383196}
+  m_Layer: 7
   m_Name: Warrior Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,6 +109,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2a9d073dd8521b4f8519d13aca785c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &128608306001383196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355275861092370815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8873fbbc284e49ef8b36facf461ef532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieAuthoring
+  moveSpeed: 3
+  health: 100
 --- !u!1 &5597692745106618304
 GameObject:
   m_ObjectHideFlags: 0
@@ -119,7 +134,7 @@ GameObject:
   - component: {fileID: 2626236523324576472}
   - component: {fileID: 5491912040566019950}
   - component: {fileID: 3214751589428218760}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Figure
   m_TagString: Untagged
   m_Icon: {fileID: 0}

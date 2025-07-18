@@ -7,7 +7,6 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Rukhanka.Hybrid.RTP;
 using Rukhanka.Toolbox;
 using Unity.Assertions;
@@ -25,22 +24,21 @@ namespace Rukhanka.Hybrid
 [BurstCompile]
 public partial class AnimationClipBaker
 {
-	NativeList<BoneClip> genericCurvesArr, boneCurvesArr;
+	//	To reduce huge memory consumption during baking of many animations, I will reuse temporarty buffers
+	NativeList<KeyFrame> keyFramesList = new (Allocator.Temp);
+	NativeList<Track> trackList = new (Allocator.Temp);
+	NativeList<uint> trackGroupHashes = new (Allocator.Temp);
+	NativeList<uint> trackGroupOffsets = new (Allocator.Temp);
+#if RUKHANKA_DEBUG_INFO
+	NativeList<FixedString128Bytes> trackGroupNames = new (Allocator.Temp);
+#endif
 	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public AnimationClipBaker()
-	{
-		genericCurvesArr = new (Allocator.Temp);
-		boneCurvesArr = new (Allocator.Temp);
-	}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	struct ParsedCurveBinding
 	{
 		public BindingType bindingType;
-		public short channelIndex;
+		public uint channelIndex;
 		public string boneName;
 		public string channelName;
 
@@ -49,11 +47,11 @@ public partial class AnimationClipBaker
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ValueTuple<string, string> SplitPath(string path)
+	(string, string) SplitPath(string path)
 	{
 		var arr = path.Split('/');
 		Assert.IsTrue(arr.Length > 0);
-		var rv = (arr.Last(), arr.Length > 1 ? arr[arr.Length - 2] : "");
+		var rv = (arr.Last(), arr.Length > 1 ? arr[^2] : "");
 		return rv;
 	}
 
@@ -66,47 +64,44 @@ public partial class AnimationClipBaker
 		"localEulerAngles" => BindingType.EulerAngles,
 		"localEulerAnglesRaw" => BindingType.EulerAngles,
 		"m_LocalScale" => BindingType.Scale,
-		"blendShape" => BindingType.BlendShape,
 		_ => BindingType.Unknown
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	short ChannelIndexFromString(string c) => c switch
+	uint ChannelIndexFromString(string c) => c switch
 	{
 		"x" => 0,
 		"y" => 1,
 		"z" => 2,
 		"w" => 3,
-		_ => -1
+		_   => 0
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	string ConstructBoneClipName(ValueTuple<string, string> nameAndPath)
+	string ConstructBoneClipName(string name, string path, Type animatedObjectType)
 	{
-		string rv;
-		//	Empty name string is unnamed root bone
-		if (nameAndPath.Item1.Length == 0 && nameAndPath.Item2.Length == 0)
+		if (animatedObjectType == typeof(UnityEngine.Animator))
+			return SpecialBones.AnimatorTypeName;
+		
+		var rv = name;
+		if (animatedObjectType != typeof(UnityEngine.SkinnedMeshRenderer))
 		{
-			rv = SpecialBones.unnamedRootBoneName;
-		}
-		else
-		{
-			rv = nameAndPath.Item1;
+			//	Empty name string is unnamed root bone
+			if (name.Length == 0 && path.Length == 0)
+			{
+				rv = SpecialBones.UnnamedRootBoneName;
+			}
 		}
 		return rv;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	RTP.AnimationCurve PrepareAnimationCurve(Keyframe[] keysArr, ParsedCurveBinding pb)
+	int2 CopyKeyFrames(Keyframe[] keysArr, ref NativeList<KeyFrame> outKeyFrames)
 	{
-		var animCurve = new RTP.AnimationCurve();
-		animCurve.channelIndex = pb.channelIndex;
-		animCurve.bindingType = pb.bindingType;
-		animCurve.keyFrames = new UnsafeList<KeyFrame>(keysArr.Length, Allocator.Temp);
-
+		var rv = new int2(outKeyFrames.Length, keysArr.Length);
 		foreach (var k in keysArr)
 		{
 			var kf = new KeyFrame()
@@ -116,80 +111,69 @@ public partial class AnimationClipBaker
 				outTan = math.select(0, k.outTangent, math.isfinite(k.outTangent)),
 				v = k.value
 			};
-			animCurve.keyFrames.Add(kf);
-		}
-		return animCurve;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool IsTransformCurve(BindingType bt)
-	{
-		switch (bt)
-		{
-			case BindingType.Translation:
-			case BindingType.Quaternion:
-			case BindingType.EulerAngles:
-			case BindingType.HumanMuscle:
-			case BindingType.Scale:
-				return true;
-		};
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GetOrCreateBoneClipHolder(ref NativeList<RTP.BoneClip> clipsArr, in Hash128 nameHash, BindingType bt)
-	{
-		var rv = clipsArr.IndexOf(nameHash);
-		if (rv < 0)
-		{
-			rv = clipsArr.Length;
-			var bc = new RTP.BoneClip();
-			bc.name = "MISSING_BONE_NAME";
-			bc.nameHash = nameHash;
-			bc.isHumanMuscleClip = bt == BindingType.HumanMuscle;
-			bc.animationCurves = new UnsafeList<RTP.AnimationCurve>(32, Allocator.Temp);
-			clipsArr.Add(bc);
+			outKeyFrames.Add(kf);
 		}
 		return rv;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int GetOrCreateBoneClipHolder(ref NativeList<RTP.BoneClip> clipsArr, ParsedCurveBinding pb, BindingType bt)
+	Track CreateTrackData(int2 keyFrameRange, ParsedCurveBinding pb)
 	{
-		//	Hash for generic curves must match parameter name hash which is 32 bit instead of 128
-		var nameHash = new Hash128(pb.boneName.CalculateHash32(), pb.channelName.CalculateHash32(), 0, 0);
-		if (IsTransformCurve(bt))
+		var rv = new Track();
+		rv.keyFrameRange = keyFrameRange;
+	#if RUKHANKA_DEBUG_INFO
+		rv.name = $"{pb.boneName}.{pb.channelName}";
+	#endif
+		//	For unknown binding types treat props as channel name hash
+		if (pb.bindingType == BindingType.Unknown)
 		{
-			nameHash = pb.boneName.CalculateHash128();
+			rv.props = Track.CalculateHash(pb.channelName);
 		}
-		var rv = GetOrCreateBoneClipHolder(ref clipsArr, nameHash, bt);
-		ref var c = ref clipsArr.ElementAt(rv);
-		c.name = pb.boneName;
+		else
+		{
+			rv.bindingType = pb.bindingType;
+			rv.channelIndex = pb.channelIndex;
+		}
 		return rv;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	RTP.BoneClip MakeBoneClipCopy(in RTP.BoneClip bc)
+	void InsertTrackIntoGroup(Track t, string trackName)
 	{
-		var rv = bc;
-		rv.animationCurves = new UnsafeList<RTP.AnimationCurve>(bc.animationCurves.Length, Allocator.Temp);
-		for (int i = 0; i < bc.animationCurves.Length; ++i)
+		//	Tracks with same path hash will go into same track group. This is needed to speedup access of bone data
+		//	(no need to query each attribute hash)
+		
+		var nameHash = trackName.CalculateHash32();
+		//	Search for name in already existing groups
+		var i = trackGroupHashes.IndexOf(nameHash);
+		
+		if (i < 0)
 		{
-			var inKf = bc.animationCurves[i].keyFrames;
-			var outKf = new UnsafeList<KeyFrame>(inKf.Length, Allocator.Temp);
-			for (int j = 0; j < inKf.Length; ++j)
+			//	Create new track group and add track into it
+			trackGroupHashes.Add(nameHash);
+			trackGroupOffsets.Add((uint)trackList.Length);
+			trackList.Add(t);
+		#if RUKHANKA_DEBUG_INFO
+			trackGroupNames.Add(trackName);
+		#endif
+		}
+		else
+		{
+			//	Insert track into existing group
+			var startIndex = (int)trackGroupOffsets[i];
+			trackList.InsertRange(startIndex, 1);
+			trackList[startIndex] = t;
+			
+			//	Shift all other groups to the right
+			for (var l = 0; l < trackGroupOffsets.Length; ++l)
 			{
-				outKf.Add(inKf[j]);
+				ref var tgo = ref trackGroupOffsets.ElementAt(l);
+				if (tgo > startIndex)
+					tgo += 1;
 			}
-			var ac = bc.animationCurves[i];
-			ac.keyFrames = outKf;
-			rv.animationCurves.Add(ac);
 		}
-		return rv;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,13 +189,8 @@ public partial class AnimationClipBaker
 		rv.channelIndex = ChannelIndexFromString(channel);
 		rv.bindingType = PickGenericBindingTypeByString(propName);
 		rv.channelName = b.propertyName;
-		rv.boneName = b.path;
-
-		if (IsTransformCurve(rv.bindingType) || rv.bindingType == BindingType.BlendShape)
-		{
-			var nameAndPath = SplitPath(b.path);
-			rv.boneName = ConstructBoneClipName(nameAndPath);
-		}
+		var nameAndPath = SplitPath(b.path);
+		rv.boneName = ConstructBoneClipName(nameAndPath.Item1, nameAndPath.Item2, b.type);
 
 		return rv;
 	}
@@ -258,7 +237,7 @@ public partial class AnimationClipBaker
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AddKeyFrameFromFloatValue(ref UnsafeList<KeyFrame> kfArr, float2 key, float v)
+	KeyFrame AddKeyFrameFromFloatValue(float2 key, float v)
 	{
 		var kf = new KeyFrame()
 		{
@@ -267,19 +246,19 @@ public partial class AnimationClipBaker
 			outTan = key.y,
 			v = v
 		};
-		kfArr.Add(kf);
+		return kf;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	[BurstCompile]
-	void ComputeTangents(ref RTP.AnimationCurve ac)
+	void ComputeTangents(in Span<KeyFrame> keyFrames)
 	{
-		for (int i = 0; i < ac.keyFrames.Length; ++i)
+		for (int i = 0; i < keyFrames.Length; ++i)
 		{
-			var p0 = i == 0 ? ac.keyFrames[0] : ac.keyFrames[i - 1];
-			var p1 = ac.keyFrames[i];
-			var p2 = i == ac.keyFrames.Length - 1 ? ac.keyFrames[i] : ac.keyFrames[i + 1];
+			var p0 = i == 0 ? keyFrames[0] : keyFrames[i - 1];
+			var p1 = keyFrames[i];
+			var p2 = i == keyFrames.Length - 1 ? keyFrames[i] : keyFrames[i + 1];
 
 			var outV = math.normalizesafe(new float2(p2.time, p2.v) - new float2(p1.time, p1.v));
 			var outTan = outV.x > 0.0001f ? outV.y / outV.x : 0;
@@ -292,19 +271,25 @@ public partial class AnimationClipBaker
 
 			var avgTan = math.lerp(inTan, outTan, f);
 
-			var k = ac.keyFrames[i];
+			var k = keyFrames[i];
 			k.outTan = avgTan;
 			k.inTan = avgTan;
-			ac.keyFrames[i] = k;
+			keyFrames[i] = k;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	NativeList<float> CreateKeyframeTimes(float animationLength, float dt)
+	NativeList<float> CreateKeyframeTimes(float animationLength, float dt, float frameTime)
 	{
 		var numFrames = (int)math.ceil(animationLength / dt) + 1;
 		var rv = new NativeList<float>(numFrames, Allocator.Temp);
+		
+		if (frameTime >= 0)
+		{
+			rv.Add(frameTime);	
+			return rv;
+		}
 
 		var curTime = 0.0f;
 		for (var i = 0; i < numFrames; ++i)
@@ -320,12 +305,12 @@ public partial class AnimationClipBaker
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ReadCurvesFromTransform(Transform tr, NativeArray<RTP.AnimationCurve> animCurves, float time)
+	void ReadCurvesFromTransform(Transform tr, in NativeArray<Track> trackSpan, int keyIndex, float time)
 	{
 		quaternion q = tr.localRotation;
 		float3 t = tr.localPosition;
 
-		var vArr = new NativeArray<float>(7, Allocator.Temp);
+		Span<float> vArr = stackalloc float[7];
 		vArr[0] = t.x;
 		vArr[1] = t.y;
 		vArr[2] = t.z;
@@ -336,49 +321,33 @@ public partial class AnimationClipBaker
 
 		for (int l = 0; l < vArr.Length; ++l)
 		{
-			var keysArr = animCurves[l];
-			AddKeyFrameFromFloatValue(ref keysArr.keyFrames, time, vArr[l]);
-			animCurves[l] = keysArr;
+			var kfIndex = trackSpan[l].keyFrameRange.x + keyIndex;
+			var kf = AddKeyFrameFromFloatValue(time, vArr[l]);
+			keyFramesList[kfIndex] = kf;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SetCurvesToAnimation(ref NativeList<BoneClip> outBoneClips, in Hash128 boneHash, NativeArray<RTP.AnimationCurve> animCurve)
-	{
-		var boneId = GetOrCreateBoneClipHolder(ref outBoneClips, boneHash, BindingType.Translation);
-		ref var bc = ref outBoneClips.ElementAt(boneId);
-		bc.DisposeCurves();
-
-		for (var i = 0; i < animCurve.Length; ++i)
-		{
-			var hac = animCurve[i];
-			ComputeTangents(ref hac);
-			bc.animationCurves.Add(hac);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SampleUnityAnimation(AnimationClip ac, Animator anm, ValueTuple<Transform, Hash128>[] trs, bool applyRootMotion, ref NativeList<RTP.BoneClip> boneClips)
+	unsafe void SampleUnityAnimation(AnimationClip ac, Animator anm, ValueTuple<Transform, uint>[] trs, bool applyRootMotion, float frameTime)
 	{
 		if (trs.Length == 0)
 			return;
 		
 		var sampleAnimationFrameTime = 1 / 60.0f;
-		var keysList = CreateKeyframeTimes(ac.length, sampleAnimationFrameTime);
+		var keysList = CreateKeyframeTimes(ac.length, sampleAnimationFrameTime, frameTime);
 
-		var channelDesc = new ValueTuple<BindingType, short>[]
+		var tracks = new []
 		{
-			(BindingType.Translation, 0),
-			(BindingType.Translation, 1),
-			(BindingType.Translation, 2),
-			(BindingType.Quaternion, 0),
-			(BindingType.Quaternion, 1),
-			(BindingType.Quaternion, 2),
-			(BindingType.Quaternion, 3),
+			new Track(BindingType.Translation, 0),
+			new Track(BindingType.Translation, 1),
+			new Track(BindingType.Translation, 2),
+			new Track(BindingType.Quaternion, 0),
+			new Track(BindingType.Quaternion, 1),
+			new Track(BindingType.Quaternion, 2),
+			new Track(BindingType.Quaternion, 3),
 		};
- 
+		
 		var rac = anm.runtimeAnimatorController;
 		var origPos = anm.transform.position;
 		var origRot = anm.transform.rotation;
@@ -391,17 +360,18 @@ public partial class AnimationClipBaker
 		anm.transform.position = Vector3.zero;
 		anm.transform.rotation = quaternion.identity;
 		
-		var animationCurves = new NativeArray<RTP.AnimationCurve>(channelDesc.Length * trs.Length, Allocator.Temp);
-		for (int k = 0; k < animationCurves.Length; ++k)
+		var newTracks = new NativeArray<Track>(tracks.Length * trs.Length, Allocator.Temp);
+		for (int k = 0; k < newTracks.Length; ++k)
 		{
-			animationCurves[k] = new RTP.AnimationCurve()
-			{
-				bindingType = channelDesc[k % channelDesc.Length].Item1,
-				channelIndex = channelDesc[k % channelDesc.Length].Item2,
-				keyFrames = new UnsafeList<KeyFrame>(keysList.Length, Allocator.Temp)
-			};
+			var nt = tracks[k % tracks.Length];
+			nt.keyFrameRange = new int2(keyFramesList.Length, keysList.Length);
+		#if RUKHANKA_DEBUG_INFO
+			nt.name = $"{trs[k / tracks.Length].Item1.name}.{nt.bindingType}.{nt.channelIndex}";
+		#endif
+			keyFramesList.Resize(keyFramesList.Length + keysList.Length, NativeArrayOptions.ClearMemory);
+			newTracks[k] = nt;
 		}
-
+		
 		for (int i = 0; i < keysList.Length; ++i)
 		{
 			var time = keysList[i];
@@ -410,15 +380,36 @@ public partial class AnimationClipBaker
 			for (int l = 0; l < trs.Length; ++l)
 			{
 				var tr = trs[l].Item1;
-				var curvesSpan = animationCurves.GetSubArray(l * channelDesc.Length, channelDesc.Length);
-				ReadCurvesFromTransform(tr, curvesSpan, time);
+				var trackSpan = newTracks.GetSubArray(l * tracks.Length, tracks.Length);
+				ReadCurvesFromTransform(tr, trackSpan, i, time);
 			}
 		}
-
+		
 		for (int l = 0; l < trs.Length; ++l)
 		{
-			var curvesSpan = animationCurves.GetSubArray(l * channelDesc.Length, channelDesc.Length);
-			SetCurvesToAnimation(ref boneClips, trs[l].Item2, curvesSpan);
+			var transformHash = trs[l].Item2;
+			var idx = trackGroupHashes.IndexOf(transformHash);
+			if (idx < 0)
+			{
+				trackGroupHashes.Add(transformHash);
+				trackGroupOffsets.Add((uint)trackList.Length);
+			#if RUKHANKA_DEBUG_INFO
+				trackGroupNames.Add(trs[l].Item1.name);
+			#endif
+			}
+			else
+			{
+				trackGroupOffsets[idx] = (uint)trackList.Length;
+			}
+			
+			trackList.AddRange(newTracks.GetSubArray(l * tracks.Length, tracks.Length));
+		}
+		
+		for (int m = 0; m < newTracks.Length; ++m)
+		{
+			var nt = newTracks[m];
+			var trackKeyFrames = new Span<KeyFrame>(keyFramesList.GetUnsafePtr() + nt.keyFrameRange.x, nt.keyFrameRange.y);
+			ComputeTangents(trackKeyFrames);
 		}
 
 		anm.cullingMode = prevAnmCulling;
@@ -430,28 +421,28 @@ public partial class AnimationClipBaker
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	(Transform, Hash128) GetRootBoneTransform(Animator anm)
+	(Transform, uint) GetRootBoneTransform(Animator anm)
 	{
 		if (anm.avatar.isHuman)
 		{
 			var hipsTransform = anm.GetBoneTransform(HumanBodyBones.Hips);
 			var hd = anm.avatar.humanDescription;
 			var humanBoneIndexInDesc = GetHumanBoneIndexForHumanName(hd, "Hips");
-			var rigHipsBoneName = new FixedStringName(hd.human[humanBoneIndexInDesc].boneName).CalculateHash128();
+			var rigHipsBoneName = new FixedStringName(hd.human[humanBoneIndexInDesc].boneName).CalculateHash32();
 			return (hipsTransform, rigHipsBoneName);
 		}
 
 		var rootBoneName =  anm.avatar.GetRootMotionNodeName();
-		var rootBoneNameHash = new FixedStringName(rootBoneName).CalculateHash128();
+		var rootBoneNameHash = new FixedStringName(rootBoneName).CalculateHash32();
 		var rootBoneTransform = Rukhanka.Toolbox.TransformUtils.FindChildRecursively(anm.transform, rootBoneName);
 		return (rootBoneTransform, rootBoneNameHash);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SampleMissingCurves(AnimationClip ac, Animator anm, ref NativeList<RTP.BoneClip> boneClips)
+	void SampleMissingCurves(AnimationClip ac, Animator anm, float frameTime)
 	{
-		var trs = new List<ValueTuple<Transform, Hash128>>();
+		var trs = new List<ValueTuple<Transform, uint>>();
 		var entityRootTransform = anm.transform;
 		var rootBoneTransformData = GetRootBoneTransform(anm);
 
@@ -459,20 +450,20 @@ public partial class AnimationClipBaker
 			trs.Add(rootBoneTransformData);
 
 		//	Sample curves for non-rootmotion animations
-		SampleUnityAnimation(ac, anm, trs.ToArray(), false, ref boneClips);
+		SampleUnityAnimation(ac, anm, trs.ToArray(), false, frameTime);
 		
 		//	Sample root motion curves
 		trs.Clear();
 		
-		var entityRootHash = SpecialBones.unnamedRootBoneName.CalculateHash128();
-		AnimationProcessSystem.ComputeBoneAnimationJob.ModifyBoneHashForRootMotion(ref entityRootHash);
+		var entityRootHash = SpecialBones.UnnamedRootBoneName.CalculateHash32();
+		entityRootHash = AnimationProcessSystem.ComputeBoneAnimationJob.ModifyBoneHashForRootMotion(entityRootHash);
 		trs.Add((entityRootTransform, entityRootHash));
 		
 		//	Modify bone hash to separate root motion tracks and ordinary tracks
-		AnimationProcessSystem.ComputeBoneAnimationJob.ModifyBoneHashForRootMotion(ref rootBoneTransformData.Item2);
+		rootBoneTransformData.Item2 = AnimationProcessSystem.ComputeBoneAnimationJob.ModifyBoneHashForRootMotion(rootBoneTransformData.Item2);
 		trs.Add(rootBoneTransformData);
 		
-		SampleUnityAnimation(ac, anm, trs.ToArray(), true, ref boneClips);
+		SampleUnityAnimation(ac, anm, trs.ToArray(), true, frameTime);
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -501,56 +492,6 @@ public partial class AnimationClipBaker
 		}
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void CopyClipsToBlobAsset(BlobBuilder bb, ref BlobArray<BoneClipBlob> acba, NativeList<RTP.BoneClip> clips)
-	{
-		var clipsArr = bb.Allocate(ref acba, clips.Length);
-		for (var i = 0; i < clips.Length; ++i)
-		{
-			ref var bcb = ref clipsArr[i];
-			CopyClipToBlobAsset(bb, ref bcb, clips[i]);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void CopyClipToBlobAsset(BlobBuilder bb, ref BoneClipBlob bcb, RTP.BoneClip clip)
-	{
-	#if RUKHANKA_DEBUG_INFO
-		if (clip.name.Length > 0)
-			bb.AllocateString(ref bcb.name, clip.name.ToString());
-	#endif
-		bcb.hash = clip.nameHash;
-		bcb.isHumanMuscleClip = clip.isHumanMuscleClip;
-		
-		var curvesArr = bb.Allocate(ref bcb.animationCurves, clip.animationCurves.Length);
-		for (var i = 0; i < curvesArr.Length; ++i)
-		{
-			ref var cb = ref curvesArr[i];
-			CopyKeyframesToBlobAsset(bb, ref cb, clip.animationCurves[i]);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void CopyKeyframesToBlobAsset(BlobBuilder bb, ref AnimationCurve acb, RTP.AnimationCurve curve)
-	{
-		acb.bindingType = curve.bindingType;
-		acb.channelIndex = curve.channelIndex;
-		
-		var keyframesArr = bb.Allocate(ref acb.keyFrames, curve.keyFrames.Length);
-		for (var i = 0; i < keyframesArr.Length; ++i)
-		{
-			ref var kfBlob = ref keyframesArr[i];
-			var kf = curve.keyFrames[i];
-			kfBlob.time = kf.time;
-			kfBlob.v = kf.v;
-			kfBlob.inTan = kf.inTan;
-			kfBlob.outTan = kf.outTan;
-		}
-	}
-	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	AnimationClip[] Deduplicate(AnimationClip[] animationClips)
@@ -686,48 +627,18 @@ public partial class AnimationClipBaker
 		rv.hash = animationHash;
 		rv.loopPoseBlend = acSettings.loopBlend;
 		rv.cycleOffset = acSettings.cycleOffset;
-		rv.additiveReferencePoseTime = acSettings.additiveReferencePoseTime;
-		rv.hasRootMotionCurves = ac.hasRootCurves || ac.hasMotionCurves;
 
 		BakeAnimationEvents(bb, ref rv, ac);
+		BakeTrackSet(bb, ref rv.clipTracks, out var maxTrackKeyframeLength, -1, ac, animator, avatar);
+		if (acSettings.additiveReferencePoseClip != null)
+			BakeTrackSet(bb, ref rv.additiveReferencePoseFrame, out _, acSettings.additiveReferencePoseTime, acSettings.additiveReferencePoseClip, animator, avatar);
 		
-		var bindings = AnimationUtility.GetCurveBindings(ac);
-
-		genericCurvesArr.Clear();
-		boneCurvesArr.Clear();
-		foreach (var b in bindings)
-		{
-			var ec = AnimationUtility.GetEditorCurve(ac, b);
-			var pb = ParseCurveBinding(ac, b, animator?.avatar);
-			
-			var animCurve = PrepareAnimationCurve(ec.keys, pb);
-			var isTransformCurve = IsTransformCurve(pb.bindingType);
-			var curveHolder = isTransformCurve ? boneCurvesArr : genericCurvesArr ;
-
-			if (isTransformCurve && pb.channelIndex < 0) continue;
-
-			var boneId = GetOrCreateBoneClipHolder(ref curveHolder, pb, pb.bindingType);
-			var boneClip = curveHolder[boneId];
-			boneClip.animationCurves.Add(animCurve);
-			curveHolder[boneId] = boneClip;
-		}
-		
-		if (avatar != null)
-		{
-			//	Sample root and hips curves and from unity animations. Maybe sometime I will figure out all RootT/RootQ and body pose generation formulas and this step could be replaced with generation.
-			SampleMissingCurves(ac, animator, ref boneCurvesArr);
-		}
-		
-		CreateBonesPerfectHashTable(bb, ref rv, boneCurvesArr);
-		
-		CopyClipsToBlobAsset(bb, ref rv.bones, boneCurvesArr);
-		CopyClipsToBlobAsset(bb, ref rv.curves, genericCurvesArr);
-
 	#if RUKHANKA_DEBUG_INFO
 		var dt = Time.realtimeSinceStartupAsDouble - startTimeMarker;
 		rv.bakingTime = (float)dt;
 	#endif
 		
+		rv.maxTrackKeyframeLength = maxTrackKeyframeLength;
 		var bar = bb.CreateBlobAssetReference<AnimationClipBlob>(Allocator.Persistent);
 		
 		//	Save baked animation into cache
@@ -738,34 +649,139 @@ public partial class AnimationClipBaker
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CreateBonesPerfectHashTable(BlobBuilder bb, ref AnimationClipBlob acb, NativeList<BoneClip> boneClips)
+	Keyframe[] GetKeyFramesArray(UnityEngine.AnimationCurve animationCurve, float frameTime)
 	{
-		var boneHashes = CollectClipHashes(boneClips);
-		var boneReinterpretedHashes = boneHashes.Reinterpret<Hash128PerfectHashed>();
+		if (frameTime < 0)
+			return animationCurve.keys;
 		
-		var hashTableCreated = PerfectHash<Hash128PerfectHashed>.CreateMinimalPerfectHash(boneReinterpretedHashes, out var seedValues, out var shuffleIndices);
-		if (hashTableCreated)
+		var oneFrameAnimation = new Keyframe[]
 		{
-			Toolbox.MathUtils.ShuffleArray(boneClips.AsArray().AsSpan(), shuffleIndices.AsArray());
-			Toolbox.MathUtils.ShuffleArray(boneHashes.AsSpan(), shuffleIndices.AsArray());
+			new (0, animationCurve.Evaluate(frameTime))
+		};
+		return oneFrameAnimation;
+	}
 
-			var bonePerfectHashSeeds = bb.Allocate(ref acb.bonesPerfectHashSeedTable, seedValues.Length);
-			for (var i = 0; i < seedValues.Length; ++i)
-				bonePerfectHashSeeds[i] = seedValues[i];
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void BakeTrackSet(BlobBuilder bb, ref TrackSet outTrackSet, out uint maxTrackKeyframeLength, float frameTime, AnimationClip ac, Animator animator, Avatar avatar)
+	{
+		var bindings = AnimationUtility.GetCurveBindings(ac);
+
+		keyFramesList.Clear();
+		trackList.Clear();
+		trackGroupHashes.Clear();
+		trackGroupOffsets.Clear();
+	#if RUKHANKA_DEBUG_INFO
+		trackGroupNames.Clear();
+	#endif
+		
+		maxTrackKeyframeLength = 0u;
+		foreach (var b in bindings)
+		{
+			var ec = AnimationUtility.GetEditorCurve(ac, b);
+			var pb = ParseCurveBinding(ac, b, animator?.avatar);
+			var inKeyframes = GetKeyFramesArray(ec, frameTime);
+			var keyFramesRange = CopyKeyFrames(inKeyframes, ref keyFramesList);
+			var trackData = CreateTrackData(keyFramesRange, pb);
+			InsertTrackIntoGroup(trackData, pb.boneName);
+			
+			maxTrackKeyframeLength = math.max(maxTrackKeyframeLength, (uint)keyFramesRange.y);
 		}
+		
+		if (avatar != null)
+		{
+			//	Sample root and hips curves and from unity animations. Maybe sometime I will figure out all RootT/RootQ and body pose generation formulas and this step could be replaced with generation.
+			SampleMissingCurves(ac, animator, frameTime);
+		}
+		
+		// Create special end empty track group because track group tracks count is calculated as trackGroup[i + 1].trackCount - trackGroup[i].trackCount
+		trackGroupHashes.Add(0xffffffff);
+		trackGroupOffsets.Add((uint)trackList.Length);
+	#if RUKHANKA_DEBUG_INFO
+		trackGroupNames.Add("RUKHANKA_TRAILING_TRACK");
+	#endif
+		
+		CreateTrackSetBlob(ref bb, ref outTrackSet, ac.name);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	unsafe void CreateTrackSetBlob(ref BlobBuilder bb, ref TrackSet outTrackSet, string animationName)
+	{
+		var keyFramesBlobArray = bb.Allocate(ref outTrackSet.keyframes, keyFramesList.Length);
+		UnsafeUtility.MemCpy(keyFramesBlobArray.GetUnsafePtr(), keyFramesList.GetUnsafeReadOnlyPtr(), keyFramesList.Length * UnsafeUtility.SizeOf<KeyFrame>());
+		
+		var tracksBlobArray = bb.Allocate(ref outTrackSet.tracks, trackList.Length);
+		UnsafeUtility.MemCpy(tracksBlobArray.GetUnsafePtr(), trackList.GetUnsafeReadOnlyPtr(), trackList.Length * UnsafeUtility.SizeOf<Track>());
+		
+		var trackGroupsBlobArray = bb.Allocate(ref outTrackSet.trackGroups, trackGroupOffsets.Length);
+		UnsafeUtility.MemCpy(trackGroupsBlobArray.GetUnsafePtr(), trackGroupOffsets.GetUnsafeReadOnlyPtr(), trackGroupOffsets.Length * UnsafeUtility.SizeOf<uint>());
+		
+		//	Make a hash table from track group hashes
+		var phtIsCreated = Perfect2HashTable.Build(trackGroupHashes.AsArray(), out var pht, out var seed);
+		Assert.IsTrue(phtIsCreated, $"Cannot create track perfect hash table for animation {animationName}");
+		
+		var phtBlobArray = bb.Allocate(ref outTrackSet.trackGroupPHT.pht, pht.Length);
+		UnsafeUtility.MemCpy(phtBlobArray.GetUnsafePtr(), pht.GetUnsafeReadOnlyPtr(), pht.Length * UnsafeUtility.SizeOf<uint2>());
+		
+	#if RUKHANKA_DEBUG_INFO
+		var trackGroupDebugInfoArr = bb.Allocate(ref outTrackSet.trackGroupDebugInfo, trackGroupHashes.Length);
+		for (var i = 0; i < trackGroupHashes.Length; ++i)
+		{
+			var trackGroupInfoBlob = new TrackGroupInfo()
+			{
+				hash = trackGroupHashes[i],
+				name = trackGroupNames[i]
+			};
+			trackGroupDebugInfoArr[i] = trackGroupInfoBlob;
+		}
+	#endif
+		
+		outTrackSet.trackGroupPHT.seed = seed;
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	NativeArray<Hash128> CollectClipHashes(NativeList<BoneClip> boneClips)
+	void MakeAdditiveReferencePoseFrame(ref NativeList<BoneClip> bc, AnimationClipSettings acs, Avatar avatar)
 	{
-		var rv = new NativeArray<Hash128>(boneClips.Length, Allocator.Temp);
-		for (var i = 0; i < boneClips.Length; ++i)
+		/*
+		if (acs.additiveReferencePoseClip == null)
+			return;
+		
+		for (var k = 0; k < bc.Length; ++k)
 		{
-			rv[i] = boneClips[i].nameHash;
+			var bcc = bc[k];
+			for (var m = 0; m < bcc.animationCurves.Length; ++m)
+			{
+				ref var ac = ref bcc.animationCurves.ElementAt(m);
+			}
 		}
-
-		return rv;
+		
+		var clipPose = SampleAnimation(acs.additiveReferencePoseClip, avatar, acs.additiveReferencePoseTime);
+		foreach (var c in clipPose)
+		{
+			for (var k = 0; k < bc.Length; ++k)
+			{
+				var bcc = bc[k];
+				if (c.pb.boneName != bcc.name)
+					continue;
+				
+				for (var m = 0; m < bcc.animationCurves.Length; ++m)
+				{
+					ref var ac = ref bcc.animationCurves.ElementAt(m);
+					
+					if (ac.bindingType == BindingType.Scale || (ac.bindingType == BindingType.Quaternion && ac.channelIndex == 3))
+					    ac.additiveReferenceValue = 1;
+					    
+					if (ac.bindingType == c.pb.bindingType && ac.channelIndex == c.pb.channelIndex)
+					{
+						ac.additiveReferenceValue = c.value;
+						break;
+					}
+				}
+			}
+		}
+			*/
 	}
 }
 }

@@ -12,7 +12,7 @@ public static class CollectionUtils
 	public static unsafe NativeArray<T> AsArray<T>(this NativeSlice<T> v) where T: unmanaged
 	{
 		var ptr = v.GetUnsafePtr();
-		var rv = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, v.Length, Allocator.None);
+		var rv = CollectionHelper.ConvertExistingDataToNativeArray<T>(ptr, v.Length, Allocator.None, true);
 		return rv;
 	}
 

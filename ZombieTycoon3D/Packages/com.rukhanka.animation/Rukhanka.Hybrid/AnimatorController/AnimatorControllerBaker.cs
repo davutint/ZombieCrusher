@@ -35,7 +35,7 @@ public partial class AnimatorControllerBaker: Baker<Animator>
 		
 		var rac = GetRuntimeAnimatorController(a);
 		var ac = GetAnimatorControllerFromRuntime(rac);
-		var controllerBlob = BuildControllerBlob(ac);
+		var controllerBlob = BuildControllerBlob(ac, rd);
 		var controllerAnimationHashesBlob = BuildControllerAnimationHashesBlob(ac, a.avatar);
 		
 		var animationsFromOverrideController = GetAnimationsFromOverrideController(a);
@@ -43,7 +43,7 @@ public partial class AnimatorControllerBaker: Baker<Animator>
 		animationsFromOverrideController.CopyTo(allClips, 0);
 		ac.animationClips.CopyTo(allClips, animationsFromOverrideController.Length);
 		BakeAllControllerAnimations(e, a.avatar, allClips, a.gameObject);
-		BakeAllUsedAvatarMasks(e, ac);
+		BakeAllUsedAvatarMasks(e, ac, rd);
 		
 		CreateControllerEntityComponents(rd, e, controllerBlob, controllerAnimationHashesBlob);
 		CreateOverrideAnimationsBuffer(e, a, ac);
@@ -100,20 +100,20 @@ public partial class AnimatorControllerBaker: Baker<Animator>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void BakeAllUsedAvatarMasks(Entity e, AnimatorController controller)
+	void BakeAllUsedAvatarMasks(Entity e, AnimatorController controller, RigDefinitionAuthoring rd)
 	{
-		var bakedAvatarMasks = new NativeList<NewBlobAssetDatabaseRecord<AvatarMaskBlob>>(Allocator.Temp);
+		var bakedAvatarMasks = new NativeList<AvatarMaskBakingData>(Allocator.Temp);
 		for (int i = 0; i < controller.layers.Length; ++i)
 		{
 			var l = controller.layers[i];
 			if (l.avatarMask != null)
 			{
 				var amb = new AvatarMaskBaker();
-				var avatarMaskBlobAsset = amb.CreateAvatarMaskBlob(this, l.avatarMask);
-				var newAvatarMaskBlob = new NewBlobAssetDatabaseRecord<AvatarMaskBlob>()
+				var avatarMaskBlobAsset = amb.CreateAvatarMaskBlob(this, l.avatarMask, rd);
+				var newAvatarMaskBlob = new AvatarMaskBakingData()
 				{
-					hash = avatarMaskBlobAsset.Value.hash,
-					value = avatarMaskBlobAsset
+					rigEntity = e,
+					dataBlob = avatarMaskBlobAsset
 				};
 				bakedAvatarMasks.Add(newAvatarMaskBlob);
 			}
@@ -121,7 +121,7 @@ public partial class AnimatorControllerBaker: Baker<Animator>
 		
 		if (bakedAvatarMasks.Length > 0)
 		{
-			var buf = AddBuffer<NewBlobAssetDatabaseRecord<AvatarMaskBlob>>(e);
+			var buf = AddBuffer<AvatarMaskBakingData>(e);
 			buf.AddRange(bakedAvatarMasks.AsArray());
 		}
 	}
@@ -179,7 +179,7 @@ public partial class AnimatorControllerBaker: Baker<Animator>
 		{
 			var pht = new AnimatorControllerParameterIndexTableComponent()
 			{
-				seedTable = parametersPerfectHashTableBlob
+				value = parametersPerfectHashTableBlob
 			};
 			AddComponent(e, pht);
 		}
@@ -239,6 +239,7 @@ public partial class AnimatorControllerBaker: Baker<Animator>
 		acc.rtd = RuntimeAnimatorData.MakeDefault();
 		acc.controller = controllerBlob;
 		acc.animations = controllerAnimationsBlob;
+		acc.speed = 1;
 
 		var buf = AddBuffer<AnimatorControllerLayerComponent>(e);
 		ref var cb = ref controllerBlob.Value;

@@ -41,6 +41,13 @@ public class ComputeKernel
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public void Dispatch(uint workGroupSizeX, uint workgroupSizeY, uint workgroupSizeZ)
+    {
+        Dispatch((int)workGroupSizeX, (int)workgroupSizeY, (int)workgroupSizeZ);
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public bool ValidateDispatch(int workGroupSizeX, int workgroupSizeY, int workgroupSizeZ)
     {
         var workGroupSize = new int3(workGroupSizeX, workgroupSizeY, workgroupSizeZ);

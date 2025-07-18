@@ -9,8 +9,8 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
     {
         static class Styles
         {
-            public static readonly GUIContent HiveMindStop = EditorGUIUtility.TrTextContent("Hive Mind Stop", "This option allows agent to do smarter stop decision than moving in group. It works under assumption that by reaching nearby agent that is already idle and have similar destination it can stop as destination is reached.");
-            public static readonly GUIContent GiveUpStop = EditorGUIUtility.TrTextContent("Give Up Stop", "This option allows agent to do smarter stop decision than moving in group. It works under assumption that by reaching nearby agent that is already idle and have similar destination it can stop as destination is reached.");
+            public static readonly GUIContent HiveMindStop = EditorGUIUtility.TrTextContent("Hive Mind Stop", "This option allows the agent to make smarter stop decisions when moving in a group. It works under the assumption that by reaching a nearby agent that is already idle and has a similar destination, it can stop as the destination is considered reached.");
+            public static readonly GUIContent GiveUpStop = EditorGUIUtility.TrTextContent("Give Up Stop", "This option allows the agent to make smarter stop decisions than simply deciding if it is stuck. Every time the agent bumps into a standing agent, it will progress towards stopping. Additionally, by not bumping into one, it will recover from stopping. Once the progress value is met, the agent will stop.");
         }
 
         SerializedProperty m_HiveMindStop;

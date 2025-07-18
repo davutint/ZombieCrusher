@@ -151,6 +151,8 @@ namespace ProjectDawn.Navigation
                 m_World = m_World,
                 MaxPathSize = MaxPathSize,
             });
+
+            state.RequireForUpdate<Agent>();
         }
 
         [BurstCompile]
@@ -217,13 +219,6 @@ namespace ProjectDawn.Navigation
 
             // TODO: Investigate if we need to add this dependency for all systems that will query navmesh singleton
             m_World.AddDependency(state.Dependency);
-        }
-
-        [Obsolete("This class is obsolete, please use new settings workflow https://lukaschod.github.io/agents-navigation-docs/manual/settings.html.")]
-        public struct Settings : IComponentData
-        {
-            public int MaxIterations;
-            public int MaxPathSize;
         }
 
         public unsafe struct Singleton : IComponentData
@@ -370,6 +365,11 @@ namespace ProjectDawn.Navigation
             public bool TryCreateFunnel(ref NavMeshFunnel funnel, NativeSlice<PolygonId> path, float3 from, float3 to)
             {
                 return funnel.TryCreateStraightPath(m_QueryForOtherOperations, path, from, to);
+            }
+
+            public void OptimizePath(ref NavMeshFunnel funnel, DynamicBuffer<PolygonId> path, NavMeshLocation from, int areaMask = -1, NativeArray<float> costs = default)
+            {
+                funnel.OptimizePath(m_QueryForOtherOperations, path, from, areaMask, costs);
             }
 
             /// <summary>

@@ -14,7 +14,7 @@ namespace ProjectDawn.Navigation
     public partial struct AgentSeekingSystem : ISystem
     {
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             new AgentSeekingJob().ScheduleParallel();
         }

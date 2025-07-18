@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ed6b9e79498bb7745bd27706ac2301c5
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Editor/UXML/SettingsWindow.uxml
+  uploadId: 754107

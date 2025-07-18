@@ -10,7 +10,8 @@ namespace Rukhanka
 [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [UpdateAfter(typeof(RegisterMaterialsAndMeshesSystem))]
-[UpdateBefore(typeof(DeformationsInPresentation))]
+[UpdateAfter(typeof(UpdatePresentationSystemGroup))]
+[UpdateBefore(typeof(EntitiesGraphicsSystem))]
 public partial class RukhankaDeformationSystemGroup: ComponentSystemGroup
 {
     protected override void OnCreate()

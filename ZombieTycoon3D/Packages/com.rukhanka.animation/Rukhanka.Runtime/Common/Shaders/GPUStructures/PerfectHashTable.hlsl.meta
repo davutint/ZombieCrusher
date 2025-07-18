@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: cd4cb6713dc57034da2b5a2cda9cf73f
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/PerfectHashTable.hlsl
+  uploadId: 754107

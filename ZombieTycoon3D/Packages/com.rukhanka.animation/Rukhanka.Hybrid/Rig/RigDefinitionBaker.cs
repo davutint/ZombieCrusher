@@ -140,6 +140,65 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int DeepestHierarchyBoneCount(in BlobBuilderArray<RigBoneInfo> rigBones)
+	{
+		var rv = 0;
+		for (var i = 0; i < rigBones.Length; ++i)
+		{
+			var numBonesInHierarchy = 1;
+			var curBoneIndex = rigBones[i].parentBoneIndex;
+			while (curBoneIndex >= 0)
+			{
+				curBoneIndex = rigBones[curBoneIndex].parentBoneIndex;
+				++numBonesInHierarchy;
+			}
+			rv = math.max(rv, numBonesInHierarchy);
+		}
+		return rv;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool IsBoneInOptimizationMask(string skeletonBonesPath, AvatarMask mask)
+	{
+		if (mask == null)
+			return true;
+		
+		for (var i = 0; i < mask.transformCount; ++i)
+		{
+			var maskPath = mask.GetTransformPath(i);
+			var pathActive = mask.GetTransformActive(i);
+			if (maskPath == skeletonBonesPath)
+				return pathActive;
+		}
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	string[] MakeSkeletonBonesFullPaths(SkeletonBone[] skeletonBones)
+	{
+		var rv = new string[skeletonBones.Length];
+		if (skeletonBones.Length == 0)
+			return rv;
+		
+		//	First bone need to be empty, because it contains root transform name, but avatar masks have it empty string
+		rv[0] = "";
+		for (var i = 1; i < skeletonBones.Length; ++i)
+		{
+			var sb = skeletonBones[i];
+			var parentName = (string)parentBoneNameField.GetValue(sb);
+			var parentIndex = Array.FindIndex(skeletonBones, 0, i, x => x.name == parentName);
+			var fullName = sb.name;
+			if (parentIndex > 0)
+				fullName = rv[parentIndex] + "/" + sb.name;
+			rv[i] = fullName;
+		}
+		return rv;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	List<InternalSkeletonBone> CreateInternalRigRepresentation(Avatar avatar, RigDefinitionAuthoring rigDef)
 	{
 		if (avatar == null)
@@ -148,12 +207,29 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		}
 		
 		var skeleton = avatar.humanDescription.skeleton;
+		
+		//	Validate avatar optimization mask
+		var rigOptimizationMask = rigDef.avatarOptimizationMask;
+		if (rigOptimizationMask != null)
+		{
+			if (rigOptimizationMask.transformCount != skeleton.Length)
+			{
+				Debug.LogWarning($"'{rigOptimizationMask.name}' bone count ({rigOptimizationMask.transformCount}) does not match rig avatar '{avatar.name}' bone count ({skeleton.Length}). Avatar mask was created for different avatar and ignored.");
+				rigOptimizationMask = null;
+			}
+		}
+		
+		var skeletonBonesFullPaths = MakeSkeletonBonesFullPaths(skeleton);
+		
 		var rv = new List<InternalSkeletonBone>();
 		for (var i = 0; i < skeleton.Length; ++i)
 		{
 			var boneIsObjectRoot = i == 0;
-			
 			var sb = skeleton[i];
+			
+			if (!IsBoneInOptimizationMask(skeletonBonesFullPaths[i], rigOptimizationMask))
+				continue;
+			
 			var isb = new InternalSkeletonBone()
 			{
 				boneTransform = boneIsObjectRoot ? rigDef.transform : TransformUtils.FindChildRecursively(rigDef.transform, sb.name),
@@ -185,7 +261,7 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		var rv = new RigDefinitionComponent();
 		rv.applyRootMotion = rigDef.applyRootMotion;
 		
-		var rigBlobHash = CalculateRigBlobHash(rigDef);
+		var rigBlobHash = rigDef.CalculateRigHash();
 		var rigBlobExist = TryGetBlobAssetReference<RigDefinitionBlob>(rigBlobHash, out var rigBlob);
 		if (!rigBlobExist)
 		{
@@ -196,6 +272,12 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		rv.rigBlob = rigBlob;
 		AddComponent(rigEntity, rv);
 		AddBuffer<RootMotionAnimationStateComponent>(rigEntity);
+		var rmvc = new RootMotionVelocityComponent()
+		{
+			worldVelocity = float3.zero,
+			removeBuiltinEntityMovement = rigDef.rootMotionMode == RigDefinitionAuthoring.RootMotionMode.DisableBuiltinMovement
+		};
+		AddComponent(rigEntity, rmvc);
 
 		if (rigDef.hasAnimationEvents)
 		{
@@ -204,21 +286,20 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		}
 			
 		if (rigDef.animationCulling)
+		{
 			AddComponent<CullAnimationsTag>(rigEntity);	
+		}
+		
+		var isGPUAnimator = rigDef.animationEngine == RigDefinitionAuthoring.AnimationEngine.GPU;
+	#if !RUKHANKA_NO_DEFORMATION_SYSTEM
+		AddComponent<GPUAnimationEngineTag>(rigEntity);
+		SetComponentEnabled<GPUAnimationEngineTag>(rigEntity, isGPUAnimator);
+	#endif
 		
 		ProcessBoneStrippingMask(rigEntity, rigDef, skeletonBones);
 		CreateBoneEntityRefs(rigEntity, skeletonBones, rigDef);
 	}
 	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Hash128 CalculateRigBlobHash(RigDefinitionAuthoring rigDef)
-	{
-		var a = rigDef.avatar;
-		var h0 = a != null ? a.GetInstanceID() : rigDef.GetInstanceID();
-		var rv = new Hash128((uint)h0, 0, 0, 0);
-		return rv;
-	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -241,16 +322,16 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 
 	void CheckForDuplicatedBones(ref RigDefinitionBlob rdb)
 	{
-		var duplicateBoneChecker = new NativeHashSet<Hash128>(rdb.bones.Length, Allocator.Temp);
+		var duplicateBoneChecker = new NativeHashSet<uint>(rdb.bones.Length, Allocator.Temp);
 		for (var i = 0; i < rdb.bones.Length; ++i)
 		{
 			ref var bone = ref rdb.bones[i];
 			if (!duplicateBoneChecker.Add(bone.hash))
 			{
 			#if RUKHANKA_DEBUG_INFO
-				Debug.LogError($"RigDefinitionBaker: Duplicate bone with name '{bone.name}' in rig! This is not allowed!");
+				Debug.LogError($"RigDefinitionBaker: Duplicate bone with name '{bone.name.ToString()}' in rig '{rdb.name.ToString()}'! This is not allowed!");
 			#else
-				Debug.LogError($"RigDefinitionBaker: Duplicate bone with hash '{bone.hash}' in rig! This is not allowed! Enable 'RUKHANKA_DEBUG_INFO' to see bone names.");
+				Debug.LogError($"RigDefinitionBaker: Duplicate bone with hash '{bone.hash}' in rig '{rdb.hash}'! This is not allowed! Enable 'RUKHANKA_DEBUG_INFO' to see bone names.");
 			#endif
 			}
 		}
@@ -288,7 +369,6 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 			CreateHumanoidData(bb, ref c, bonesArrayBlob, avatar, skeletonBones);
 		}
 		
-		CheckForDuplicatedBones(ref c);
 		
 	#if RUKHANKA_DEBUG_INFO
 		var dt = Time.realtimeSinceStartupAsDouble - startTimeMarker;
@@ -296,6 +376,8 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 	#endif
 		
 		var rv = bb.CreateBlobAssetReference<RigDefinitionBlob>(Allocator.Persistent);
+		CheckForDuplicatedBones(ref rv.Value);
+        
 		return rv;
 	}
 
@@ -417,11 +499,11 @@ public partial class RigDefinitionBaker: Baker<RigDefinitionAuthoring>
 		// Special handling of hierarchy root
 		if (boneIsObjectRoot)
 		{
-			name = SpecialBones.unnamedRootBoneName;
+			name = SpecialBones.UnnamedRootBoneName;
 		}
 
 		var boneName = new FixedStringName(name);
-		var boneHash = boneName.CalculateHash128();
+		var boneHash = boneName.CalculateHash32();
 		rbi.hash = boneHash;
 		rbi.refPose = CreateBoneTransformFromSkeletonBone(skeletonBone);
 		rbi.humanBodyPart = (AvatarMaskBodyPart)(-1);

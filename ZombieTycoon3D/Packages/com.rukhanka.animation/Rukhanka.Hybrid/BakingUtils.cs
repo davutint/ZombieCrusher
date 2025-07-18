@@ -27,7 +27,10 @@ public static class BakingUtils
             return 0;
         
         if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guidString, out long fileID))
-            return 0;
+        {
+            //  In case of no backed file, use InstanceID
+            return new uint2((uint)obj.GetInstanceID(), 0);
+        }
         
         var guid = new GUID(guidString);
         
@@ -59,10 +62,11 @@ public static class BakingUtils
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static Hash128 ComputeAvatarMaskHash(AvatarMask avatarMask)
+    public static Hash128 ComputeAvatarMaskHash(AvatarMask avatarMask, RigDefinitionAuthoring rigDefinition)
     {
 		var assetID = GetAssetID(avatarMask);
-        var rv = new Hash128(assetID.x, assetID.y, 0, 0);
+        var rigHash = rigDefinition.CalculateRigHash();
+        var rv = new Hash128(assetID.x, assetID.y, rigHash.Value.x, rigHash.Value.y);
         return rv;
     }
 }

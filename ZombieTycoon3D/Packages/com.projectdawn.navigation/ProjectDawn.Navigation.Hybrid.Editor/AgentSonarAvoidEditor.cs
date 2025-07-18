@@ -10,8 +10,8 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
         static class Styles
         {
             public static readonly GUIContent Radius = EditorGUIUtility.TrTextContent("Radius", "The maximum distance at which agent will attempt to avoid nearby agents.");
-            public static readonly GUIContent Angle = EditorGUIUtility.TrTextContent("Velocity Obstacle Angle", "The angle of obstacle inserted behind agent velocity.");
-            public static readonly GUIContent MaxAngle = EditorGUIUtility.TrTextContent("Max Angle", "The maximum angle at which agent will attempt to nearby agents.");
+            public static readonly GUIContent Angle = EditorGUIUtility.TrTextContent("Velocity Obstacle Angle", "Discourages the agent from moving backwards. The higher the value, the more likely the agent will be able to escape surrounded scenarios, but this comes at the cost of reduced agent control.");
+            public static readonly GUIContent MaxAngle = EditorGUIUtility.TrTextContent("Max Angle", "The maximum angle at which the agent will steer away to avoid local obstacles. The lower the value, the less sonar avoidance will affect the steering direction.");
             public static readonly GUIContent Mode = EditorGUIUtility.TrTextContent("Mode", "Mode that modifies avoidance behaviour.");
             public static readonly GUIContent BlockedStop = EditorGUIUtility.TrTextContent("Blocked Stop", "Whenever agent should stop, if all directions are blocked.");
             public static readonly GUIContent UseWalls = EditorGUIUtility.TrTextContent("Use Walls", "Should avoidance account for static obstacles. Having this option enable will cost more performance.");
@@ -33,7 +33,7 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
             EditorGUILayout.PropertyField(m_Radius, Styles.Radius);
             EditorGUILayout.PropertyField(m_Angle, Styles.Angle);
             EditorGUILayout.PropertyField(m_MaxAngle, Styles.MaxAngle);
-#if EXPERIMENTAL_SONAR_TIME
+#if !DISABLE_SONAR_HORIZON
             using (new EditorGUI.DisabledGroupScope(true))
             {
                 EditorGUILayout.PropertyField(m_Mode, Styles.Mode);

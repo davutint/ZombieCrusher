@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4e6c707d4d6a4d94e86a4c9cf4f80dd3
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Samples~/Samples/Shaders/GPUAttachmentLitShader
+    HDRP.shadergraph
+  uploadId: 754107

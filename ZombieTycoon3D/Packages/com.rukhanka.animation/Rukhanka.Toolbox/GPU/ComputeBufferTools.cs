@@ -135,5 +135,35 @@ public static class ComputeBufferTools
             }
         }
     }
+    
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static GraphicsBuffer CreateOrGrowGraphicsBuffer<T>
+    (
+        GraphicsBuffer gb,
+        GraphicsBuffer.Target target,
+        GraphicsBuffer.UsageFlags usage,
+        int elementCount,
+        bool preserveContents,
+        int extraCountAfterResize = 0x1000
+    ) where T: unmanaged
+    {
+		if (gb == null)
+        {
+	        //	In case of zero input size, increase it to make a buffer in any case
+	        elementCount = math.max(0xff, elementCount);
+			gb = new GraphicsBuffer(target, usage, elementCount, UnsafeUtility.SizeOf<T>());
+            return gb;
+        }
+		
+        if (elementCount <= gb.count)
+            return gb;
+        
+        //	To prevent frequent buffer recreations, resize buffer with some additional capacity
+        elementCount += extraCountAfterResize;
+        
+		gb = preserveContents ? Resize(gb, elementCount) : GrowNoCopy(gb, elementCount);
+        return gb;
+    }
 }
 }

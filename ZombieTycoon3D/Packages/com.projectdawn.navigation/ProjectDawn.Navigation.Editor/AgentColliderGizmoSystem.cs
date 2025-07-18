@@ -17,8 +17,13 @@ namespace ProjectDawn.Navigation.Editor
     [UpdateBefore(typeof(AgentColliderSystem))]
     public partial struct AgentColliderGizmosSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<AgentCollider>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var gizmos = GetSingletonRW<GizmosSystem.Singleton>();
             var spatial = GetSingleton<AgentSpatialPartitioningSystem.Singleton>();

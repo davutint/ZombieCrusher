@@ -1,0 +1,48 @@
+BEGIN_OPTIONS
+    Stackable "False"
+	ShaderName "Hidden/Rukhanka Animation/Deformation" 
+END_OPTIONS
+
+BEGIN_PROPERTIES
+    [HideInInspector]_DeformedMeshIndex("Deformed Mesh Buffer Index Offset", Float) = 0
+    [HideInInspector]_DeformationParamsForMotionVectors("Deformation Parameters", Float) = 0
+END_PROPERTIES
+
+
+BEGIN_CBUFFER
+    float _DeformedMeshIndex;
+    float _DeformationParamsForMotionVectors;
+END_CBUFFER
+
+BEGIN_CODE
+
+
+#if defined(DOTS_INSTANCING_ON)
+// DOTS instancing definitions
+UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
+    UNITY_DOTS_INSTANCED_PROP(float, _DeformedMeshIndex)
+    UNITY_DOTS_INSTANCED_PROP(float4, _DeformationParamsForMotionVectors)
+UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
+// DOTS instancing usage macros
+#define UNITY_ACCESS_HYBRID_INSTANCED_PROP(var, type) UNITY_ACCESS_DOTS_INSTANCED_PROP_WITH_DEFAULT(type, var)
+#elif defined(UNITY_INSTANCING_ENABLED)
+// Unity instancing definitions
+UNITY_INSTANCING_BUFFER_START(SGPerInstanceData)
+    UNITY_DEFINE_INSTANCED_PROP(float, _DeformedMeshIndex)
+    UNITY_DEFINE_INSTANCED_PROP(float4, _DeformationParamsForMotionVectors)
+UNITY_INSTANCING_BUFFER_END(SGPerInstanceData)
+// Unity instancing usage macros
+#define UNITY_ACCESS_HYBRID_INSTANCED_PROP(var, type) UNITY_ACCESS_INSTANCED_PROP(SGPerInstanceData, var)
+#else
+#define UNITY_ACCESS_HYBRID_INSTANCED_PROP(var, type) var
+#endif
+
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Deformation/Resources/ComputeDeformedVertex.hlsl"
+
+void ModifyVertex(inout VertexData v, inout ExtraV2F d)
+{
+    ComputeDeformedVertex_float(v.vertexID, v.vertex.xyz, v.normal.xyz, v.tangent.xyz, v.vertex.xyz, v.normal.xyz, v.tangent.xyz);
+}
+
+END_CODE
+

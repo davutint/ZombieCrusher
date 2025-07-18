@@ -11,8 +11,8 @@ MonoImporter:
   assetBundleVariant: 
 AssetOrigin:
   serializedVersion: 1
-  productId: 241472
-  packageName: Rukhanka - ECS Animation System
-  packageVersion: 1.9.2
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
   assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/ScriptedAnimator/ScriptedAnimator.cs
-  uploadId: 706158
+  uploadId: 754107

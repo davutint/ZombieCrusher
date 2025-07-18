@@ -75,6 +75,10 @@ partial struct PrepareSkinningCommandsJob: IJobEntity
 		meshFrameData.meshBlendShapesCount = arc.smrInfoBlob.Value.meshBlendShapesCount;
 		
 		var currentMeshFrameDeformationDataIndex = frameActiveDeformedMeshesCounter.Add(1);
+	#if RUKHANKA_INPLACE_SKINNING
+		//	Yes, I am overwriting the value here. Frame active meshes counter need to be incremented in any case
+		currentMeshFrameDeformationDataIndex = smrdd.deformedVertexIndex; 
+	#endif
 		meshFrameDeformationData[currentMeshFrameDeformationDataIndex] = meshFrameData;
 	}
 }
@@ -96,26 +100,42 @@ partial struct SetDeformedMeshIndicesJob: IJobEntity
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsafe void Execute(in AnimatedRendererComponent arc, ref DeformedMeshIndex dri)
+	unsafe void Execute(in AnimatedRendererComponent arc, ref DeformedMeshIndex dri, ref DeformedMeshIndexDeprecated drid)
 	{
 	#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
 		dri.Value[2] = (uint)currentFrameDeformedBufferIndex;
 	#endif
 		
+		//	Handle invisible mesh renderers by assigning theirs deformed mesh index to some value that can be handled in shaders:
+		//	* In case of in-place skinning I need to simply check for this index for some given predefined distinct value
+		//	* In case of preskinning path set deformed mesh index beyond valid data. Previously I have added some zeroes at the end
+		//	of skinned vertices data. Indexing it will return zero values for skinning mesh
 		if (!entityToSMRFrameDataMap.TryGetValue(arc.skinnedMeshEntity, out var smrdd))
 		{
 		#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
-			dri.Value[currentFrameDeformedBufferIndex] = (uint)*frameDeformedVerticesCounter.Counter;
+			#if RUKHANKA_INPLACE_SKINNING
+				dri.Value[currentFrameDeformedBufferIndex] = 0xffffffff;
+			#else
+				dri.Value[currentFrameDeformedBufferIndex] = (uint)*frameDeformedVerticesCounter.Counter;
+			#endif
+			drid.Value[currentFrameDeformedBufferIndex] = dri.Value[currentFrameDeformedBufferIndex];
 		#else
-			dri.Value = (uint)*frameDeformedVerticesCounter.Counter;
+			#if RUKHANKA_INPLACE_SKINNING
+				dri.Value = 0xffffffff;
+			#else
+				dri.Value = (uint)*frameDeformedVerticesCounter.Counter;
+			#endif
+			drid.Value = dri.Value;
 		#endif
 			return;
 		}
 		
 	#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
 		dri.Value[currentFrameDeformedBufferIndex] = (uint)smrdd.deformedVertexIndex;
+		drid.Value[currentFrameDeformedBufferIndex] = dri.Value[currentFrameDeformedBufferIndex];
 	#else
 		dri.Value = (uint)smrdd.deformedVertexIndex;
+		drid.Value = dri.Value;
 	#endif
 	}
 }
@@ -127,19 +147,26 @@ partial struct CopySkinMatricesToGPUJob: IJobEntity
 {
 	[ReadOnly]
 	public NativeParallelHashMap<Entity, SkinnedMeshRendererFrameDeformationData> entityToSMRFrameDataMap;
+	[ReadOnly]
+	public ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTag;
 	
 	[NativeDisableParallelForRestriction]
-	public NativeArray<SkinMatrix> mappedGPUSkinMatrixBuffer;
+	public ThreadedSparseUploader mappedGPUSkinMatrixBuffer;
+	
+	public bool isEditor;
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsafe void Execute(Entity e, in DynamicBuffer<SkinMatrix> skinMatrices)
+	unsafe void Execute(Entity e, AnimatedSkinnedMeshComponent arc, in DynamicBuffer<SkinMatrix> skinMatrices)
 	{
-		if (!entityToSMRFrameDataMap.TryGetValue(e, out var smrdd))
+		bool isGPUAnimator = !isEditor && arc.IsGPUAnimator(gpuAnimationEngineTag);
+		if (isGPUAnimator || !entityToSMRFrameDataMap.TryGetValue(e, out var smrdd))
 			return;
 		
-		var dstPtr = (SkinMatrix*)mappedGPUSkinMatrixBuffer.GetUnsafePtr() + smrdd.skinMatrixIndex;
-		UnsafeUtility.MemCpy(dstPtr, skinMatrices.GetUnsafeReadOnlyPtr(), UnsafeUtility.SizeOf<SkinMatrix>() * skinMatrices.Length);
+		var srcPtr = skinMatrices.GetUnsafeReadOnlyPtr();
+		var srcSize = skinMatrices.Length * UnsafeUtility.SizeOf<SkinMatrix>();
+		var dstOffset = smrdd.skinMatrixIndex * UnsafeUtility.SizeOf<SkinMatrix>();
+		mappedGPUSkinMatrixBuffer.AddUpload(srcPtr, srcSize, dstOffset);
 	}
 }
 

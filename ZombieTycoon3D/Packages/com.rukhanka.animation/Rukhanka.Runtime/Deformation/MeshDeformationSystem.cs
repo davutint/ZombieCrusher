@@ -31,9 +31,10 @@ public partial class MeshDeformationSystem: SystemBase
 #if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
 	//	Double buffer scheme. Current frame will read previous frame data to calculate motion delta
 	GraphicsBuffer finalDeformedVerticesCB1;
-	bool buffer0IsFront = true;
+	uint bufferSwapCounter = 0;
 #endif
 	
+	SparseUploader sparseUploader;
 	FrameFencedGPUBufferPool<SkinMatrix> frameSkinMatricesBuffer;
 	FrameFencedGPUBufferPool<float> frameBlendShapeWeightsBuffer;
 	FrameFencedGPUBufferPool<MeshFrameDeformationDescription> frameMeshDeformationDescriptionBuffer;
@@ -43,7 +44,9 @@ public partial class MeshDeformationSystem: SystemBase
 	ComputeKernel fillInitialMeshBlendShapesKernel;
 	ComputeKernel createPerVertexDeformationWorkloadKernel;
 	ComputeKernel skinningKernel;
+	
 	EntitiesGraphicsSystem entitiesGraphicsSystem;
+	GPUAnimationSystem gpuAnimationSystem;
 	
 	SharedComponentTypeHandle<RenderMeshArray> renderMeshArrayTypeHandle;
 
@@ -62,48 +65,34 @@ public partial class MeshDeformationSystem: SystemBase
 		new () {vertexAttribute = VertexAttribute.Tangent, vertexAttributeFormat = VertexAttributeFormat.Float32, streamIndex = 0, dimension = 4 },
 	};
 	
-	readonly int ShaderID_inputVertexSizeInBytes = Shader.PropertyToID("inputVertexSizeInBytes");
-	readonly int ShaderID_outDataVertexOffset = Shader.PropertyToID("outDataVertexOffset");
-	readonly int ShaderID_totalMeshVertices = Shader.PropertyToID("totalMeshVertices");
-	readonly int ShaderID_meshVertexData = Shader.PropertyToID("meshVertexData");
-	readonly int ShaderID_outInitialDeformedMeshData = Shader.PropertyToID("outInitialDeformedMeshData");
-	readonly int ShaderID_meshBonesPerVertexData = Shader.PropertyToID("meshBonesPerVertexData");
-	readonly int ShaderID_inputBonesWeightsDataOffset = Shader.PropertyToID("inputBonesWeightsDataOffset");
-	readonly int ShaderID_outBonesWeightsDataOffset = Shader.PropertyToID("outBonesWeightsDataOffset");
-	readonly int ShaderID_frameDeformedMeshes = Shader.PropertyToID("frameDeformedMeshes");
-	readonly int ShaderID_outFramePerVertexWorkload = Shader.PropertyToID("outFramePerVertexWorkload");
-	readonly int ShaderID_framePerVertexWorkload = Shader.PropertyToID("framePerVertexWorkload");
-	readonly int ShaderID_inputMeshVertexData = Shader.PropertyToID("inputMeshVertexData");
-	readonly int ShaderID_inputBoneInfluences = Shader.PropertyToID("inputBoneInfluences");
-	readonly int ShaderID_inputBlendShapes = Shader.PropertyToID("inputBlendShapes");
-	readonly int ShaderID_frameSkinMatrices = Shader.PropertyToID("frameSkinMatrices");
-	readonly int ShaderID_frameBlendShapeWeights = Shader.PropertyToID("frameBlendShapeWeights");
-	readonly int ShaderID_outDeformedVertices = Shader.PropertyToID("outDeformedVertices");
-	readonly int ShaderID_totalDeformedMeshesCount = Shader.PropertyToID("totalDeformedMeshesCount");
-	readonly int ShaderID_totalSkinnedVerticesCount = Shader.PropertyToID("totalSkinnedVerticesCount");
-	readonly int ShaderID_voidMeshVertexCount = Shader.PropertyToID("voidMeshVertexCount");
-	readonly int ShaderID_DeformedMeshData = Shader.PropertyToID("_DeformedMeshData");
-	readonly int ShaderID_PreviousFrameDeformedMeshData = Shader.PropertyToID("_PreviousFrameDeformedMeshData");
-	readonly int ShaderID_meshBlendShapesBuffer = Shader.PropertyToID("meshBlendShapesBuffer");
-	readonly int ShaderID_outInitialMeshBlendShapesData = Shader.PropertyToID("outInitialMeshBlendShapesData");
-	readonly int ShaderID_inputBlendShapeVerticesCount = Shader.PropertyToID("inputBlendShapeVerticesCount");
-	readonly int ShaderID_inputBlendShapeVertexOffset = Shader.PropertyToID("inputBlendShapeVertexOffset");
-	readonly int ShaderID_outBlendShapeVertexOffset = Shader.PropertyToID("outBlendShapeVertexOffset");
-	
-	EntityQuery activeDeformedEntitiesQuery;
+	EntityQuery activeDeformedEntitiesQuery, activeDeformedMeshesQuery;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected override void OnCreate()
 	{
+#if !HYBRID_RENDERER_DISABLED
+        if (!EntitiesGraphicsUtils.IsEntitiesGraphicsSupportedOnSystem())
+#endif
+		{
+			Enabled = false;
+			return;
+		}
+        
 		renderMeshArrayTypeHandle = GetSharedComponentTypeHandle<RenderMeshArray>();
 		entitiesGraphicsSystem = World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
-		frameSkinMatricesBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.LockBufferForWrite);
+		gpuAnimationSystem = World.GetExistingSystemManaged<GPUAnimationSystem>();
+		frameSkinMatricesBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.None);
 		frameBlendShapeWeightsBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.LockBufferForWrite);
 		frameMeshDeformationDescriptionBuffer = new (0xffff, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.LockBufferForWrite);
+		sparseUploader = new (null);
 		
 		activeDeformedEntitiesQuery = SystemAPI.QueryBuilder()
 			.WithAll<AnimatedSkinnedMeshComponent>()
+			.Build();
+		
+		activeDeformedMeshesQuery = SystemAPI.QueryBuilder()
+			.WithAll<AnimatedRendererComponent>()
 			.Build();
 		
 		RequireForUpdate(activeDeformedEntitiesQuery);
@@ -113,6 +102,11 @@ public partial class MeshDeformationSystem: SystemBase
 
 	protected override void OnDestroy()
 	{
+#if !HYBRID_RENDERER_DISABLED
+        if (!EntitiesGraphicsUtils.IsEntitiesGraphicsSupportedOnSystem())
+#endif
+		{ return; }
+		
 		meshVertexDataCB?.Dispose();
 		meshBoneWeightDataCB?.Dispose();
 		meshBlendShapesDataCB?.Dispose();
@@ -124,9 +118,10 @@ public partial class MeshDeformationSystem: SystemBase
 		finalDeformedVerticesCB1?.Dispose();
 	#endif
 		
-		frameMeshDeformationDescriptionBuffer.Dispose();
-		frameSkinMatricesBuffer.Dispose();
-		frameBlendShapeWeightsBuffer.Dispose();
+		frameMeshDeformationDescriptionBuffer?.Dispose();
+		frameSkinMatricesBuffer?.Dispose();
+		frameBlendShapeWeightsBuffer?.Dispose();
+		sparseUploader.Dispose();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +131,6 @@ public partial class MeshDeformationSystem: SystemBase
 		renderMeshArrayTypeHandle.Update(this);
 		
 		ref var deformationRuntimeData = ref SystemAPI.GetSingletonRW<DeformationRuntimeData>().ValueRW;
-		deformationRuntimeData.frameDeformedMeshesCount = activeDeformedEntitiesQuery.CalculateEntityCount();
 		
 		var resetFrameCountersJH = ResetFrameCounters(ref deformationRuntimeData, Dependency);
 		var prepareSkinningDataJH = PrepareMeshGPUSkinningData(ref deformationRuntimeData, resetFrameCountersJH);
@@ -144,7 +138,7 @@ public partial class MeshDeformationSystem: SystemBase
 		//	Complete previous jobs here, because we need to know skin matrix buffer and blend shape weights sizes here to resize GPU buffers
 		prepareSkinningDataJH.Complete();
 		
-		var copySkinMatricesToGPUBufferJH = CopySkinMatricesToGPUBuffer(deformationRuntimeData, default);
+		var (copySkinMatricesToGPUBufferJH, skinMatrixThreadedUploader) = CopySkinMatricesToGPUBuffer(deformationRuntimeData, default);
 		var copyBlendShapeWeightsToGPUBufferJH = CopyBlendShapeWeightsToGPUBuffer(deformationRuntimeData, default);
 		var copyFrameDeformationDataToGPUBuffersJH = JobHandle.CombineDependencies(copySkinMatricesToGPUBufferJH, copyBlendShapeWeightsToGPUBufferJH);
 		
@@ -152,41 +146,28 @@ public partial class MeshDeformationSystem: SystemBase
 		//	is complete.
 		copyFrameDeformationDataToGPUBuffersJH.Complete();
 		
-		CopyNewMeshesToInitialMeshDataBuffer(deformationRuntimeData);
-		
-		frameSkinMatricesBuffer.UnlockBufferAfterWrite(deformationRuntimeData.frameSkinMatrixCount);
+		sparseUploader.EndAndCommit(skinMatrixThreadedUploader);
 		frameBlendShapeWeightsBuffer.UnlockBufferAfterWrite(deformationRuntimeData.frameBlendShapeWeightsCount);
 		frameMeshDeformationDescriptionBuffer.UnlockBufferAfterWrite(deformationRuntimeData.frameActiveDeformedMeshesCount);
 		
+		CopyNewMeshesToInitialMeshDataBuffer(deformationRuntimeData);
+		
+		//	Need to inject GPU animation system here, for GPU animated entities skin matrices computation directly to skin matrix frame GPU buffer
+		//	It is not pretty approach, I know
+		gpuAnimationSystem?.BuildSkinMatrices(deformationRuntimeData.entityToSMRFrameDataMap, frameSkinMatricesBuffer);
+		
+	#if RUKHANKA_INPLACE_SKINNING
+		SetInplaceSkinningGlobalBuffers();
+	#else
 		ScheduleSkinningDispatch(deformationRuntimeData);
+	#endif
 		
 		frameSkinMatricesBuffer.EndFrame();
+		sparseUploader.FrameCleanup();
 		frameBlendShapeWeightsBuffer.EndFrame();
 		frameMeshDeformationDescriptionBuffer.EndFrame();
 	}
 	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static GraphicsBuffer CreateOrGrowGraphicsBuffer<T>(GraphicsBuffer gb, GraphicsBuffer.Target target, GraphicsBuffer.UsageFlags usage, int elementCount, bool preserveContents) where T: unmanaged
-    {
-		if (gb == null)
-        {
-	        //	In case of zero input size, increase it to make a buffer in any case
-	        elementCount = math.max(0xff, elementCount);
-			gb = new GraphicsBuffer(target, usage, elementCount, UnsafeUtility.SizeOf<T>());
-            return gb;
-        }
-		
-        if (elementCount <= gb.count)
-            return gb;
-        
-        //	To prevent frequent buffer recreations, resize buffer with some additional capacity
-        elementCount += 0x1000;
-        
-		gb = preserveContents ? ComputeBufferTools.Resize(gb, elementCount) : ComputeBufferTools.GrowNoCopy(gb, elementCount);
-        return gb;
-    }
-    
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	unsafe JobHandle ResetFrameCounters(ref DeformationRuntimeData drd, JobHandle dependsOn)
@@ -202,10 +183,22 @@ public partial class MeshDeformationSystem: SystemBase
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SetInplaceSkinningGlobalBuffers()
+	{
+		Shader.SetGlobalBuffer(ShaderID_frameDeformedMeshes, frameMeshDeformationDescriptionBuffer);
+		Shader.SetGlobalBuffer(ShaderID_frameSkinMatrices, frameSkinMatricesBuffer);
+		Shader.SetGlobalBuffer(ShaderID_frameBlendShapeWeights, frameBlendShapeWeightsBuffer);
+		Shader.SetGlobalBuffer(ShaderID_inputBlendShapes, meshBlendShapesDataCB);
+		Shader.SetGlobalBuffer(ShaderID_inputBoneInfluences, meshBoneWeightDataCB);
+		Shader.SetGlobalBuffer(ShaderID_inputMeshVertexData, meshVertexDataCB);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ScheduleSkinningDispatch(in DeformationRuntimeData drd)
 	{
 		var frameDeformedVerticesCount = drd.frameDeformedVerticesCount;
-		frameVertexSkinningWorkloadCB = CreateOrGrowGraphicsBuffer<uint>(frameVertexSkinningWorkloadCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, frameDeformedVerticesCount, false);
+		frameVertexSkinningWorkloadCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<uint>(frameVertexSkinningWorkloadCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, frameDeformedVerticesCount, false);
 		
 		//	Schedule workload generation dispatch if we have visible/existing skinned mesh renderers
 		if (drd.frameActiveDeformedMeshesCount > 0)
@@ -218,14 +211,13 @@ public partial class MeshDeformationSystem: SystemBase
 		}
 		
 		var deformedVerticesBufferSize = frameDeformedVerticesCount + drd.maximumVerticesAcrossAllRegisteredMeshes;
-		finalDeformedVerticesCB = CreateOrGrowGraphicsBuffer<DeformedVertex>(finalDeformedVerticesCB, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.None, deformedVerticesBufferSize, false);
-		
-	#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
-		finalDeformedVerticesCB1 = CreateOrGrowGraphicsBuffer<DeformedVertex>(finalDeformedVerticesCB1, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.None, deformedVerticesBufferSize, false);
-		var outDeformedVerticesCB = buffer0IsFront ? finalDeformedVerticesCB : finalDeformedVerticesCB1;
+	#if RUKHANKA_HALF_DEFORMED_DATA
+		finalDeformedVerticesCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<PackedDeformedVertex>(finalDeformedVerticesCB, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.None, deformedVerticesBufferSize, false);
 	#else
-		var outDeformedVerticesCB = finalDeformedVerticesCB;
+		finalDeformedVerticesCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<DeformedVertex>(finalDeformedVerticesCB, GraphicsBuffer.Target.Structured, GraphicsBuffer.UsageFlags.None, deformedVerticesBufferSize, false);
 	#endif
+		
+		var outDeformedVerticesCB = finalDeformedVerticesCB;
 		
 		//	Schedule skinning even for zero visible meshes, because we need to actualize void mesh zone to properly cull invisible meshes
 		if (deformedVerticesBufferSize > 0)
@@ -247,30 +239,42 @@ public partial class MeshDeformationSystem: SystemBase
 		Shader.SetGlobalBuffer(ShaderID_DeformedMeshData, outDeformedVerticesCB);
 		
 	#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
-		var prevDeformedVerticesDataCB = buffer0IsFront ? finalDeformedVerticesCB1 : finalDeformedVerticesCB;
-		Shader.SetGlobalBuffer(ShaderID_PreviousFrameDeformedMeshData, prevDeformedVerticesDataCB);
-		buffer0IsFront = !buffer0IsFront;
+		if (finalDeformedVerticesCB1 != null)
+			Shader.SetGlobalBuffer(ShaderID_PreviousFrameDeformedMeshData, finalDeformedVerticesCB1);
+		(finalDeformedVerticesCB, finalDeformedVerticesCB1) = (finalDeformedVerticesCB1, finalDeformedVerticesCB);
+		bufferSwapCounter += 1;
 	#endif
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	JobHandle CopySkinMatricesToGPUBuffer(in DeformationRuntimeData drd, JobHandle dependsOn)
+	(JobHandle, ThreadedSparseUploader) CopySkinMatricesToGPUBuffer(in DeformationRuntimeData drd, JobHandle dependsOn)
 	{
 		var skinMatrixCount = drd.frameSkinMatrixCount;
 		frameSkinMatricesBuffer.Grow(skinMatrixCount);
 		frameSkinMatricesBuffer.BeginFrame();
+		sparseUploader.ReplaceBuffer(frameSkinMatricesBuffer);
 		
-		var gpuBufferSkinMatrixOutArr = frameSkinMatricesBuffer.LockBufferForWrite(0, skinMatrixCount);
+		var q = SystemAPI.QueryBuilder()
+			.WithAll<AnimatedSkinnedMeshComponent>()
+			.Build();
+		var numEntities = q.CalculateEntityCount();
 		
+		var skinMatrixDataSize = skinMatrixCount * UnsafeUtility.SizeOf<SkinMatrix>();
+		var maxDataUploadSize = drd.maximumSkinMatrixCountAcrossAllRegisteredMeshes * UnsafeUtility.SizeOf<SkinMatrix>();
+		var gpuSkinMatrixThreadedUploader = sparseUploader.Begin(skinMatrixDataSize, maxDataUploadSize, numEntities);
+		
+		var isEditor = (this.World.Flags & WorldFlags.Editor) == WorldFlags.Editor;
 		var copySkinMatricesToGPUJob = new CopySkinMatricesToGPUJob()
 		{
 			entityToSMRFrameDataMap = drd.entityToSMRFrameDataMap,
-			mappedGPUSkinMatrixBuffer = gpuBufferSkinMatrixOutArr
+			mappedGPUSkinMatrixBuffer = gpuSkinMatrixThreadedUploader,
+			gpuAnimationEngineTag = SystemAPI.GetComponentLookup<GPUAnimationEngineTag>(true),
+			isEditor = isEditor,
 		};
 		
 		var jh = copySkinMatricesToGPUJob.ScheduleParallel(dependsOn);
-		return jh;
+		return (jh, gpuSkinMatrixThreadedUploader);
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -297,7 +301,24 @@ public partial class MeshDeformationSystem: SystemBase
 
 	JobHandle PrepareMeshGPUSkinningData(ref DeformationRuntimeData drd, JobHandle dependsOn)
 	{
-		var deformedMeshCount = drd.frameDeformedMeshesCount;
+		var deformedMeshCount = activeDeformedEntitiesQuery.CalculateEntityCount();
+		frameMeshDeformationDescriptionBuffer.Grow(deformedMeshCount);
+		frameMeshDeformationDescriptionBuffer.BeginFrame();
+		var gpuBufferMeshDeformationOutArr = frameMeshDeformationDescriptionBuffer.LockBufferForWrite(0, deformedMeshCount);
+		
+		var setDeformedMeshIndicesJH = SetDeformedMeshIndicesForRenderEntities(ref drd, dependsOn);
+		var prepareSkinningDataJH = PrepareSkinningCommands(ref drd, gpuBufferMeshDeformationOutArr, dependsOn);
+		
+		var rv = JobHandle.CombineDependencies(setDeformedMeshIndicesJH, prepareSkinningDataJH);
+		
+		return rv;
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	JobHandle PrepareMeshGPUSkinningDataForInplaceSkinning(ref DeformationRuntimeData drd, JobHandle dependsOn)
+	{
+		var deformedMeshCount = activeDeformedMeshesQuery.CalculateEntityCount();
 		frameMeshDeformationDescriptionBuffer.Grow(deformedMeshCount);
 		frameMeshDeformationDescriptionBuffer.BeginFrame();
 		var gpuBufferMeshDeformationOutArr = frameMeshDeformationDescriptionBuffer.LockBufferForWrite(0, deformedMeshCount);
@@ -334,7 +355,7 @@ public partial class MeshDeformationSystem: SystemBase
 			frameDeformedVerticesCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameDeformedVerticesCount)),
 			entityToSMRFrameDataMap = drd.entityToSMRFrameDataMap,
 		#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
-			currentFrameDeformedBufferIndex = buffer0IsFront ? 0 : 1
+			currentFrameDeformedBufferIndex = (int)(bufferSwapCounter & 1)
 		#endif
 		};
 		
@@ -355,7 +376,7 @@ public partial class MeshDeformationSystem: SystemBase
 		createPerVertexDeformationWorkloadKernel = new ComputeKernel(meshDeformationSystemCS, "CreatePerVertexDeformationWorkload");
 		
 		//	Pick skinning kernel depending on hardware capabilities (max workgroup size)
-		var workGroupSizeX = SystemInfo.maxComputeWorkGroupSizeX;
+		var workGroupSizeX = math.ceilpow2(SystemInfo.maxComputeWorkGroupSizeX);
 		if (workGroupSizeX != SystemInfo.maxComputeWorkGroupSizeX)
 			workGroupSizeX >>= 1;
 		
@@ -369,12 +390,16 @@ public partial class MeshDeformationSystem: SystemBase
 		if (drd.newSkinnedMeshesToRegister.IsEmpty)
 			return;
 		
-		meshVertexDataCB = CreateOrGrowGraphicsBuffer<SourceMeshVertex>(meshVertexDataCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, drd.totalSkinnedVerticesCount, true);
-		meshBoneWeightDataCB = CreateOrGrowGraphicsBuffer<BoneWeight1>(meshBoneWeightDataCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, drd.totalBoneWeightsCount, true);
-		meshBlendShapesDataCB = CreateOrGrowGraphicsBuffer<DeformedVertex>(meshBlendShapesDataCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, drd.totalBlendShapeVerticesCount, true);
+		meshVertexDataCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<SourceMeshVertex>(meshVertexDataCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, drd.totalSkinnedVerticesCount, true);
+		meshBoneWeightDataCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<BoneWeight1>(meshBoneWeightDataCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, drd.totalBoneWeightsCount, true);
+		meshBlendShapesDataCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<DeformedVertex>(meshBlendShapesDataCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, drd.totalBlendShapeVerticesCount, true);
 		
 		InitComputeShaders();
 		var meshToBoneWeightsOffsetMap = CreateNewMeshesBoneIndicesComputeBuffer(drd);
+		
+		sparseUploader.ReplaceBuffer(meshBoneWeightDataCB);
+		var boneWeightDataSize = drd.totalBoneWeightsCount * UnsafeUtility.SizeOf<BoneWeight1>();
+		var tsu = sparseUploader.Begin(boneWeightDataSize, boneWeightDataSize, 1);
 
 		foreach (var sm in drd.newSkinnedMeshesToRegister)
 		{
@@ -385,9 +410,10 @@ public partial class MeshDeformationSystem: SystemBase
 			var boneWeightsOffsetForMesh = meshToBoneWeightsOffsetMap[batchMeshID];
 			
 			CopyMeshVertexData(smd, boneWeightsOffsetForMesh, mesh);
-			CopyMeshBoneWeightsData(smd, mesh);
+			CopyMeshBoneWeightsData(smd, mesh, tsu);
 			CopyMeshBlendShapes(smd, mesh);
 		}
+		sparseUploader.EndAndCommit(tsu);
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +439,7 @@ public partial class MeshDeformationSystem: SystemBase
 			UnsafeUtility.MemCpy(newMeshesBonesPerVertexData.GetUnsafePtr() + baseVertexIndex, bwi.GetUnsafePtr(), bwi.Length * 4);
 		}
 		
-		newMeshBonesPerVertexCB = CreateOrGrowGraphicsBuffer<uint>(newMeshBonesPerVertexCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, newMeshesBonesPerVertexData.Length, false);
+		newMeshBonesPerVertexCB = ComputeBufferTools.CreateOrGrowGraphicsBuffer<uint>(newMeshBonesPerVertexCB, GraphicsBuffer.Target.Raw, GraphicsBuffer.UsageFlags.None, newMeshesBonesPerVertexData.Length, false);
 		newMeshBonesPerVertexCB.SetData(newMeshesBonesPerVertexData.AsArray());
 		return meshToBoneWeightsOffsetMap;
 	}
@@ -425,7 +451,7 @@ public partial class MeshDeformationSystem: SystemBase
 		if (mesh.blendShapeCount == 0)
 			return;
 		
-		var meshAllBlendShapes = mesh.GetBlendShapeBuffer(BlendShapeBufferLayout.PerShape);
+		using var meshAllBlendShapes = mesh.GetBlendShapeBuffer(BlendShapeBufferLayout.PerShape);
 		var blendShapeVertexDeltaSize = UnsafeUtility.SizeOf<BlendShapeVertexDelta>();
 		Assert.IsTrue(blendShapeVertexDeltaSize == meshAllBlendShapes.stride);
 		
@@ -439,7 +465,7 @@ public partial class MeshDeformationSystem: SystemBase
 		for (var i = 0; i < mesh.blendShapeCount; ++i)
 		{
 			var bsr = mesh.GetBlendShapeBufferRange(i);
-			cs.SetInt(ShaderID_inputBlendShapeVerticesCount, (int)(bsr.endIndex - bsr.startIndex));
+			cs.SetInt(ShaderID_inputBlendShapeVerticesCount, (int)(bsr.endIndex - bsr.startIndex) + 1);
 			cs.SetInt(ShaderID_inputBlendShapeVertexOffset, (int)bsr.startIndex);
 			cs.SetInt(ShaderID_outBlendShapeVertexOffset, smd.baseBlendShapeIndex + i * smd.vertexCount );
 			fillInitialMeshBlendShapesKernel.Dispatch(smd.vertexCount, 1, 1);
@@ -448,10 +474,10 @@ public partial class MeshDeformationSystem: SystemBase
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CopyMeshBoneWeightsData(SkinnedMeshDescription smd, Mesh mesh)
+	void CopyMeshBoneWeightsData(SkinnedMeshDescription smd, Mesh mesh, ThreadedSparseUploader boneWeightDataUploader)
 	{
 		var meshAllBoneWeights = mesh.GetAllBoneWeights();
-		meshBoneWeightDataCB.SetData(meshAllBoneWeights, 0, smd.baseBoneWeightIndex, meshAllBoneWeights.Length);
+		boneWeightDataUploader.AddUpload(meshAllBoneWeights, smd.baseBoneWeightIndex * UnsafeUtility.SizeOf<BoneWeight1>(), 1);
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

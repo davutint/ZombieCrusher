@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ff3f32e2710712542bbe95b14f0535c3
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/AnimationToProcess.hlsl
+  uploadId: 754107

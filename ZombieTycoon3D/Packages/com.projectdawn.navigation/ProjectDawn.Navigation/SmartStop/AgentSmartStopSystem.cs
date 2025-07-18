@@ -18,6 +18,7 @@ namespace ProjectDawn.Navigation
         public void OnCreate(ref SystemState state)
         {
             m_SmartStopLookup = state.GetComponentLookup<AgentSmartStop>(isReadOnly: true);
+            state.RequireForUpdate<AgentSmartStop>();
         }
 
         [BurstCompile]

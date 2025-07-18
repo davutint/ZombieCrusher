@@ -4,6 +4,7 @@ using Unity.Burst;
 using static Unity.Entities.SystemAPI;
 using Unity.Burst.Intrinsics;
 using ProjectDawn.Entities;
+using Unity.Collections;
 
 namespace ProjectDawn.Navigation
 {
@@ -14,14 +15,19 @@ namespace ProjectDawn.Navigation
     [UpdateInGroup(typeof(AgentPathingSystemGroup))]
     public partial struct NavMeshPathSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<NavMeshPath>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var navmesh = GetSingletonRW<NavMeshQuerySystem.Singleton>();
             new NavMeshPathJob
             {
                 NavMesh = navmesh.ValueRW,
-                AreaCost = new OptionalBufferAccessor<NavMeshAreaCost>(GetBufferTypeHandle<NavMeshAreaCost>())
+                AreaCost = new OptionalBufferAccessor<NavMeshAreaCost>(GetBufferTypeHandle<NavMeshAreaCost>(true))
             }.Schedule();
             navmesh.ValueRW.World.AddDependency(state.Dependency);
         }
@@ -31,6 +37,7 @@ namespace ProjectDawn.Navigation
         partial struct NavMeshPathJob : IJobEntity, IJobEntityChunkBeginEnd
         {
             public NavMeshQuerySystem.Singleton NavMesh;
+            [ReadOnly]
             public OptionalBufferAccessor<NavMeshAreaCost> AreaCost;
 
             public void Execute([EntityIndexInChunk] int index, ref DynamicBuffer<NavMeshNode> nodes, ref NavMeshPath path, in AgentBody body, in LocalTransform transform)

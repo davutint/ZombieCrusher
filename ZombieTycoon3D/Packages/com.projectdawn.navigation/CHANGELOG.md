@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this package will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
+## [4.1.1] - 2025-06-21
+- Fixed build errors
+
+## [4.1.0] - 2025-06-17
+- Added to navmesh `OptimizePath` feature that improves path quality for highly non uniform navmesh surfaces
+- Fixed navmesh init to wait for query
+- Fixed AgentCollider to work, if it is created disabled
+- Changed SonarHorizon to be enabled by default, you can still disable it
+- Changed AgentSonarAvoid some angle tooltips to be more clear
+- Changed a lot of systems not to run without existing components
+- Changed hive stop comment
+- Changed not to print `Failed to map agent` in non development builds
+
 ## [4.0.15] - 2025-03-10
 - Fixed Astar pathing resulting in errors during carving
 

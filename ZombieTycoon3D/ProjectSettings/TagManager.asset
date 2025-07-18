@@ -20,7 +20,7 @@ TagManager:
   - UI
   - Weapons
   - Enemy
-  - Object
+  - Blood Layer
   - Interactable
   - Grass
   - Metal

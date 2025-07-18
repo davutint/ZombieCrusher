@@ -18,10 +18,8 @@ public class RukhankaDebugConfiguration: MonoBehaviour
 
 	[Header("Bone Visualization")]
 	public bool visualizeAllRigs;
-	public Color boneColor = new Color(0, 1, 1, 0.3f);
-	public Color outlineColor = new Color(0, 1, 1, 1);
-	public Color serverRigBoneColor = new Color(1, 1, 0, 0.3f);
-	public Color serverRigOutlineColor = new Color(1, 1, 0, 1f);
+	public Color boneColorCPURig = new Color(0, 1, 1, 1);
+	public Color boneColorGPURig = new Color(0, 1, 0, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,20 +28,17 @@ public class DebugConfigurationBaker: Baker<RukhankaDebugConfiguration>
 {
 	public override void Bake(RukhankaDebugConfiguration a)
 	{
-		var dcc = new DebugConfigurationComponent()
-		{
-			logAnimatorControllerProcesses = a.logAnimatorControllerProcesses,
-			logAnimationCalculationProcesses = a.logAnimationCalculationProcesses,
-			
-			logAnimationEvents = a.logAnimationEvents,
-			logAnimatorControllerEvents = a.logAnimatorControllerEvents,
+		var dcc = DebugConfigurationComponent.Default();
+		
+		dcc.logAnimatorControllerProcesses = a.logAnimatorControllerProcesses;
+		dcc.logAnimationCalculationProcesses = a.logAnimationCalculationProcesses;
+		
+		dcc.logAnimationEvents = a.logAnimationEvents;
+		dcc.logAnimatorControllerEvents = a.logAnimatorControllerEvents;
 
-			visualizeAllRigs = a.visualizeAllRigs,
-			clientRigColorLines = new float4(a.outlineColor.r, a.outlineColor.g, a.outlineColor.b, a.outlineColor.a),
-			clientRigColorTri = new float4(a.boneColor.r, a.boneColor.g, a.boneColor.b, a.boneColor.a),
-			serverRigColorLines = new float4(a.serverRigOutlineColor.r, a.serverRigOutlineColor.r, a.serverRigOutlineColor.b, a.serverRigOutlineColor.a),
-			serverRigColorTri = new float4(a.serverRigOutlineColor.r, a.serverRigBoneColor.r, a.serverRigBoneColor.b, a.serverRigBoneColor.a)
-		};
+		dcc.visualizeAllRigs = a.visualizeAllRigs;
+		dcc.cpuRigColor = new float4(a.boneColorCPURig.r, a.boneColorCPURig.g, a.boneColorCPURig.b, a.boneColorCPURig.a);
+		dcc.gpuRigColor = new float4(a.boneColorGPURig.r, a.boneColorGPURig.g, a.boneColorGPURig.b, a.boneColorGPURig.a);
 
 		var e = GetEntity(TransformUsageFlags.None);
 		AddComponent(e, dcc);

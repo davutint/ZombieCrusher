@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2b6a8234a3200384f94471df88fb843b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/GPUAnimationEngine/GPUAnimationSystem_ShaderVars.cs
+  uploadId: 754107

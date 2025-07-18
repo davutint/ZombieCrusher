@@ -50,12 +50,14 @@ internal class AnimatorControllerDataCollector
 	
 	Dictionary<AnimatorStateMachine, AnimatorStateMachine> stateMachineParents;
 	readonly AnimatorController ac;
+	readonly RigDefinitionAuthoring rigDefinition;
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public AnimatorControllerDataCollector(AnimatorController ac)
+	public AnimatorControllerDataCollector(AnimatorController ac, RigDefinitionAuthoring rd)
 	{
 		this.ac = ac;
+		this.rigDefinition = rd;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +136,7 @@ internal class AnimatorControllerDataCollector
 		var anyStateTransitions = new UnsafeList<RTP.Transition>(128, Allocator.Temp);
 		
 		GenerateControllerStateMachineComputationData(acl.stateMachine, ref stateList, ref anyStateTransitions, allParams);
-		l.avatarMaskBlobHash = BakingUtils.ComputeAvatarMaskHash(acl.avatarMask);
+		l.avatarMaskBlobHash = BakingUtils.ComputeAvatarMaskHash(acl.avatarMask, rigDefinition);
 		l.states = stateList;
 
 		var defaultState = acl.stateMachine.defaultState;

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f0c8e199e88b9894b92573b0636c8e6b
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/GPUAnimationEngine/Resources/MakeSkinMatrices.hlsl
+  uploadId: 754107

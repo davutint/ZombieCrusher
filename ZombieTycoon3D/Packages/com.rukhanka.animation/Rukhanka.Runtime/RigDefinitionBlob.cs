@@ -15,7 +15,7 @@ public struct RigBoneInfo
 	public BlobString name;
 #endif
 
-	public Hash128 hash;
+	public uint hash;
 	public int parentBoneIndex;
 	public BoneTransform refPose;
 	public AvatarMaskBodyPart humanBodyPart;
@@ -53,13 +53,17 @@ public struct HumanData
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public struct RigDefinitionBlob
+public struct RigDefinitionBlob: GenericAssetBlob
 {
 #if RUKHANKA_DEBUG_INFO
 	public BlobString name;
+	public string Name() => name.ToString();
 	public float bakingTime;
+	public float BakingTime() => bakingTime;
 #endif
 	public Hash128 hash;
+	public Hash128 Hash() => hash;
+	
 	public BlobArray<RigBoneInfo> bones;
 	public BlobPtr<HumanData> humanData;
 	public int rootBoneIndex;
@@ -71,14 +75,13 @@ public struct RigDefinitionComponent: IComponentData, IEnableableComponent
 {
 	public BlobAssetReference<RigDefinitionBlob> rigBlob;
 	public bool applyRootMotion;
-	
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 public struct BoneRemapTableBlob
 {
-	public BlobArray<int> rigBoneToSkinnedMeshBoneRemapIndices;
+	public BlobArray<int> remapIndices;
 }
 
 }

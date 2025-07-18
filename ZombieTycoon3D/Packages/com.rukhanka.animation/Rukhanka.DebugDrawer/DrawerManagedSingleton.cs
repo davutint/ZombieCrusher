@@ -48,7 +48,7 @@ public class DrawerManagedSingleton: IComponentData
         public uint color;
     }
     
-    internal struct BoneData
+    public struct BoneData
     {
 		public float3 pos0, pos1;
 		public uint colorTri, colorLines;
@@ -80,7 +80,7 @@ public class DrawerManagedSingleton: IComponentData
         bonesBuf = new ();
 
         CreateMaterials();
-        CreateBoneMesh();
+        boneMesh = CreateBoneMesh();
     }
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,27 +105,18 @@ public class DrawerManagedSingleton: IComponentData
 
 	void CreateMaterials()
 	{
-	#if HDRP_10_0_0_OR_NEWER
-		var srpName = "HDRP";
-	#elif URP_10_0_0_OR_NEWER
-		var srpName = "URP";
-	#else
-		Debug.LogError("No scriptable renderer pipeline found. Please install HDRP or URP.");
-		return;
-	#endif
-		
-        lineDrawMat = new Material(Shader.Find($"RukhankaDebugLineDrawer {srpName}"));
-        thickLinesDrawMat = new Material(Shader.Find($"RukhankaDebugThickLineDrawer {srpName}"));
-        trianglesDrawMat = new Material(Shader.Find($"RukhankaDebugTriangleDrawer {srpName}"));
-        boneTriDrawMat = new Material(Shader.Find($"RukhankaBoneTriangleRenderer {srpName}"));
-        boneOutlineDrawMat = new Material(Shader.Find($"RukhankaBoneOutlineRenderer {srpName}"));
+        lineDrawMat = new Material(Shader.Find($"RukhankaDebugLineDrawer"));
+        thickLinesDrawMat = new Material(Shader.Find($"RukhankaDebugThickLineDrawer"));
+        trianglesDrawMat = new Material(Shader.Find($"RukhankaDebugTriangleDrawer"));
+        boneTriDrawMat = new Material(Shader.Find($"RukhankaBoneTriangleRenderer"));
+        boneOutlineDrawMat = new Material(Shader.Find($"RukhankaBoneOutlineRenderer"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CreateBoneMesh()
+	public static Mesh CreateBoneMesh()
 	{
-		boneMesh = new Mesh();
+		var boneMesh = new Mesh();
 		boneMesh.subMeshCount = 2;
 
 		var vtx = new Vector3[6];
@@ -171,7 +162,10 @@ public class DrawerManagedSingleton: IComponentData
 		boneMesh.SetVertices(vtx);
 		boneMesh.SetIndices(triIdx, MeshTopology.Triangles, 0);
 		boneMesh.SetIndices(lineIdx, MeshTopology.Lines, 1);
+		
+		return boneMesh;
 	}
+	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void BeginFrame()

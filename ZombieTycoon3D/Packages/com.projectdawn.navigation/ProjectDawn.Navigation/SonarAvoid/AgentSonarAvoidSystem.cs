@@ -27,6 +27,7 @@ namespace ProjectDawn.Navigation
         {
             m_NavMeshWallLookup = state.GetBufferLookup<NavMeshWall>(isReadOnly:true);
             m_NavMeshWallHandle = state.GetBufferTypeHandle<NavMeshWall>(isReadOnly:true);
+            state.RequireForUpdate<AgentSonarAvoid>();
         }
 
         [BurstCompile]
@@ -71,7 +72,7 @@ namespace ProjectDawn.Navigation
                 if (!SonarAvoidance.TryDirectionToRotation(desiredDirection, shape.GetUp(), out var rotation))
                     return;
 
-#if EXPERIMENTAL_SONAR_TIME
+#if !DISABLE_SONAR_HORIZON
                 float sonarRadius = clamp(length(body.Velocity) * 0.9f, 0.1f, min(distance(body.Destination, transform.Position), avoid.Radius));
 #else
                 float sonarRadius = min(distance(body.Destination, transform.Position), avoid.Radius);
@@ -100,7 +101,7 @@ namespace ProjectDawn.Navigation
                     DesiredDirection = desiredDirection,
                 };
 
-#if EXPERIMENTAL_SONAR_TIME
+#if !DISABLE_SONAR_HORIZON
                 action.MaxRadius = Sonar.OuterRadius + shape.Radius - 1e-3f;
                 action.MaxCostAngle = cos(avoid.MaxAngle * 0.5f);
 #endif
@@ -167,7 +168,7 @@ namespace ProjectDawn.Navigation
                 public AgentSonarAvoid Avoid;
                 public LocalTransform Transform;
                 public float3 DesiredDirection;
-#if EXPERIMENTAL_SONAR_TIME
+#if !DISABLE_SONAR_HORIZON
                 public float MaxRadius;
                 public float MaxCostAngle;
 #endif
@@ -178,7 +179,7 @@ namespace ProjectDawn.Navigation
                     if (Entity == otherEntity)
                         return;
 
-#if EXPERIMENTAL_SONAR_TIME
+#if !DISABLE_SONAR_HORIZON
                     float3 directionToOther = otherTransform.Position - Transform.Position;
 
                     // Skip agent outside sonar radius

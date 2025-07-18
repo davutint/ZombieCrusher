@@ -142,7 +142,7 @@ public struct AnimationStream: IDisposable
         var parentWorldRot = GetParentBoneWorldPose(boneIndex).rot;
 
         ref var boneLocalPose = ref runtimeData.animatedBonesBuffer.ElementAt(absBoneIndex);
-        boneLocalPose.rot = math.mul(math.conjugate(parentWorldRot), boneWorldPose.rot);
+        boneLocalPose.rot = math.mul(math.inverse(parentWorldRot), boneWorldPose.rot);
         
         MarkChildrenWorldPosesAsDirty(boneIndex);
     }

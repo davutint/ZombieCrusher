@@ -1,3 +1,4 @@
+using Rukhanka.Toolbox;
 using Unity.Entities;
 using Unity.Mathematics;
 #if RUKHANKA_WITH_NETCODE
@@ -40,8 +41,24 @@ public struct AnimatedSkinnedMeshComponent: IComponentData
 {
 	public uint nameHash;
 	public Entity animatedRigEntity;
+	public Entity rootBoneEntity;
 	public int rootBoneIndexInRig;
 	public BlobAssetReference<SkinnedMeshInfoBlob> smrInfoBlob;
+	
+	public bool IsGPUAnimator(ComponentLookup<GPUAnimationEngineTag> gpuAnimationEngineTagLookup)
+	{
+		return gpuAnimationEngineTagLookup.HasComponent(animatedRigEntity) && gpuAnimationEngineTagLookup.IsComponentEnabled(animatedRigEntity);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if RUKHANKA_WITH_NETCODE
+[GhostComponent(PrefabType = GhostPrefabType.Client)]
+#endif
+public struct SkinnedMeshRenderEntity: IBufferElementData
+{
+	public Entity value;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +97,14 @@ public struct RootMotionAnimationStateComponent: IBufferElementData, IEnableable
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+public struct RootMotionVelocityComponent: IComponentData
+{
+	public bool removeBuiltinEntityMovement;
+	public float3 worldVelocity;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 public struct AnimationEventComponent: IBufferElementData, IEnableableComponent
 {
 	public AnimationEventComponent(ref AnimationEventBlob aeb)
@@ -112,7 +137,11 @@ public struct PreviousProcessedAnimationComponent: IBufferElementData
 //	Define some special bone names
 public static class SpecialBones
 {
-	public readonly static string unnamedRootBoneName = "RUKHANKA_UnnamedRootBone";
+	//	Special bone hashes need to be recalculated in case of hashing function change!
+	//	I cannot add hash computation code here, because burst will fail to compile
+	public static readonly string UnnamedRootBoneName = "RUKHANKA_UnnamedRootBone";
+	public static readonly string AnimatorTypeName = "RUKHANKA_Animator";
+	public static readonly uint AnimatorTypeNameHash = 0xde00343e;
 }
 }
 

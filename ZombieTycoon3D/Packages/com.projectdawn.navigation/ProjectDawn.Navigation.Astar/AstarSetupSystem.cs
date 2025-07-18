@@ -12,6 +12,7 @@ namespace ProjectDawn.Navigation.Astar
         public AstarLinkTraversalMode LinkTraversalMode;
     }
 
+    [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct AstarSetupSystem : ISystem
     {

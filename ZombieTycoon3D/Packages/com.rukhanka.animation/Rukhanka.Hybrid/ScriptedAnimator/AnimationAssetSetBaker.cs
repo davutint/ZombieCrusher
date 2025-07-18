@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 
+using Unity.Collections;
 using Unity.Entities;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,8 +16,10 @@ public class AnimationAssetSetBaker: Baker<AnimationAssetSetAuthoring>
 		
 		var animationBaker = new AnimationClipBaker();
 		var bakedAnimations = animationBaker.BakeAnimations(this, a.animationClips, avatar, a.gameObject);
-		var e = GetEntity(a, TransformUsageFlags.None);
+		var e = CreateAdditionalEntity(TransformUsageFlags.None, false, a.name + "_AnimationAssets");
 		var newAnimArr = AddBuffer<NewBlobAssetDatabaseRecord<AnimationClipBlob>>(e);
+		
+		//	Add animations
 		foreach (var ba in bakedAnimations)
 		{
 			var newAnim = new NewBlobAssetDatabaseRecord<AnimationClipBlob>()
@@ -26,6 +29,26 @@ public class AnimationAssetSetBaker: Baker<AnimationAssetSetAuthoring>
 			};
 			
 			newAnimArr.Add(newAnim);
+		}
+		
+		//	Add avatar masks
+		var bakedAvatarMasks = new NativeList<AvatarMaskBakingData>(Allocator.Temp);
+		foreach (var am in a.avatarMasks)
+		{
+			var amb = new AvatarMaskBaker();
+			var avatarMaskBlobAsset = amb.CreateAvatarMaskBlob(this, am, rigDef);
+			var newAvatarMaskBlob = new AvatarMaskBakingData()
+			{
+				rigEntity = GetEntity(a, TransformUsageFlags.None),
+				dataBlob = avatarMaskBlobAsset
+			};
+			bakedAvatarMasks.Add(newAvatarMaskBlob);
+		}
+		
+		if (bakedAvatarMasks.Length > 0)
+		{
+			var buf = AddBuffer<AvatarMaskBakingData>(e);
+			buf.AddRange(bakedAvatarMasks.AsArray());
 		}
 	}
 }

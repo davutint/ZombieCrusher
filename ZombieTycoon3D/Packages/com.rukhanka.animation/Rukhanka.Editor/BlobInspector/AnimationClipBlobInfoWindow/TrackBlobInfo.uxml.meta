@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 63bc41214c99e734aa5adc4a69340137
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Editor/BlobInspector/AnimationClipBlobInfoWindow/TrackBlobInfo.uxml
+  uploadId: 754107

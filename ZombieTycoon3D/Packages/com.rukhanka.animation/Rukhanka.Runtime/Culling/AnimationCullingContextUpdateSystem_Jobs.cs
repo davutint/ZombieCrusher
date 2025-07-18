@@ -1,12 +1,12 @@
-#if !RUKHANKA_NO_DEBUG_DRAWER
-using Rukhanka.DebugDrawer;
-#endif
-
 using Rukhanka.Toolbox;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+
+#if !RUKHANKA_NO_DEBUG_DRAWER
+using Rukhanka.DebugDrawer;
+#endif
 
 /////////////////////////////////////////////////////////////////////////////////
 

@@ -34,6 +34,34 @@ namespace ProjectDawn.Navigation.Editor
             return value;
         }
 
+        public static bool DrawInverted(GUIContent label, string defineSymbol)
+        {
+            bool hasDefineSymbol = !HasScriptingDefineSymbol(defineSymbol);
+
+            EditorGUI.BeginChangeCheck();
+
+            bool value = EditorGUILayout.Toggle(label, hasDefineSymbol);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (!EditorUtility.DisplayDialog("Confirmation", $"This operation will modify scripting defines by adding/removing define symbol {defineSymbol}", "Yes", "No"))
+                {
+                    return value;
+                }
+
+                if (!value)
+                {
+                    AddScriptingDefineSymbol(defineSymbol);
+                }
+                else
+                {
+                    RemoveScriptingDefineSymbol(defineSymbol);
+                }
+            }
+
+            return value;
+        }
+
         static bool HasScriptingDefineSymbol(string symbol)
         {
             string defines = GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);

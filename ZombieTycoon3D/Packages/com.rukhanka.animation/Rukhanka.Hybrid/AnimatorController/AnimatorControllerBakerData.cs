@@ -125,16 +125,6 @@ public struct Controller
 	public UnsafeList<Parameter> parameters;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-public struct AvatarMask
-{
-	public FixedStringName name;
-	public Hash128 hash;
-	public NativeList<FixedStringName> includedBonePaths;
-	public uint humanBodyPartsAvatarMask;
-}
-
 } // RTP
 }
 

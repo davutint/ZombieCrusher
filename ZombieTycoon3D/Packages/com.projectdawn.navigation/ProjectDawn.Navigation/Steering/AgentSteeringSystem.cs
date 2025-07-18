@@ -15,8 +15,13 @@ namespace ProjectDawn.Navigation
     [Obsolete("AgentSteeringSystem is deprecated, please use AgentSeekingSystem!", false)]
     public partial struct AgentSteeringSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<AgentSteering>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             new AgentSteeringJob().ScheduleParallel();
         }

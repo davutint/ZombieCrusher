@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 53e554c5c17b29f4ebb95370af0ddd20
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/DebugAndVisualization/Resources/BoneRendererGPU.shader
+  uploadId: 754107

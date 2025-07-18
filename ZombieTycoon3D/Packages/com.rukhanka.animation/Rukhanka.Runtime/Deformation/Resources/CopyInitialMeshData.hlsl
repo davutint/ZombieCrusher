@@ -19,18 +19,23 @@ SourceSkinnedMeshVertex ReadSourceVertex(int vertexIndex)
 {
     int vertexByteOffset = vertexIndex * inputVertexSizeInBytes;
     SourceSkinnedMeshVertex rv = (SourceSkinnedMeshVertex)0;
+#ifndef RUKHANKA_INPLACE_SKINNING
+    CHECK_RAW_BUFFER_OUT_OF_BOUNDS(RUKHANKADEBUGMARKERS_DEFORMATION_COPY_MESH_DATA, vertexByteOffset, 40, meshVertexData);
+
     float4 v0 = asfloat(meshVertexData.Load4(vertexByteOffset + 0));
     float4 v1 = asfloat(meshVertexData.Load4(vertexByteOffset + 16));
     float1 v2 = asfloat(meshVertexData.Load(vertexByteOffset + 32));
     rv.position = v0.xyz;
     rv.normal = float3(v0.w, v1.xy);
     rv.tangent = float3(v1.zw, v2.x);
+#endif
 
     int baseBoneWeightIndex = inputBonesWeightsDataOffset + vertexIndex;
+
+    CHECK_RAW_BUFFER_OUT_OF_BOUNDS(RUKHANKADEBUGMARKERS_DEFORMATION_COPY_MESH_DATA, baseBoneWeightIndex * 4, 4, meshBonesPerVertexData);
     uint boneWeightsOffsetAndCountPacked = meshBonesPerVertexData.Load(baseBoneWeightIndex * 4);
-    uint boneWeightsOffset = GetBoneWeightsOffsetFromPackedUINT(boneWeightsOffsetAndCountPacked) + outBonesWeightsDataOffset;
-    uint boneWeightsCount = GetBoneWeightsCountFromPackedUINT(boneWeightsOffsetAndCountPacked);
-    rv.boneWeightsOffsetAndCount = PackBoneOffsetAndCount(boneWeightsCount, boneWeightsOffset);
+    rv.boneWeightsOffset = SourceSkinnedMeshVertex::GetBoneWeightsOffsetFromPackedUINT(boneWeightsOffsetAndCountPacked) + outBonesWeightsDataOffset;
+    rv.boneWeightsCount = SourceSkinnedMeshVertex::GetBoneWeightsCountFromPackedUINT(boneWeightsOffsetAndCountPacked);
 
     return rv;
 }

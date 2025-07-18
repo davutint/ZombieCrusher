@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9d46c9cd9b4c75d4188bf5e6914efc46
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/HumanRotationData.hlsl
+  uploadId: 754107

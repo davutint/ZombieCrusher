@@ -13,18 +13,18 @@ namespace Rukhanka.Hybrid
 { 
 public class AvatarMaskBaker
 {
-	public BlobAssetReference<AvatarMaskBlob> CreateAvatarMaskBlob(IBaker baker, AvatarMask am)
+	internal BlobAssetReference<AvatarMaskBakingDataBlob> CreateAvatarMaskBlob(IBaker baker, AvatarMask am, RigDefinitionAuthoring rd)
 	{
 		if (am == null)
 			return default;
 		
-		var blobHash = BakingUtils.ComputeAvatarMaskHash(am);
-		var blobExists = baker.TryGetBlobAssetReference<AvatarMaskBlob>(blobHash, out var avatarMaskBlob);
+		var blobHash = BakingUtils.ComputeAvatarMaskHash(am, rd);
+		var blobExists = baker.TryGetBlobAssetReference<AvatarMaskBakingDataBlob>(blobHash, out var avatarMaskBlob);
 		if (blobExists)
 			return avatarMaskBlob;
 		
 		var bb = new BlobBuilder(Allocator.Temp);
-		ref var amb = ref bb.ConstructRoot<AvatarMaskBlob>();
+		ref var amb = ref bb.ConstructRoot<AvatarMaskBakingDataBlob>();
 		amb.hash = blobHash;	
 	#if RUKHANKA_DEBUG_INFO
 		if (am.name.Length > 0)
@@ -55,7 +55,7 @@ public class AvatarMaskBaker
 		#if RUKHANKA_DEBUG_INFO
 			bb.AllocateString(ref includedBonePaths[i], leafBoneName);
 		#endif
-			includedBoneHashes[i] = new FixedStringName(leafBoneName).CalculateHash128();
+			includedBoneHashes[i] = new FixedStringName(leafBoneName).CalculateHash32();
 		}
 
 		//	Humanoid avatar mask
@@ -73,7 +73,7 @@ public class AvatarMaskBaker
 		amb.bakingTime = (float)dt;
 	#endif
 		
-		var rv = bb.CreateBlobAssetReference<AvatarMaskBlob>(Allocator.Persistent);
+		var rv = bb.CreateBlobAssetReference<AvatarMaskBakingDataBlob>(Allocator.Persistent);
 		baker.AddBlobAssetWithCustomHash(ref rv, blobHash);
 		
 		return rv;

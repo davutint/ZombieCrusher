@@ -11,7 +11,9 @@ namespace Rukhanka
 
 public struct FastAnimatorParameter
 {
+#if RUKHANKA_DEBUG_INFO
 	public FixedStringName paramName;
+#endif
 	public uint hash;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +21,9 @@ public struct FastAnimatorParameter
 	public FastAnimatorParameter(FixedStringName name)
 	{
 		hash = name.CalculateHash32();
+#if RUKHANKA_DEBUG_INFO
 		paramName = name;
+#endif
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +31,9 @@ public struct FastAnimatorParameter
 	public FastAnimatorParameter(uint hash)
 	{
 		this.hash = hash;
+#if RUKHANKA_DEBUG_INFO
 		paramName = default;
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,9 +58,9 @@ public struct FastAnimatorParameter
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public bool GetRuntimeParameterData(BlobAssetReference<ParameterPerfectHashTableBlob> cb, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters, out ParameterValue outData)
+	public bool GetRuntimeParameterData(BlobAssetReference<PerfectHashTableBlob> pt, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters, out ParameterValue outData)
 	{
-		var paramIdx = GetRuntimeParameterIndex(cb, runtimeParameters);
+		var paramIdx = GetRuntimeParameterIndex(pt, runtimeParameters);
 		return GetRuntimeParameterDataInternal(paramIdx, runtimeParameters, out outData);
 	}
 
@@ -89,9 +95,9 @@ public struct FastAnimatorParameter
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public bool SetRuntimeParameterData(BlobAssetReference<ParameterPerfectHashTableBlob> cb, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters, in ParameterValue paramData)
+	public bool SetRuntimeParameterData(BlobAssetReference<PerfectHashTableBlob> pt, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters, in ParameterValue paramData)
 	{
-		var paramIdx = GetRuntimeParameterIndex(cb, runtimeParameters);
+		var paramIdx = GetRuntimeParameterIndex(pt, runtimeParameters);
 		return SetRuntimeParameterDataInternal(paramIdx, runtimeParameters, paramData);
 	}
 
@@ -105,7 +111,7 @@ public struct FastAnimatorParameter
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public bool SetTrigger(BlobAssetReference<ParameterPerfectHashTableBlob> cb, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters) => SetRuntimeParameterData(cb, runtimeParameters, new ParameterValue() { boolValue = true });
+	public bool SetTrigger(BlobAssetReference<PerfectHashTableBlob> pt, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters) => SetRuntimeParameterData(pt, runtimeParameters, new ParameterValue() { boolValue = true });
 	public bool SetTrigger(DynamicBuffer<AnimatorControllerParameterComponent> runtimeParameters) => SetRuntimeParameterData(runtimeParameters, new ParameterValue() { boolValue = true });
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,18 +131,10 @@ public struct FastAnimatorParameter
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//	Perfect hash table variant
-	public static int GetRuntimeParameterIndex(uint hash, in BlobAssetReference<ParameterPerfectHashTableBlob> cb, in ReadOnlySpan<AnimatorControllerParameterComponent> parameters)
+	public static int GetRuntimeParameterIndex(uint hash, in BlobAssetReference<PerfectHashTableBlob> pt, in ReadOnlySpan<AnimatorControllerParameterComponent> parameters)
 	{
-		ref var seedTable = ref cb.Value.seedTable;
-		var paramIdxShuffled = PerfectHash<UIntPerfectHashed>.QueryPerfectHashTable(ref seedTable, hash);
-
-		if (paramIdxShuffled >= parameters.Length)
-			return -1;
-
-		var paramIdx = cb.Value.indirectionTable[paramIdxShuffled];
-
-		var p = parameters[paramIdx];
-		if (p.hash != hash)
+		var paramIdx = pt.Value.Query(hash);
+		if (paramIdx < 0)
 			return -1;
 
 		return paramIdx;
@@ -144,10 +142,10 @@ public struct FastAnimatorParameter
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public unsafe int GetRuntimeParameterIndex(in BlobAssetReference<ParameterPerfectHashTableBlob> cb, in DynamicBuffer<AnimatorControllerParameterComponent> acpc)
+	public unsafe int GetRuntimeParameterIndex(in BlobAssetReference<PerfectHashTableBlob> pt, in DynamicBuffer<AnimatorControllerParameterComponent> acpc)
 	{
 		var span = new ReadOnlySpan<AnimatorControllerParameterComponent>(acpc.GetUnsafePtr(), acpc.Length);
-		return GetRuntimeParameterIndex(hash, cb, span);
+		return GetRuntimeParameterIndex(hash, pt, span);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -116,7 +116,18 @@ public class FrameFencedGPUBufferPool<T>: IDisposable where T: unmanaged
     }
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public GraphicsBuffer GetBuffer()
+    {
+        if (currentFrameBufferIndex < 0)
+            return null;
+        
+        var b = bufferPool.GetBufferFromId(currentFrameBufferIndex);
+        return b;
+    }
     
-    public static implicit operator GraphicsBuffer(FrameFencedGPUBufferPool<T> b) => b.bufferPool.GetBufferFromId(b.currentFrameBufferIndex);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static implicit operator GraphicsBuffer(FrameFencedGPUBufferPool<T> b) => b.GetBuffer();
 }
 }

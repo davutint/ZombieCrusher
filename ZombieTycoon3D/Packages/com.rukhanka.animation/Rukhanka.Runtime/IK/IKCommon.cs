@@ -1,5 +1,3 @@
-using System;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 
@@ -25,12 +23,18 @@ public static class IKCommon
         if (aerc.TryGetComponent(e, out var aer))
         {
             var boneWorldPoses = RuntimeAnimationData.GetAnimationDataForRigRO(runtimeAnimationData.worldSpaceBonesBuffer, runtimeAnimationData.entityToDataOffsetMap, aer.animatorEntity);
-            var bt = boneWorldPoses[aer.boneIndexInAnimationRig];
-            t = BoneTransform.Multiply(bt, t);
-            return;
+            if (boneWorldPoses.Length > aer.boneIndexInAnimationRig)
+            {
+                var bt = boneWorldPoses[aer.boneIndexInAnimationRig];
+                t = BoneTransform.Multiply(bt, t);
+            }
+            //  We have got rig relative position so must continue with parent entities of animated rig
+            e = aer.animatorEntity;
         }
-
-        t = BoneTransform.Multiply(new BoneTransform(lt), t);
+        else
+        {
+            t = BoneTransform.Multiply(new BoneTransform(lt), t);
+        }
 
         if (pl.TryGetComponent(e, out var p))
         {

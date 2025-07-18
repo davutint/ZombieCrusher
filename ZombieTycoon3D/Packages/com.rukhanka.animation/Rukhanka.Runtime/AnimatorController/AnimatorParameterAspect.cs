@@ -29,7 +29,7 @@ public readonly partial struct AnimatorParametersAspect: IAspect
 	{
 		ParameterValue rv;
 		if (indexTable.IsValid)
-			fp.GetRuntimeParameterData(indexTable.ValueRO.seedTable, parametersArr, out rv);
+			fp.GetRuntimeParameterData(indexTable.ValueRO.value, parametersArr, out rv);
 		else
 			fp.GetRuntimeParameterData(parametersArr, out rv);
 		return rv;
@@ -42,7 +42,6 @@ public readonly partial struct AnimatorParametersAspect: IAspect
 		var fp = new FastAnimatorParameter()
 		{
 			hash = parameterHash,
-			paramName = default,
 		};
 		return GetParameterValue(fp);
 	}
@@ -67,7 +66,7 @@ public readonly partial struct AnimatorParametersAspect: IAspect
 	public void SetParameterValue(FastAnimatorParameter fp, ParameterValue value)
 	{
 		if (indexTable.IsValid)
-			fp.SetRuntimeParameterData(indexTable.ValueRO.seedTable, parametersArr, value);
+			fp.SetRuntimeParameterData(indexTable.ValueRO.value, parametersArr, value);
 		else
 			fp.SetRuntimeParameterData(parametersArr, value);
 	}
@@ -121,7 +120,6 @@ public readonly partial struct AnimatorParametersAspect: IAspect
 		var fp = new FastAnimatorParameter()
 		{
 			hash = parameterHash,
-			paramName = default,
 		};
 		SetParameterValue(fp, value);
 	}
@@ -139,7 +137,7 @@ public readonly partial struct AnimatorParametersAspect: IAspect
 	public int GetParameterIndex(FastAnimatorParameter fp)
 	{
 		var index = indexTable.IsValid ?
-			fp.GetRuntimeParameterIndex(indexTable.ValueRO.seedTable, parametersArr) :
+			fp.GetRuntimeParameterIndex(indexTable.ValueRO.value, parametersArr) :
 			fp.GetRuntimeParameterIndex(parametersArr);
 
 		return index;
@@ -158,7 +156,6 @@ public readonly partial struct AnimatorParametersAspect: IAspect
 		var fp = new FastAnimatorParameter()
 		{
 			hash = parameterHash,
-			paramName = default,
 		};
 		return HasParameter(fp);
 	}

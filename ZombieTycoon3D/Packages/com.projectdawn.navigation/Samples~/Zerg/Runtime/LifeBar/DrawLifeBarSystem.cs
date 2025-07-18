@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Transforms;
-using Unity.Jobs;
 using UnityEngine;
+using static Unity.Entities.SystemAPI;
 
 namespace ProjectDawn.Navigation.Sample.Zerg
 {
@@ -22,10 +22,10 @@ namespace ProjectDawn.Navigation.Sample.Zerg
 
             m_LifeBar.UpdateProperties();
 
-            Entities.ForEach((in UnitLife life, in AgentShape shape, in LocalTransform transform) =>
+            foreach (var (life, shape, transform) in Query< UnitLife, AgentShape, LocalTransform>())
             {
                 m_LifeBar.Draw(transform.Position, life.Life / life.MaxLife, (int)(shape.Radius / 0.2f), shape.Radius, shape.Height);
-            }).WithoutBurst().Run();
+            }
         }
     }
 }

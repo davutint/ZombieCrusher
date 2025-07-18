@@ -82,13 +82,13 @@ partial struct ApplyAnimationToSkinnedMeshJob: IJobEntity
 		var skinMeshBonesInfo = animatedSkinnedMesh.smrInfoBlob;
 
 		var rootBoneIndex = math.max(0, animatedSkinnedMesh.rootBoneIndexInRig);
-		var boneObjLocalPose = absoluteBoneTransforms[rootBoneIndex];
-		var entityToRootBoneTransform = math.inverse(boneObjLocalPose.ToFloat4x4());
+		var invRootBonePose = BoneTransform.Inverse(absoluteBoneTransforms[rootBoneIndex]);
+		var entityToRootBoneTransform = invRootBonePose.ToFloat4x4();
 
 		// Iterate over all animated bones and set pose for corresponding skin matrices
 		for (int animationBoneIndex = 0; animationBoneIndex < absoluteBoneTransforms.Length; ++animationBoneIndex)
 		{
-			var skinnedMeshBoneIndex = boneRemapTable.rigBoneToSkinnedMeshBoneRemapIndices[animationBoneIndex];
+			var skinnedMeshBoneIndex = boneRemapTable.remapIndices[animationBoneIndex];
 
 			//	Skip bone if it is not present in skinned mesh
 			if (skinnedMeshBoneIndex < 0)
@@ -228,7 +228,7 @@ unsafe partial struct FillRigToSkinBonesRemapTableCacheJob: IJobEntity
 			Debug.Log($"[FillRigToSkinBonesRemapTableCacheJob] Creating rig '{rnd.ToFixedString()}' to skinned mesh '{snd.ToFixedString()}' remap table");
 	#endif
 		
-		var bba = bb.Allocate(ref brt.rigBoneToSkinnedMeshBoneRemapIndices, rigDef.rigBlob.Value.bones.Length);
+		var bba = bb.Allocate(ref brt.remapIndices, rigDef.rigBlob.Value.bones.Length);
 		for (int i = 0; i < bba.Length; ++i)
 		{
 			bba[i] = -1;
@@ -265,9 +265,9 @@ partial struct CopySkinnedMeshBoundsToChildRenderers: IJobEntity
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Execute(ref RenderBounds rb, in DeformedEntity de)
+	void Execute(ref RenderBounds rb, in AnimatedRendererComponent de)
 	{
-		if (!skinnedMeshBoundsLookup.TryGetComponent(de.Value, out var smb))
+		if (!skinnedMeshBoundsLookup.TryGetComponent(de.skinnedMeshEntity, out var smb))
 			return;
 		
 		rb.Value = smb.value;
@@ -318,65 +318,6 @@ partial struct UpdateSkinnedMeshBoundsJob: IJobEntity
 		aabb.Extents *= 1.1f;
 		
 		rb.value = aabb;
-	}
-}
-
-//=================================================================================================================//
-
-[BurstCompile]
-partial struct CopyAnimatedValuesToControllerParametersJob: IJobEntity
-{
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
-	[ReadOnly]
-	public NativeList<RuntimeAnimationData.GenericFloatAnimatedValue> genericAnimatedValues;
-	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void Execute(Entity e, DynamicBuffer<AnimatorControllerParameterComponent> runtimeParams)
-	{
-		for (var i = 0; i < runtimeParams.Length; ++i)
-		{
-			var p = runtimeParams[i];
-			var hash128 = new Hash128(0, p.hash, (int)BindingType.Unknown, 0xffffffff);
-			var idx = RuntimeAnimationData.FindGenericAnimatedDataIndexByHash(e, entityToDataOffsetMap, genericAnimatedValues, hash128);
-			if (idx >= 0)
-			{
-				p.value = genericAnimatedValues[idx].value;
-				runtimeParams[i] = p;
-			}
-		}
-	}
-}
-
-//=================================================================================================================//
-
-[BurstCompile]
-partial struct ApplyBlendShapeWeightsJob: IJobEntity
-{
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
-	[ReadOnly]
-	public NativeList<RuntimeAnimationData.GenericFloatAnimatedValue> genericAnimatedValues;
-	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void Execute(DynamicBuffer<BlendShapeWeight> blendShapeWeights, in AnimatedSkinnedMeshComponent asm)
-	{
-		var e = asm.animatedRigEntity;
-		for (var i = 0; i < asm.smrInfoBlob.Value.blendShapes.Length; ++i)
-		{
-			ref var bs = ref asm.smrInfoBlob.Value.blendShapes[i];
-			var hash128 = new Hash128(asm.nameHash, bs.hash, (int)BindingType.BlendShape, 0xffffffff);
-			var idx = RuntimeAnimationData.FindGenericAnimatedDataIndexByHash(e, entityToDataOffsetMap, genericAnimatedValues, hash128);
-			if (idx >= 0)
-			{
-				blendShapeWeights[i] = new BlendShapeWeight()
-				{
-					Value = genericAnimatedValues[idx].value
-				};
-			}
-		}
 	}
 }
 }

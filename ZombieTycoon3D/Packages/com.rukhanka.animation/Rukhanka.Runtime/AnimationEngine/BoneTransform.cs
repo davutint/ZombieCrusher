@@ -83,6 +83,14 @@ public struct BoneTransform
 		return rv;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////
+
+    public static float3 TransformPoint(BoneTransform bt, float3 v)
+    {
+        float3 rv = math.rotate(bt.rot, v * bt.scale) + bt.pos;
+        return rv;
+    }
+    
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public LocalTransform ToLocalTransformComponent() => new LocalTransform() { Position = pos, Rotation = rot, Scale = scale.x };

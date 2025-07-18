@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f29810a31843dc541867e28df0f9370e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Samples~/Samples/SampleAssets/Common/GPUAttachment
+    SimpleRed.mat
+  uploadId: 754107

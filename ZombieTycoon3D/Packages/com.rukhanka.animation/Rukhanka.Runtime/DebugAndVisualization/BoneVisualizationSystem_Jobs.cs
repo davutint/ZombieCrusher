@@ -1,9 +1,12 @@
-#if !RUKHANKA_NO_DEBUG_DRAWER
+#if RUKHANKA_DEBUG_INFO
+
 using Rukhanka.DebugDrawer;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -12,13 +15,16 @@ namespace Rukhanka
 partial class BoneVisualizationSystem
 {
 [BurstCompile]
-partial struct RenderBonesJob: IJobEntity
+partial struct RenderBonesCPUAnimatorsJob: IJobEntity
 {
 	[ReadOnly]
 	public NativeList<BoneTransform> bonePoses;
 	[ReadOnly]
 	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
 
+    public uint colorTriangles;
+    public uint colorLines;
+    
     public Drawer drawer;
     
 /////////////////////////////////////////////////////////////////////////////////
@@ -41,11 +47,40 @@ partial struct RenderBonesJob: IJobEntity
 
             if (math.any(math.abs(bonePos0 - bonePos1)))
             {
-                var colorTri = Drawer.ColorToUINT(bvc.colorTri);
-                var colorLines = Drawer.ColorToUINT(bvc.colorLines);
-                drawer.DrawBoneMesh(bt[l].pos, bt[rb.parentBoneIndex].pos, colorTri, colorLines);
+                drawer.DrawBoneMesh(bt[l].pos, bt[rb.parentBoneIndex].pos, colorTriangles, colorLines);
             }
         }
+    }
+}
+
+//------------------------------------------------------------------------------//
+
+[BurstCompile]
+[WithAll(typeof(GPUAnimationEngineTag), typeof(RigDefinitionComponent))]
+partial struct PrepareGPURigsJob: IJobEntity
+{
+    [ReadOnly]
+    public ComponentLookup<LocalTransform> localTransformLookup;
+    [ReadOnly]
+    public ComponentLookup<BoneVisualizationComponent> boneVisualizationLookup;
+    [ReadOnly]
+	public NativeParallelHashMap<Entity, GPURuntimeAnimationData.FrameOffsets> frameEntityAnimatedDataOffsetsMap;
+    [NativeDisableParallelForRestriction]
+    public NativeArray<GPUBoneRendererRigInfo> frameRigData;
+    
+/////////////////////////////////////////////////////////////////////////////////
+
+    void Execute(Entity e)
+    {
+        if (!frameEntityAnimatedDataOffsetsMap.TryGetValue(e, out var rigOffsets))
+            return;
+        
+        var rigInfo = new GPUBoneRendererRigInfo();
+        if (boneVisualizationLookup.HasComponent(e))
+        {
+            localTransformLookup.TryGetComponent(e, out rigInfo.rigWorldPose);
+        }
+        frameRigData[rigOffsets.rigIndex] = rigInfo;
     }
 }
 }

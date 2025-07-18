@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 82f7bcf8fbdb6044181d80fc661b5392
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/GPUAnimationEngine/Resources/ProcessAnimations.hlsl
+  uploadId: 754107

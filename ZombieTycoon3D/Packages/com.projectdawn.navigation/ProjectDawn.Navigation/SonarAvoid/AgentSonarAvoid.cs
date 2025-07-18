@@ -13,11 +13,11 @@ namespace ProjectDawn.Navigation
         /// </summary>
         public float Radius;
         /// <summary>
-        /// The angle of obstacle inserted behind agent velocity.
+        /// Discourages the agent from moving backwards. The higher the value, the more likely the agent will be able to escape surrounded scenarios, but this comes at the cost of reduced agent control.
         /// </summary>
         public float Angle;
         /// <summary>
-        /// The maximum angle at which agent will attempt to nearby agents.
+        /// The maximum angle at which the agent will steer away to avoid local obstacles. The lower the value, the less sonar avoidance will affect the steering direction.
         /// </summary>
         public float MaxAngle;
         /// <summary>

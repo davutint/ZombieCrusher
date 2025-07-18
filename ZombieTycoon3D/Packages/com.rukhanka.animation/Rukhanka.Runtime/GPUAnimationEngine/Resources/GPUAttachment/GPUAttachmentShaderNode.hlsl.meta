@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 72cf2095e0e922349b94b239dcf25a14
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/GPUAnimationEngine/Resources/GPUAttachment/GPUAttachmentShaderNode.hlsl
+  uploadId: 754107

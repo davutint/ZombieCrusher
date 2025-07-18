@@ -41,10 +41,11 @@ public static class BlobCurve
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static unsafe float SampleAnimationCurve(in UnsafeList<KeyFrame> kf, float time)
+	public static unsafe float SampleAnimationCurve(ref TrackSet ts, int trackIndex, float time)
 	{
-		var arr = new ReadOnlySpan<KeyFrame>(kf.Ptr, kf.Length);
-		return SampleAnimationCurveBinarySearch(arr, time);
+		var track = ts.tracks[trackIndex];
+		var kfRange = new ReadOnlySpan<KeyFrame>((KeyFrame*)ts.keyframes.GetUnsafePtr() + track.keyFrameRange.x, track.keyFrameRange.y);
+		return SampleAnimationCurveBinarySearch(kfRange, time);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

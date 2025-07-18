@@ -32,9 +32,11 @@ namespace Rukhanka
 
 	internal struct SourceMeshVertex
 	{
+	#if !RUKHANKA_INPLACE_SKINNING
 		public float3 position;
 		public float3 normal;
 		public float3 tangent;
+	#endif
 		public uint boneWeightsOffsetAndCount;
 	}
 	
@@ -45,6 +47,14 @@ namespace Rukhanka
 		public float3 position;
 		public float3 normal;
 		public float3 tangent;
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	internal struct PackedDeformedVertex
+	{
+		public uint4 pack0;
+		public uint pack1;
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,9 +106,10 @@ namespace Rukhanka
 		public int frameSkinMatrixCount;
 		public int frameBlendShapeWeightsCount;
 		public int frameDeformedVerticesCount;
-		public int frameDeformedMeshesCount;
 		public int frameActiveDeformedMeshesCount;
+		
 		public int maximumVerticesAcrossAllRegisteredMeshes;
+		public int maximumSkinMatrixCountAcrossAllRegisteredMeshes;
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -123,7 +134,7 @@ namespace Rukhanka
 			BurstAssert.IsTrue(rv.renderMeshArrays.IsCreated, "Render mesh arrays is not valid. Probably wrong system creation order.");
 			
 			rv.registeredSkinnedMeshesMap = new (0xff, Allocator.Persistent);	
-			rv.newSkinnedMeshesToRegister = new (0xff, Allocator.Persistent);	
+			rv.newSkinnedMeshesToRegister = new (0xffff, Allocator.Persistent);	
 			rv.entityToSMRFrameDataMap = new (0xff, Allocator.Persistent);
 			rv.totalSkinnedVerticesCount = 0;
 			rv.totalBoneWeightsCount = 0;
@@ -131,9 +142,9 @@ namespace Rukhanka
 			rv.frameSkinMatrixCount = 0;
 			rv.frameBlendShapeWeightsCount = 0;
 			rv.frameDeformedVerticesCount = 0;
-			rv.frameDeformedMeshesCount = 0;
 			rv.frameActiveDeformedMeshesCount = 0;
 			rv.maximumVerticesAcrossAllRegisteredMeshes = 0;
+			rv.maximumSkinMatrixCountAcrossAllRegisteredMeshes = 0;
 			
 			return rv;
 		}

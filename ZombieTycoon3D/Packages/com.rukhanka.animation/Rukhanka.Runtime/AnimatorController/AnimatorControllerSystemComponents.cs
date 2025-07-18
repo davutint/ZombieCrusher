@@ -1,4 +1,3 @@
-using System;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -22,17 +21,33 @@ public struct RuntimeAnimatorData
 			return rv;
 		}
 	}
+	
+	public struct TransitionRuntimeData
+	{
+		public int id;
+		public float normalizedDuration;
+		public float length;
+
+		public static TransitionRuntimeData MakeDefault()
+		{
+			var rv = new TransitionRuntimeData();
+			rv.id = -1;
+			rv.normalizedDuration = 0;
+			rv.length = 0;
+			return rv;
+		}
+	}
 
 	public StateRuntimeData srcState;
 	public StateRuntimeData dstState;
-	public StateRuntimeData activeTransition;
+	public TransitionRuntimeData activeTransition;
 
 	public static RuntimeAnimatorData MakeDefault()
 	{
 		var rv = new RuntimeAnimatorData();
 		rv.srcState = StateRuntimeData.MakeDefault();
 		rv.dstState = StateRuntimeData.MakeDefault();
-		rv.activeTransition = StateRuntimeData.MakeDefault();
+		rv.activeTransition = TransitionRuntimeData.MakeDefault();
 		return rv;
 	}
 }
@@ -45,6 +60,7 @@ public struct AnimatorControllerLayerComponent: IBufferElementData, IEnableableC
 	public BlobAssetReference<ControllerAnimationsBlob> animations;
 	public int layerIndex;
 	public float weight;
+	public float speed;
 	public RuntimeAnimatorData rtd;
 }
 
@@ -87,7 +103,7 @@ public struct AnimatorControllerParameterComponent: IBufferElementData
 
 public struct AnimatorControllerParameterIndexTableComponent: IComponentData
 {
-	public BlobAssetReference<ParameterPerfectHashTableBlob> seedTable;
+	public BlobAssetReference<PerfectHashTableBlob> value;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,8 @@ using Unity.Burst.Intrinsics;
 using UnityEngine.Experimental.AI;
 using Unity.Collections.LowLevel.Unsafe;
 using static Unity.Entities.SystemAPI;
+using ProjectDawn.Entities;
+using System;
 
 namespace ProjectDawn.Navigation
 {
@@ -25,12 +27,15 @@ namespace ProjectDawn.Navigation
         ComponentLookup<LinkTraversal> m_OnLinkTraversalLookup;
         ComponentLookup<LinkTraversalSeek> m_SeekLinkTraversalLookup;
         ComponentLookup<NavMeshLinkTraversal> m_NavMeshLinkTraversalLookup;
+        BufferLookup<NavMeshAreaCost> m_AreaCostLookup;
 
         void ISystem.OnCreate(ref SystemState state)
         {
             m_OnLinkTraversalLookup = state.GetComponentLookup<LinkTraversal>();
             m_SeekLinkTraversalLookup = state.GetComponentLookup<LinkTraversalSeek>();
             m_NavMeshLinkTraversalLookup = state.GetComponentLookup<NavMeshLinkTraversal>();
+            m_AreaCostLookup = state.GetBufferLookup<NavMeshAreaCost>();
+            state.RequireForUpdate<NavMeshPath>();
         }
 
         [BurstCompile]
@@ -40,12 +45,14 @@ namespace ProjectDawn.Navigation
             m_OnLinkTraversalLookup.Update(ref state);
             m_SeekLinkTraversalLookup.Update(ref state);
             m_NavMeshLinkTraversalLookup.Update(ref state);
+            m_AreaCostLookup.Update(ref state);
             new NavMeshSteeringJob
             {
                 NavMesh = navmesh,
                 OnLinkTraversalLookup = m_OnLinkTraversalLookup,
                 SeekLinkTraversalLookup = m_SeekLinkTraversalLookup,
                 NavMeshLinkTraversalLookup = m_NavMeshLinkTraversalLookup,
+                AreaCostLookup = m_AreaCostLookup,
                 DeltaTime = Time.DeltaTime,
             }.ScheduleParallel();
             navmesh.World.AddDependency(state.Dependency);
@@ -71,6 +78,10 @@ namespace ProjectDawn.Navigation
             public ComponentLookup<NavMeshLinkTraversal> NavMeshLinkTraversalLookup;
             bool HasNavMeshLinkTreaversal;
 
+            [NativeDisableParallelForRestriction]
+            public BufferLookup<NavMeshAreaCost> AreaCostLookup;
+            bool HasAreaCost;
+
             [NativeDisableContainerSafetyRestriction]
             NavMeshFunnel Funnel;
 
@@ -86,7 +97,9 @@ namespace ProjectDawn.Navigation
                     // Handle case if failde to map location
                     if (location.polygon.IsNull())
                     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         UnityEngine.Debug.LogWarning("Failed to map agent position to nav mesh location. This can happen either if nav mesh is not present or property MappingExtent value is too low.");
+#endif
                         return;
                     }
 
@@ -118,7 +131,9 @@ namespace ProjectDawn.Navigation
                     // Handle case if failde to map location
                     if (location.polygon.IsNull())
                     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         UnityEngine.Debug.LogWarning("Failed to map agent destination to nav mesh location. This can happen either if nav mesh is not present or property MappingExtent value is too low.");
+#endif
                     }
 
                     // Update destination to avoid mapping location again
@@ -158,6 +173,12 @@ namespace ProjectDawn.Navigation
                     var locations = Funnel.AsLocations();
                     if (locations.Length > 1)
                     {
+                        if (path.OptimizePath)
+                        {
+                            var areaCost = HasAreaCost ? AreaCostLookup[entity].Reinterpret<float>().AsNativeArray() : default;
+                            NavMesh.OptimizePath(ref Funnel, nodes.Reinterpret<PolygonId>(), locations[0], path.AreaMask, areaCost);
+                        }
+
                         body.Force = math.normalizesafe((float3) locations[1].position - transform.Position);
                         body.RemainingDistance = Funnel.IsEndReachable ? Funnel.GetCornersDistance() : float.MaxValue;
 
@@ -222,6 +243,7 @@ namespace ProjectDawn.Navigation
                 HasSeekLinkTreaversal = chunk.Has<LinkTraversalSeek>();
                 HasOnLinkTreaversal = chunk.Has<LinkTraversal>();
                 HasNavMeshLinkTreaversal = chunk.Has<NavMeshLinkTraversal>();
+                HasAreaCost = chunk.Has<NavMeshAreaCost>();
                 return true;
             }
 

@@ -29,7 +29,7 @@ namespace ProjectDawn.Navigation
 
         [SerializeField]
         [Range(0, 16), Tooltip("The maximum number of nearby neighbors to be included in the avoidance/collision systems will be determined.")]
-        int m_QueryCapacity = 0;
+        int m_QueryCapacity = 8;
 
         [SerializeField]
         NavigationLayerNames m_Layers = new();
@@ -190,6 +190,8 @@ namespace ProjectDawn.Navigation
                 m_QueryCapacity = m_QueryCapacity,
                 m_QueryChecks = AgentsNavigationSettings.Get<SpatialPartitioningSubSettings>().QueryChecks,
             });
+
+            state.RequireForUpdate<Agent>();
         }
 
         [BurstCompile]
@@ -201,13 +203,6 @@ namespace ProjectDawn.Navigation
             m_Bodies.Dispose();
             m_Shapes.Dispose();
             m_Transforms.Dispose();
-        }
-
-        [System.Obsolete("This class is obsolete, please use new settings workflow https://lukaschod.github.io/agents-navigation-docs/manual/settings.html.")]
-        public struct Settings : IComponentData
-        {
-            public float3 CellSize;
-            public int QueryCapacity;
         }
 
         public struct Singleton : IComponentData

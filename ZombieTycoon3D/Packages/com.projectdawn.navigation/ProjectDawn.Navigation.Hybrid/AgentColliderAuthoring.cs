@@ -40,6 +40,10 @@ namespace ProjectDawn.Navigation.Hybrid
             var world = World.DefaultGameObjectInjectionWorld;
             m_Entity = GetComponent<AgentAuthoring>().GetOrCreateEntity();
             world.EntityManager.AddComponentData(m_Entity, DefaultCollider);
+
+            // Sync in case it was created as disabled
+            if (!enabled)
+                world.EntityManager.SetComponentEnabled<AgentCollider>(m_Entity, false);
         }
 
         void OnDestroy()

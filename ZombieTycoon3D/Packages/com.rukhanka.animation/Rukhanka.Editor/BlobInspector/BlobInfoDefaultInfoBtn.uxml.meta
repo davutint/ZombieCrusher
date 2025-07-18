@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: cc67005ecd9cc2d4fa5acf24bb390f45
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 13804, guid: 0000000000000000e000000000000000, type: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Editor/BlobInspector/BlobInfoDefaultInfoBtn.uxml
+  uploadId: 754107

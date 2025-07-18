@@ -43,14 +43,11 @@ float3 GetStableTangent(float3 v)
 
 /////////////////////////////////////////////////////////////////////////////////
 
-VertexToPixel VS(VertexInput i)
+float3 ComputeVertexWorldPos(BoneData bd, float3 vertexPos, int vertexID)
 {
-	VertexToPixel o = (VertexToPixel)0;
-	BoneData bd = boneDataBuf[i.instanceID];
-
 	float3 worldPos = 0;
 
-	switch (i.vertexID)
+	switch (vertexID)
 	{
 		case 0: worldPos = bd.pos0; break;
 		case 5: worldPos = bd.pos1; break;
@@ -65,12 +62,23 @@ VertexToPixel VS(VertexInput i)
 				float3 t = normalize(cross(boneVecNrm, tangent));
 				float3 n = normalize(cross(boneVecNrm, t));
 
-				float3 offsetVec = t * i.pos.x - n * i.pos.z;
+				float3 offsetVec = t * vertexPos.x - n * vertexPos.z;
 				worldPos = bd.pos1 + boneVec * 0.3f + offsetVec * l;
 			}
 		}
 		break;
 	}
+    return worldPos;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+VertexToPixel VS(VertexInput i)
+{
+	VertexToPixel o = (VertexToPixel)0;
+	BoneData bd = boneDataBuf[i.instanceID];
+
+	float3 worldPos = ComputeVertexWorldPos(bd, i.pos, i.vertexID);
 
 	worldPos = GetCameraRelativePositionWS(worldPos);
 	o.pos = mul(unity_MatrixVP, float4(worldPos, 1));

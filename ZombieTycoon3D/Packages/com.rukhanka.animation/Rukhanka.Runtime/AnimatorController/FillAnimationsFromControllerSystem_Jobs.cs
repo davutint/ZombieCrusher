@@ -89,7 +89,6 @@ struct FillAnimationsBufferJob: IJobChunk
 		animations.Clear();
 
 		//	Need to skip zero weight layers
-		var curLayerIndex = 0;
 		for (int i = 0; i < aclc.Length; ++i)
 		{
 			var animationCurIndex = animations.Length;
@@ -133,9 +132,8 @@ struct FillAnimationsBufferJob: IJobChunk
 			dstStateWeight = math.select(1, dstStateWeight, srcStateAnimCount > 0);
 			srcStateWeight = math.select(1, srcStateWeight, dstStateAnimCount > 0);
 
-			AnimationsPostSetup(dstAnimsSpan, ref lb, curLayerIndex, dstStateWeight, dstLayerMultiplier * l.weight);
-			AnimationsPostSetup(srcAnimsSpan, ref lb, curLayerIndex, srcStateWeight, srcLayerMultiplier * l.weight);
-			++curLayerIndex;
+			AnimationsPostSetup(dstAnimsSpan, ref lb, i, dstStateWeight, dstLayerMultiplier * l.weight);
+			AnimationsPostSetup(srcAnimsSpan, ref lb, i, srcStateWeight, srcLayerMultiplier * l.weight);
 		}
 	}
 

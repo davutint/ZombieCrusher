@@ -35,7 +35,7 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 		if (a.sharedMesh == null)
 			return;
 		
-		var smrHash = new Hash128((uint)a.sharedMesh.GetInstanceID(), 0, 0, 0);
+		var smrHash = CalculateSkinnedMeshHash(a.sharedMesh);
 		var e = GetEntity(a, TransformUsageFlags.Renderable);
 		
 		var isSMSBlobExists = TryGetBlobAssetReference<SkinnedMeshInfoBlob>(smrHash, out var smrBlobAsset);
@@ -45,20 +45,21 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 			AddBlobAssetWithCustomHash(ref smrBlobAsset, smrHash);
 		}
 		
-		var asmc = new AnimatedSkinnedMeshComponent()
-		{
-			smrInfoBlob = smrBlobAsset,
-			animatedRigEntity = GetEntity(a.gameObject.GetComponentInParent<RigDefinitionAuthoring>(true), TransformUsageFlags.Dynamic),
-			rootBoneIndexInRig = -1,
-			nameHash = FixedStringExtensions.CalculateHash32(new FixedStringName(a.name))
-		};
-		AddComponent(e, asmc);
-		
 		var rbe = new SkinnedMeshRendererRootBoneEntity()
 		{
 			value = GetEntity(a.rootBone, TransformUsageFlags.None)
 		};
 		AddComponent(e, rbe);
+		
+		var asmc = new AnimatedSkinnedMeshComponent()
+		{
+			smrInfoBlob = smrBlobAsset,
+			animatedRigEntity = GetEntity(a.gameObject.GetComponentInParent<RigDefinitionAuthoring>(true), TransformUsageFlags.Dynamic),
+			rootBoneEntity = rbe.value,
+			rootBoneIndexInRig = -1,
+			nameHash = a.name.CalculateHash32()
+		};
+		AddComponent(e, asmc);
 		
 		//	Skinned mesh renderer is split into multiple render entities in runtime. We need to track renderer<->skinned mesh relationships
 		var c = new AnimatedRendererBakingComponent()
@@ -91,6 +92,18 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Hash128 CalculateSkinnedMeshHash(Mesh m)
+	{
+		var rv = new Hash128();
+	#if UNITY_EDITOR
+		var assetId = BakingUtils.GetAssetID(m);
+		rv = new Hash128(assetId.x, assetId.y, 0, 0);
+	#endif
+		return rv;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void CreateSkinnedMeshBonesBlob(ref BlobBuilder bb, ref SkinnedMeshInfoBlob smrBlob, SkinnedMeshRenderer r)
 	{
 		var bonesArr = bb.Allocate(ref smrBlob.bones, r.bones.Length);
@@ -105,7 +118,7 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 				bb.AllocateString(ref boneBlob.name, b.name);
 	#endif
 				var bn = new FixedStringName(b.name);
-				boneBlob.hash = bn.CalculateHash128();
+				boneBlob.hash = bn.CalculateHash32();
 				boneBlob.bindPose = r.sharedMesh.bindposes[j];
 			}
 		}
@@ -167,6 +180,7 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 		var bb = new BlobBuilder(Allocator.Temp);
 		ref var smrBlob = ref bb.ConstructRoot<SkinnedMeshInfoBlob>();
 		smrBlob.hash = smrHash;
+		
 	#if RUKHANKA_DEBUG_INFO
 		if (r.name.Length > 0)
 			bb.AllocateString(ref smrBlob.skeletonName, r.name);
@@ -271,6 +285,7 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 		foreach (var ae in additionalEntities)
 		{
 			AddComponent<DeformedMeshIndex>(ae);
+			AddComponent<DeformedMeshIndexDeprecated>(ae);
 			SetComponent(ae, new RenderBounds { Value = aabb });
 		}
 		
@@ -366,15 +381,25 @@ public partial class SkinnedMeshBaker: Baker<SkinnedMeshRenderer>
 				continue;
 
 		#if ENABLE_DOTS_DEFORMATION_MOTION_VECTORS
-			var deformationCompatibleShader = m.HasProperty("_DotsDeformationParams");
+			var deformationCompatibleShader = m.HasProperty("_DeformationParamsForMotionVectors");
+			var oldDeformationCompatibleShader = m.HasProperty("_DotsDeformationParams");
 		#else
-			var deformationCompatibleShader = m.HasProperty("_ComputeMeshIndex");
+			var deformationCompatibleShader = m.HasProperty("_DeformedMeshIndex");
+			var oldDeformationCompatibleShader = m.HasProperty("_ComputeMeshIndex");
 		#endif
-			if (!deformationCompatibleShader)
+			if (!deformationCompatibleShader && !oldDeformationCompatibleShader)
 			{
 				var s = $"Shader [{m.shader.name}] on [{a.name}] does not support skinning. This can result in incorrect rendering."
-						+ "Please see <a href=\"https://docs.unity3d.com/Packages/com.unity.entities.graphics@1.2/manual/mesh_deformations.html#material-setup\">documentation</a>"
-						+ " for Linear Blend Skinning Node and Compute Deformation Node in Shader Graph";
+						+ " Please see the <a href=\"https://docs.rukhanka.com/shaders_with_deformations\">documentation</a>"
+						+ " for information about making a deformation-compatible shader";
+				Debug.LogWarning(s, a);
+			}
+			else if (oldDeformationCompatibleShader)
+			{
+				var s = $"Shader [{m.shader.name}] on [{a.name}] uses Entities.Graphics deformation shader. It is deprecated for use with the Rukhanka deformation system,"
+				        + " and its support will be removed in the next version of the Rukhanka Animation System."
+						+ " Please see the <a href=\"https://docs.rukhanka.com/shaders_with_deformations\">documentation</a>"
+						+ " for information about making a new deformation-compatible shader";
 				Debug.LogWarning(s, a);
 			}
 		}

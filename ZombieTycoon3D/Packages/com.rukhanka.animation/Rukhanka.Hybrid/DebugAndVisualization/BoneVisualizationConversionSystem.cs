@@ -19,19 +19,13 @@ partial class BoneVisualizationConversionSystem : SystemBase
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         
-        //  Add BoneVisualizationComponent to every animated entity
-        var bvcClient = new BoneVisualizationComponent()
-        {
-            colorTri = dcc.clientRigColorTri,
-            colorLines = dcc.clientRigColorLines
-        };
-        
         foreach (var (_, e) in SystemAPI.Query<RigDefinitionComponent>()
                      .WithEntityAccess()
                      .WithOptions(EntityQueryOptions.IncludePrefab)
                      .WithNone<BoneVisualizationComponent>())
         {
-            ecb.AddComponent(e, bvcClient);
+            //  Add BoneVisualizationComponent to every animated entity
+            ecb.AddComponent<BoneVisualizationComponent>(e);
         }
         
         ecb.Playback(EntityManager);

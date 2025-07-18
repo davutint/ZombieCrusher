@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7fb582dc2671eaa40869fc5ceea5f2c4
+ComputeShaderImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/GPUAnimationEngine/Resources/GPUAnimationEngine.compute
+  uploadId: 754107

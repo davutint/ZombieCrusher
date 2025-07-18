@@ -46,7 +46,7 @@ public class AnimatorParameterTest
 	NativeArray<AnimatorControllerParameterComponent> CreateTestParamArray(int len)
 	{
 		var paramArr = new NativeArray<AnimatorControllerParameterComponent>(len, Allocator.Temp);
-		var rng = new Random((uint)DateTime.Now.Millisecond);
+		var rng = new Random((uint)DateTime.Now.Millisecond + 1);
 
 		for (var i = 0; i < paramArr.Length; ++i)
 		{
@@ -90,7 +90,7 @@ public class AnimatorParameterTest
 /////////////////////////////////////////////////////////////////////////////////
 
 	[BurstCompile]
-	static unsafe void ParameterAccessHashLookup(ref NativeSlice<AnimatorControllerParameterComponent> paramArr, ref BlobAssetReference<ParameterPerfectHashTableBlob> pht, int iterationCount, out int dummyResult)
+	static unsafe void ParameterAccessHashLookup(ref NativeSlice<AnimatorControllerParameterComponent> paramArr, ref BlobAssetReference<PerfectHashTableBlob> pht, int iterationCount, out int dummyResult)
 	{
 		dummyResult = 0;
 		var l = paramArr.Length;

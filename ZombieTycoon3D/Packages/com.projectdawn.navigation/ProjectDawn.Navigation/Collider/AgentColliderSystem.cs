@@ -37,6 +37,7 @@ namespace ProjectDawn.Navigation
         {
             m_SpatialPartitioningSystem = state.WorldUnmanaged.GetExistingUnmanagedSystem<AgentSpatialPartitioningSystem>();
             m_Iterations = AgentsNavigationSettings.Get<ColliderSubSettings>().Iterations;
+            state.RequireForUpdate<AgentCollider>();
         }
 
         [BurstCompile]

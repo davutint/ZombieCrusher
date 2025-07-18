@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="header" style="flex-grow: 0; flex-direction: row; align-items: center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;">
+        <ui:VisualElement name="icon" style="flex-grow: 0; width: 64px; height: 64px; flex-shrink: 0; background-image: url(&quot;project://database/Packages/com.rukhanka.animation/Rukhanka.Editor/Editor%20Default%20Resources/Icons/Icon@64.png?fileID=2800000&amp;guid=656caeb2c35ed38498a80781843a5012&amp;type=3#Icon@64&quot;); margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+        <ui:Label text="Rukhanka Animation System" name="rukhankaAnimationSystem" style="font-size: 20px; -unity-font-style: bold;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="settings" style="flex-grow: 1; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px; width: 400px;">
+        <ui:Label text="Settings" name="settingsHeader" style="-unity-font-style: bold; font-size: 14px; margin-bottom: 6px;" />
+        <ui:VisualElement name="debugInfoMode" style="flex-grow: 1; flex-direction: row;">
+            <ui:Label text="Debug and validation mode" name="debugInfoLabel" tooltip="Enable RUKHANKA_DEBUG_INFO script symbol" style="flex-grow: 1; -unity-text-align: middle-left;" />
+            <ui:Toggle name="debugInfoToggle" />
+            <ui:Label text="ⓘ" name="debugInfoHelpIcon" style="font-size: 14px; color: rgb(0, 255, 255);" />
+        </ui:VisualElement>
+        <ui:VisualElement name="enableMotionVectors" style="flex-grow: 1; flex-direction: row;">
+            <ui:Label text="Enable motion vectors for deformation shaders" name="enableMotionVectorsLabel" style="flex-grow: 1; -unity-text-align: middle-left;" />
+            <ui:Toggle name="enableMotionVectorsToggle" />
+            <ui:Label text="ⓘ" name="enableMotionVectorsHelpIcon" style="font-size: 14px; color: rgb(0, 255, 255);" />
+        </ui:VisualElement>
+        <ui:Label text="Advanced Configuration" name="advancedConfigurationHeader" style="-unity-font-style: bold; font-size: 14px; margin-top: 10px;" />
+        <ui:VisualElement name="warningLabel" style="flex-grow: 1; flex-direction: row; margin-top: 6px; margin-bottom: 6px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+            <ui:Label text="⚠" name="warningIcon" style="-unity-text-align: middle-left; font-size: 24px; color: rgb(255, 194, 0);" />
+            <ui:Label text="Changing this options can have substantial effect on Rukhanka functionality. Consult the documentation for detailed description" name="warningText" style="white-space: normal; flex-shrink: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="halfDeformedData" style="flex-grow: 1; flex-direction: row;">
+            <ui:Label text="Half precision deformation data" name="halfDeformedDataLabel" tooltip="Use half precision (float16) instead of single precision float for internal deformation data (position, normal, tangent) storage" style="flex-grow: 1; -unity-text-align: middle-left;" />
+            <ui:Toggle name="halfDeformedDataToggle" />
+            <ui:Label text="ⓘ" name="halfDeformedDataHelpIcon" style="font-size: 14px; color: rgb(0, 255, 255);" />
+        </ui:VisualElement>
+        <ui:VisualElement name="dualQuaternionSkinning" style="flex-grow: 1; flex-direction: row;">
+            <ui:Label text="Dual quaternion skinning" name="dualQuaternionSkinningLabel" tooltip="Use volume preserve dual quaternion skinning method" style="flex-grow: 1; -unity-text-align: middle-left;" />
+            <ui:Toggle name="dualQuaternionSkinningToggle" />
+            <ui:Label text="ⓘ" name="dualQuaternionSkinningHelpIcon" style="font-size: 14px; color: rgb(0, 255, 255);" />
+        </ui:VisualElement>
+        <ui:VisualElement name="inplaceSkinning" style="flex-grow: 1; flex-direction: row;">
+            <ui:Label text="In-place skinning" name="inplaceSkinningLabel" tooltip="Do not perform separate skinning pass with intermediate compute buffer storage. Instead, perform skinning directly in the vertex shader." style="flex-grow: 1; -unity-text-align: middle-left;" />
+            <ui:Toggle name="inplaceSkinningToggle" />
+            <ui:Label text="ⓘ" name="inplaceSkinningHelpIcon" style="font-size: 14px; color: rgb(0, 255, 255);" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

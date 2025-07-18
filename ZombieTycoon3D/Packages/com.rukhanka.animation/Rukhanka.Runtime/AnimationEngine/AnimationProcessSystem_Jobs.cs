@@ -7,12 +7,12 @@ using Unity.Burst.CompilerServices;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Deformations;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using Hash128 = Unity.Entities.Hash128;
 
 //=================================================================================================================//
 
@@ -44,6 +44,7 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	[SkipLocalsInit]
 	public void Execute(int globalBoneIndex)
 	{
 		var boneToEntityIndex = boneToEntityArr[globalBoneIndex];
@@ -61,9 +62,15 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 		var transformFlags = RuntimeAnimationData.GetAnimationTransformFlagsRW(boneToEntityArr, boneTransformFlagsArr, globalBoneIndex, rigBoneCount);
 		GetHumanRotationDataForSkeletonBone(out var humanBoneInfo, ref rigBlobAsset.Value.humanData, rigBoneIndex);
+		
+		//	There are separate tracks for root motion
+		var boneNameHash = rb.hash;
+		if (rigDef.applyRootMotion && (rigBlobAsset.Value.rootBoneIndex == rigBoneIndex || rigBoneIndex == 0))
+			boneNameHash = ModifyBoneHashForRootMotion(boneNameHash);
 
-		Span<float> layerWeights = stackalloc float[animationsToProcess.Length];
-		var refPosWeight = CalculateFinalLayerWeights(layerWeights, animationsToProcess, rb.hash, rb.humanBodyPart);
+		//	Animations must be ordered by layer index
+		Span<float> layerWeights = stackalloc float[animationsToProcess[^1].layerIndex + 1];
+		var refPosWeight = CalculateFinalLayerWeights(layerWeights, animationsToProcess, rigBoneIndex, boneNameHash, rb.humanBodyPart);
 		float3 totalWeights = refPosWeight;
 
 		var blendedBonePose = BoneTransform.Scale(rb.refPose, refPosWeight);
@@ -78,32 +85,33 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 				continue;
 
 			var animTime = NormalizeAnimationTime(atp.time, ref atp.animation.Value);
+			ref var clipTracks = ref atp.animation.Value.clipTracks;
 
 			var layerWeight = layerWeights[atp.layerIndex];
 			if (layerWeight == 0) continue;
 
-			var boneNameHash = rb.hash;
-			if (rigDef.applyRootMotion && (rigBlobAsset.Value.rootBoneIndex == rigBoneIndex || rigBoneIndex == 0))
-				ModifyBoneHashForRootMotion(ref boneNameHash);
+			var boneHasAnimation = SampleAnimation
+			(
+				ref atp.animation.Value,
+				animTime,
+				rigBoneIndex,
+				boneNameHash,
+				atp.blendMode,
+				humanBoneInfo,
+				out var bonePose,
+				out var flags,
+				out var trackRange
+			);
 			
-			var animationBoneIndex = GetBoneIndexByHash(ref atp.animation.Value, boneNameHash);
-			var isAnimationAdditive = atp.blendMode == AnimationBlendingMode.Additive;
-
-			if (Hint.Likely(animationBoneIndex >= 0))
+			if (boneHasAnimation)
 			{
-				// Loop Pose calculus for all bones except root motion
-				var calculateLoopPose = atp.animation.Value.loopPoseBlend && rigBoneIndex != 0;
-				var additiveReferencePoseTime = math.select(-1.0f, atp.animation.Value.additiveReferencePoseTime, isAnimationAdditive);
-				
-				ref var boneAnimation = ref atp.animation.Value.bones[animationBoneIndex];
-				var (bonePose, flags) = SampleAnimation(ref boneAnimation, animTime, atp, calculateLoopPose, additiveReferencePoseTime, humanBoneInfo);
 				SetTransformFlags(flags, transformFlags, rigBoneIndex);
 
 				float3 modWeight = flags * atp.weight * layerWeight;
-				totalWeights += math.select(modWeight, 0, isAnimationAdditive);
+				totalWeights += math.select(modWeight, 0, false);
 
 				if (rootMotionDeltaBone)
-					ProcessRootMotionDeltas(ref bonePose, ref boneAnimation, atp, curRootMotionState, ref newRootMotionState);
+					ProcessRootMotionDeltas(ref bonePose, ref clipTracks, trackRange, atp, curRootMotionState, ref newRootMotionState);
 				
 				MixPoses(ref blendedBonePose, bonePose, modWeight, atp.blendMode);
 			}
@@ -121,23 +129,12 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static void ModifyBoneHashForRootMotion(ref Hash128 h)
+	public static uint ModifyBoneHashForRootMotion(uint h)
 	{
-		h.Value.z = 0xbaad;
-		h.Value.w = 0xf00d;
+		var rv = math.hash(new uint2(h, h * 2));
+		return rv;
 	}
 	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int GetBoneIndexByHash(ref AnimationClipBlob acb, in Hash128 boneHash)
-	{
-		var queryIndex = PerfectHash<Hash128PerfectHashed>.QueryPerfectHashTable(ref acb.bonesPerfectHashSeedTable, boneHash);
-		if (queryIndex >= acb.bones.Length || queryIndex < 0)
-			return -1;
-		var candidateBoneHash = acb.bones[queryIndex].hash;
-		return candidateBoneHash == boneHash ? queryIndex : -1;
-	}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrepareRootMotionStateBuffers
@@ -165,14 +162,15 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 	void ProcessRootMotionDeltas
 	(
 		ref BoneTransform bonePose,
-		ref BoneClipBlob boneAnimation,
+		ref TrackSet trackSet,
+		int2 trackRange,
 		in AnimationToProcessComponent atp,
 		in NativeArray<RootMotionAnimationStateComponent> curRootMotionState,
 		ref NativeList<RootMotionAnimationStateComponent> newRootMotionState
 	)
 	{
 		//	Special care for root motion animation loops
-		HandleRootMotionLoops(ref bonePose, ref boneAnimation, atp);
+		HandleRootMotionLoops(ref bonePose, ref trackSet, trackRange, atp);
 	
 		BoneTransform rootMotionPrevPose = bonePose;
 
@@ -269,12 +267,11 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CalculateLoopPose(ref BoneClipBlob boneAnimation, AnimationToProcessComponent atp, ref BoneTransform bonePose, in HumanRotationData hrd, float normalizedTime)
+	void CalculateLoopPose(ref TrackSet trackSet, int2 trackRange, ref BoneTransform bonePose, in HumanRotationData hrd, float normalizedTime)
 	{
-		var animLen = atp.animation.Value.length;
 		var lerpFactor = normalizedTime;
-		var (rootPoseStart, _) = ProcessAnimationCurves(ref boneAnimation, hrd, 0);
-		var (rootPoseEnd, _) = ProcessAnimationCurves(ref boneAnimation, hrd, animLen);
+		var rootPoseStart = GetTransformFrame(ref trackSet, trackRange, hrd, TrackFrame.First);
+		var rootPoseEnd = GetTransformFrame(ref trackSet, trackRange, hrd, TrackFrame.Last);
 
 		var dPos = rootPoseEnd.pos - rootPoseStart.pos;
 		var dRot = math.mul(math.conjugate(rootPoseEnd.rot), rootPoseStart.rot);
@@ -284,7 +281,7 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void HandleRootMotionLoops(ref BoneTransform bonePose, ref BoneClipBlob boneAnimation, in AnimationToProcessComponent atp)
+	void HandleRootMotionLoops(ref BoneTransform bonePose, ref TrackSet ts, int2 trackRange, in AnimationToProcessComponent atp)
 	{
 		ref var animBlob = ref atp.animation.Value;
 		if (!animBlob.looped)
@@ -294,9 +291,8 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 		if (numLoopCycles < 1)
 			return;
 
-		var animLen = atp.animation.Value.length;
-		var (endFramePose, _) = SampleAnimation(ref boneAnimation, animLen, atp, false, -1);
-		var (startFramePose, _) = SampleAnimation(ref boneAnimation, 0, atp, false, -1);
+		var endFramePose = GetTransformFrame(ref ts, trackRange, default, TrackFrame.Last);
+		var startFramePose = GetTransformFrame(ref ts, trackRange, default, TrackFrame.First);
 
 		var deltaPose = BoneTransform.Multiply(endFramePose, BoneTransform.Inverse(startFramePose));
 
@@ -335,7 +331,14 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static float CalculateFinalLayerWeights(in Span<float> layerWeights, in DynamicBuffer<AnimationToProcessComponent> atp, in Hash128 boneHash, AvatarMaskBodyPart humanAvatarMaskBodyPart)
+	public static float CalculateFinalLayerWeights
+	(
+		in Span<float> layerWeights,
+		in DynamicBuffer<AnimationToProcessComponent> atp,
+		int boneIndex,
+		uint boneHash,
+		AvatarMaskBodyPart humanAvatarMaskBodyPart
+	)
 	{
 		var layerIndex = -1;
 		var w = 1.0f;
@@ -345,8 +348,9 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 			var a = atp[i];
 			if (a.layerIndex == layerIndex) continue;
 
-			var inAvatarMask = IsBoneInAvatarMask(boneHash, humanAvatarMaskBodyPart, a.avatarMask);
-			var layerWeight = inAvatarMask ? a.layerWeight : 0;
+			var inAvatarMask = IsBoneInAvatarMask(boneIndex, humanAvatarMaskBodyPart, a.avatarMask);
+			var hasTrack = boneHash == 0 || a.animation.Value.clipTracks.GetTrackGroupIndex(boneHash) >= 0;
+			var layerWeight = inAvatarMask && hasTrack ? a.layerWeight : 0;
 
 			var lw = w * layerWeight;
 			layerWeights[a.layerIndex] = lw;
@@ -379,15 +383,15 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static bool IsBoneInAvatarMask(in Hash128 boneHash, AvatarMaskBodyPart humanAvatarMaskBodyPart, BlobAssetReference<AvatarMaskBlob> am)
+	public static bool IsBoneInAvatarMask(int boneIndex, AvatarMaskBodyPart humanAvatarMaskBodyPart, BlobAssetReference<AvatarMaskBlob> am)
 	{
 		// If no avatar mask defined or bone hash is all zeroes assume that bone included
-		if (!am.IsCreated || !math.any(boneHash.Value))
+		if (!am.IsCreated || boneIndex < 0)
 			return true;
 
 		return (int)humanAvatarMaskBodyPart >= 0 ?
 			IsBoneInHumanAvatarMask(humanAvatarMaskBodyPart, am) :
-			IsBoneInGenericAvatarMask(boneHash, am);
+			am.Value.IsBoneIncluded(boneIndex);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -400,47 +404,56 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static bool IsBoneInGenericAvatarMask(in Hash128 boneHash, BlobAssetReference<AvatarMaskBlob> am)
-	{
-		for (int i = 0; i < am.Value.includedBoneHashes.Length; ++i)
-		{
-			var avatarMaskBoneHash = am.Value.includedBoneHashes[i];
-			if (avatarMaskBoneHash == boneHash)
-				return true;
-		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	(BoneTransform, float3) SampleAnimation
-	(
-		ref BoneClipBlob bcb,
-		float2 animTime,
-		in AnimationToProcessComponent atp,
-		bool calculateLoopPose, 
-		float additiveReferencePoseTime,
-		in HumanRotationData hrd = default
+	bool SampleAnimation
+    (
+	    ref AnimationClipBlob acb,
+	    float2 animTime,
+	    int rigBoneIndex,
+	    uint boneHash,
+	    AnimationBlendingMode blendMode,
+		in HumanRotationData hrd,
+	    out BoneTransform animatedPose,
+	    out float3 flags,
+	    out int2 clipTrackRange
 	)
 	{
+		animatedPose = BoneTransform.Identity();
+		flags = 0;
+		clipTrackRange = 0;
+		
+		var trackIndex = acb.clipTracks.GetTrackGroupIndex(boneHash);
+		if (Hint.Unlikely(trackIndex < 0))
+			return false;
+
 		var time = animTime.x;
 		var timeNrm = animTime.y;
 
-		var (bonePose, flags) = ProcessAnimationCurves(ref bcb, hrd, time);
+		clipTrackRange = new int2(acb.clipTracks.trackGroups[trackIndex], acb.clipTracks.trackGroups[trackIndex + 1]); // This is safe because of trailing trackGroup
+		(animatedPose, flags) = ProcessAnimationCurves(ref acb.clipTracks, clipTrackRange, hrd, time);
 		
 		//	Make additive animation if requested
-		if (Hint.Unlikely(additiveReferencePoseTime >= 0))
+		var isAnimationAdditive = blendMode == AnimationBlendingMode.Additive;
+		if (Hint.Unlikely(isAnimationAdditive))
 		{
-			var (zeroFramePose, _) = ProcessAnimationCurves(ref bcb, hrd, additiveReferencePoseTime);
-			MakeAdditiveAnimation(ref bonePose, zeroFramePose);
+			//	Get separate additive frame if requested
+			ref var additiveTrackSet = ref Hint.Unlikely(acb.additiveReferencePoseFrame.keyframes.Length > 0) ? ref acb.additiveReferencePoseFrame : ref acb.clipTracks; 
+			var additiveTrackIndex = additiveTrackSet.trackGroupPHT.Query(boneHash);
+			if (additiveTrackIndex >= 0)
+			{
+				var additivePoseTrackRange = new int2(additiveTrackSet.trackGroups[additiveTrackIndex], additiveTrackSet.trackGroups[additiveTrackIndex + 1]);
+				var additiveFramePose = GetTransformFrame(ref additiveTrackSet, additivePoseTrackRange, hrd, TrackFrame.First);
+				MakeAdditiveAnimation(ref animatedPose, additiveFramePose);
+			}
 		}
 		
+		// Loop Pose calculus for all bones except root motion
+		var calculateLoopPose = acb.loopPoseBlend && rigBoneIndex != 0;
 		if (Hint.Unlikely(calculateLoopPose))
 		{
-			CalculateLoopPose(ref bcb, atp, ref bonePose, hrd, timeNrm);
+			CalculateLoopPose(ref acb.clipTracks, clipTrackRange, ref animatedPose, hrd, timeNrm);
 		}
 		
-		return (bonePose, flags);
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -457,43 +470,41 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	(BoneTransform, float3) ProcessAnimationCurves(ref BoneClipBlob bcb, HumanRotationData hrd, float time)
+	BoneTransform GetTransformFrame(ref TrackSet ts, int2 trackRange, HumanRotationData hrd, TrackFrame tf)
 	{
 		var rv = BoneTransform.Identity();
 
 		bool eulerToQuaternion = false;
-
-		float3 flags = 0;
-		for (int i = 0; i < bcb.animationCurves.Length; ++i)
+		var isHumanMuscle = false;
+		for (int i = trackRange.x; i < trackRange.y; ++i)
 		{
-			ref var ac = ref bcb.animationCurves[i];
-			var interpolatedCurveValue = BlobCurve.SampleAnimationCurve(ref ac.keyFrames, time);
+			var track = ts.tracks[i];
+			
+			var kfIndex = track.keyFrameRange.x;
+			if (tf == TrackFrame.Last)
+				kfIndex += track.keyFrameRange.y - 1;
+			
+			var trackValue = ts.keyframes[kfIndex].v;
 
-			switch (ac.bindingType)
+			var ci = (int)track.channelIndex;
+			switch (track.bindingType)
 			{
 			case BindingType.Translation:
-				rv.pos[ac.channelIndex] = interpolatedCurveValue;
-				flags.x = 1;
+				rv.pos[ci] = trackValue;
 				break;
 			case BindingType.Quaternion:
-				rv.rot.value[ac.channelIndex] = interpolatedCurveValue;
-				flags.y = 1;
+				rv.rot.value[ci] = trackValue;
 				break;
 			case BindingType.EulerAngles:
+				rv.rot.value[ci] = trackValue;
 				eulerToQuaternion = true;
-				rv.rot.value[ac.channelIndex] = interpolatedCurveValue;
-				flags.y = 1;
 				break;
 			case BindingType.HumanMuscle:
-				rv.rot.value[ac.channelIndex] = interpolatedCurveValue;
-				flags.y = 1;
+				rv.rot.value[ci] = trackValue;
+				isHumanMuscle = true;
 				break;
 			case BindingType.Scale:
-				rv.scale[ac.channelIndex] = interpolatedCurveValue;
-				flags.z = 1;
-				break;
-			default:
-				BurstAssert.IsTrue(false, "Unknown binding type!");
+				rv.scale[ci] = trackValue;
 				break;
 			}
 		}
@@ -504,7 +515,64 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 			rv.rot = quaternion.Euler(math.radians(rv.rot.value.xyz), math.RotationOrder.XYZ);
 		}
 
-		if (bcb.isHumanMuscleClip)
+		if (isHumanMuscle)
+		{
+			MuscleValuesToQuaternion(hrd, ref rv);
+		}
+
+		return rv;
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	(BoneTransform, float3) ProcessAnimationCurves(ref TrackSet ts, int2 trackRange, HumanRotationData hrd, float time)
+	{
+		var rv = BoneTransform.Identity();
+
+		bool eulerToQuaternion = false;
+
+		float3 flags = 0;
+		var isHumanMuscle = false;
+		for (int i = trackRange.x; i < trackRange.y; ++i)
+		{
+			var track = ts.tracks[i];
+			var interpolatedCurveValue = BlobCurve.SampleAnimationCurve(ref ts, i, time);
+
+			var ci = (int)track.channelIndex;
+			switch (track.bindingType)
+			{
+			case BindingType.Translation:
+				rv.pos[ci] = interpolatedCurveValue;
+				flags.x = 1;
+				break;
+			case BindingType.Quaternion:
+				rv.rot.value[ci] = interpolatedCurveValue;
+				flags.y = 1;
+				break;
+			case BindingType.EulerAngles:
+				eulerToQuaternion = true;
+				rv.rot.value[ci] = interpolatedCurveValue;
+				flags.y = 1;
+				break;
+			case BindingType.HumanMuscle:
+				rv.rot.value[ci] = interpolatedCurveValue;
+				isHumanMuscle = true;
+				flags.y = 1;
+				break;
+			case BindingType.Scale:
+				rv.scale[ci] = interpolatedCurveValue;
+				flags.z = 1;
+				break;
+			}
+		}
+
+		//	If we have got Euler angles instead of quaternion, convert them here
+		if (eulerToQuaternion)
+		{
+			rv.rot = quaternion.Euler(math.radians(rv.rot.value.xyz), math.RotationOrder.XYZ);
+		}
+
+		if (isHumanMuscle)
 		{
 			MuscleValuesToQuaternion(hrd, ref rv);
 		}
@@ -516,99 +584,57 @@ public struct ComputeBoneAnimationJob: IJobParallelForDefer
 //=================================================================================================================//
 
 [BurstCompile]
-partial struct ProcessGenericCurvesJob: IJobEntity
+[WithNone(typeof(GPUAnimationEngineTag))]
+partial struct ProcessAnimatorParameterCurveJob: IJobEntity
 {
-	[ReadOnly]
-	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
-	
-	[NativeDisableParallelForRestriction]
-	public NativeList<RuntimeAnimationData.GenericFloatAnimatedValue> genericAnimatedValues;
-	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	unsafe void Execute(Entity e, in DynamicBuffer<AnimationToProcessComponent> animationsToProcess)
+	unsafe void Execute(in DynamicBuffer<AnimationToProcessComponent> animationsToProcess, ref DynamicBuffer<AnimatorControllerParameterComponent> acpc)
 	{
 		if (animationsToProcess.IsEmpty) return;
 
-		Span<float> layerWeights = stackalloc float[animationsToProcess.Length];
-		ComputeBoneAnimationJob.CalculateFinalLayerWeights(layerWeights, animationsToProcess, new Hash128(), (AvatarMaskBodyPart)(-1));
-
-		for (int l = 0; l < animationsToProcess.Length; ++l)
-		{
-			var atp = animationsToProcess[l];
-			if (atp.animation == BlobAssetReference<AnimationClipBlob>.Null)
-				continue;
-			
-			var animTime = ComputeBoneAnimationJob.NormalizeAnimationTime(atp.time, ref atp.animation.Value);
-			var layerWeight = layerWeights[atp.layerIndex];
-			ref var curves = ref atp.animation.Value.curves;
-			var weight = atp.weight * layerWeight;
-			
-			for (int k = 0; k < curves.Length && weight > 0; ++k)
-			{
-				ref var c = ref curves[k];
-				
-				for (var m = 0; m < c.animationCurves.Length; ++m)
-				{
-					ref var curve = ref c.animationCurves[m];
-					var curveValue = SampleUserCurve(ref curve.keyFrames, atp, animTime.x);
-					if (atp.animation.Value.loopPoseBlend)
-						curveValue -= CalculateLoopPose(ref curve.keyFrames, atp, animTime.y);
-					var curveHash128 = c.ComputeAnimationCurveHash(ref curve);
-					StoreAnimatedValue(e, curveHash128, curveValue, weight);
-				}
-			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void StoreAnimatedValue(Entity e, in Hash128 curveHash128, float v, float weight)
-	{
-		var curveHash = Toolbox.HashUtils.Hash128To32(curveHash128);
-		var entityOffsets = entityToDataOffsetMap[e];
-		var startIndex = curveHash % entityOffsets.genericAnimationDataSize;
-		var maxIterations = entityOffsets.genericAnimationDataSize;
+		//	Animations must be ordered by layer index
+		Span<float> layerWeights = stackalloc float[animationsToProcess[^1].layerIndex + 1];
+		ComputeBoneAnimationJob.CalculateFinalLayerWeights(layerWeights, animationsToProcess, -1, 0, (AvatarMaskBodyPart)(-1));
 		
-		for (var i = 0; i < maxIterations; ++i)
+		for (var i = 0; i < acpc.Length; ++i)
 		{
-			var idx = (int)(startIndex + i) % maxIterations + entityOffsets.genericAnimationDataOffset;
-			var gav = genericAnimatedValues[idx];
-			if (!gav.hash.IsValid || gav.hash == curveHash128)
-			{
-				gav.hash = curveHash128;
-				gav.value += v * weight;
-				genericAnimatedValues[idx] = gav;
-				return;
-			}
-		}
-		
-		BurstAssert.IsTrue(false, "Max iterations exceeded!");
+			ref var p = ref acpc.ElementAt(i);
+			var parameterNameHash = Track.CalculateHash(p.hash);
+	
+			ComputeAnimatedProperty(ref p.value.floatValue, animationsToProcess.AsNativeArray(), layerWeights, SpecialBones.AnimatorTypeNameHash, parameterNameHash); 
+        }
 	}
+}
+
+//=================================================================================================================//
+
+[BurstCompile]
+[WithNone(typeof(GPUAnimationEngineTag))]
+partial struct AnimateBlendShapeWeightsJob: IJobEntity
+{
+	[ReadOnly]
+	public BufferLookup<AnimationToProcessComponent> animationToProcessLookup;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float SampleUserCurve(ref BlobArray<KeyFrame> curve, in AnimationToProcessComponent atp, float animTime)
-	{ 
-		var curveValue = BlobCurve.SampleAnimationCurve(ref curve, animTime);
-		//	Make additive animation if requested
-		if (atp.blendMode == AnimationBlendingMode.Additive)
-		{
-			var additiveValue = BlobCurve.SampleAnimationCurve(ref curve, atp.animation.Value.additiveReferencePoseTime);
-			curveValue -= additiveValue;
-		}
-		return curveValue;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float CalculateLoopPose(ref BlobArray<KeyFrame> curve, in AnimationToProcessComponent atp, float normalizedTime)
+	
+	void Execute(DynamicBuffer<BlendShapeWeight> blendShapeWeights, in AnimatedSkinnedMeshComponent asm)
 	{
-		var startV = SampleUserCurve(ref curve, atp, 0);
-		var endV = SampleUserCurve(ref curve, atp, atp.animation.Value.length);
+		if (!animationToProcessLookup.TryGetBuffer(asm.animatedRigEntity, out var animationsToProcess))
+			return;
+		
+		if (animationsToProcess.IsEmpty) return;
 
-		var rv = (endV - startV) * normalizedTime;
-		return rv;
+		//	Animations must be ordered by layer index
+		Span<float> layerWeights = stackalloc float[animationsToProcess[^1].layerIndex + 1];
+		ComputeBoneAnimationJob.CalculateFinalLayerWeights(layerWeights, animationsToProcess, -1, 0, (AvatarMaskBodyPart)(-1));
+		
+		for (var i = 0; i < blendShapeWeights.Length; ++i)
+		{
+			ref var p = ref blendShapeWeights.ElementAt(i);
+			var bsi = asm.smrInfoBlob.Value.blendShapes[i].hash;
+			var parameterNameHash = Track.CalculateHash(bsi);
+	
+			ComputeAnimatedProperty(ref p.Value, animationsToProcess.AsNativeArray(), layerWeights, asm.nameHash, parameterNameHash); 
+        }
 	}
 }
 
@@ -622,21 +648,18 @@ struct CalculateBoneOffsetsJob: IJobChunk
 	[ReadOnly]
 	public ComponentLookup<CullAnimationsTag> cullAnimationsTagLookup;
 	[ReadOnly]
-	public BufferTypeHandle<AnimationToProcessComponent> animationToProcessBufferLookup;
-	[ReadOnly]
 	public NativeArray<int> chunkBaseEntityIndices;
 	[ReadOnly]
 	public NativeList<Entity> entities;
 	
 	[WriteOnly, NativeDisableContainerSafetyRestriction]
-	public NativeList<int3> bonePosesOffsets;
+	public NativeList<int2> bonePosesOffsets;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
 	{
 		var rigDefAccessor = chunk.GetNativeArray(ref rigDefinitionTypeHandle);
-		var animationToProcessBuffers = chunk.GetBufferAccessor(ref animationToProcessBufferLookup);
 		int baseEntityIndex = chunkBaseEntityIndices[unfilteredChunkIndex];
 		int validEntitiesInChunk = 0;
 
@@ -653,40 +676,17 @@ struct CalculateBoneOffsetsJob: IJobChunk
             var e = entities[entityInQueryIndex];
             var boneCount = GetRigBoneCountWithRespectToCulling(e, rigDef, cullAnimationsTagLookup);
 
-			var v = new int3
+			var v = new int2
 			(
 				//	Bone count
 				boneCount,
 				//	Number of ulong values that can hold bone transform flags
-				(boneCount * 4 >> 6) + 1,
-				//	Number of generic curves present in all clips
-				CalculateTotalGenericTracks(animationToProcessBuffers[i])
+				(boneCount * 4 >> 6) + 1
 			);
 			bonePosesOffsets[entityInQueryIndex + 1] = v;
 		}
 	}
 	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int CalculateTotalGenericTracks(in DynamicBuffer<AnimationToProcessComponent> atps)
-	{
-		var total = 0;
-		//	Very conservatively (one slot for each clip track) count number of needed space to store generic curve data
-		for (var i = 0; i < atps.Length; ++i)
-		{
-			var atp = atps[i];
-			if (!atp.animation.IsCreated)
-				continue;
-			
-			ref var userCurves = ref atp.animation.Value.curves;
-			for (var k = 0; k < userCurves.Length; ++k)
-			{
-				total += userCurves[k].animationCurves.Length;
-			}
-		}
-		return total;
-	}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int GetRigBoneCountWithRespectToCulling(Entity e, in RigDefinitionComponent rdc, in ComponentLookup<CullAnimationsTag> cullAnimationsTagLookup)
@@ -706,7 +706,7 @@ struct CalculatePerBoneInfoJob: IJobChunk
 	[ReadOnly]
 	public NativeArray<int> chunkBaseEntityIndices;
 	[ReadOnly]
-	public NativeList<int3> bonePosesOffsets;
+	public NativeList<int2> bonePosesOffsets;
 	[ReadOnly]
 	public NativeList<Entity> entities;
 	
@@ -746,8 +746,6 @@ struct CalculatePerBoneInfoJob: IJobChunk
 				bonePoseOffset = offset.x,
 				boneFlagsOffset = offset.y,
 				rigBoneCount = boneCount,
-				genericAnimationDataOffset = offset.z,
-				genericAnimationDataSize = nextOffset.z - offset.z
 			};
 			entityToDataOffsetMap.TryAdd(e, entityRigData);
 		}
@@ -759,13 +757,13 @@ struct CalculatePerBoneInfoJob: IJobChunk
 [BurstCompile]
 struct DoPrefixSumJob: IJob
 {
-	public NativeList<int3> boneOffsets;
+	public NativeList<int2> boneOffsets;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void Execute()
 	{
-		var sum = new int3(0);
+		var sum = new int2(0);
 		for (int i = 0; i < boneOffsets.Length; ++i)
 		{
 			var v = boneOffsets[i];
@@ -781,7 +779,7 @@ struct DoPrefixSumJob: IJob
 struct ResizeDataBuffersJob: IJob
 {
 	[ReadOnly]
-	public NativeList<int3> boneOffsets;
+	public NativeList<int2> boneOffsets;
 	public RuntimeAnimationData runtimeData;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -800,10 +798,6 @@ struct ResizeDataBuffersJob: IJob
 		var entityCount = boneOffsets.Length;
 		runtimeData.entityToDataOffsetMap.Clear();
 		runtimeData.entityToDataOffsetMap.Capacity = math.max(entityCount, runtimeData.entityToDataOffsetMap.Capacity);
-		
-		//	Clear by two resizes
-		runtimeData.genericCurveAnimatedValuesBuffer.Resize(0, NativeArrayOptions.UninitializedMemory);
-		runtimeData.genericCurveAnimatedValuesBuffer.Resize(boneBufferLen.z, NativeArrayOptions.ClearMemory);
 	}
 }
 
@@ -904,7 +898,7 @@ struct MakeAbsoluteTransformsJob: IJobChunk
 			var rigEntity = entityAccessor[i];
 			
 			if (!entityToDataOffsetMap.TryGetValue(rigEntity, out var boneDataOffset))
-				return;
+				continue;
 
 			ref var rigBones = ref rigDef.rigBlob.Value.bones;
 			var rigBonesCount = boneDataOffset.rigBoneCount;
@@ -982,11 +976,18 @@ partial struct ComputeRootMotionJob: IJobEntity
 	[NativeDisableContainerSafetyRestriction]
 	public NativeList<BoneTransform> animatedBonePoses;
 	[ReadOnly]
+	public ComponentLookup<Parent> parentLookup;
+	[ReadOnly]
+	public ComponentLookup<PostTransformMatrix> ptmLookup;
+	[ReadOnly]
+	public ComponentLookup<LocalTransform> localTransformLookup;
+	[ReadOnly]
 	public NativeParallelHashMap<Entity, RuntimeAnimationData.AnimatedEntityBoneDataProps> entityToDataOffsetMap;
+	public float deltaTime;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Execute(Entity e, in RigDefinitionComponent rdc, LocalTransform lt)
+	void Execute(Entity e, in RigDefinitionComponent rdc, ref RootMotionVelocityComponent rmvc, in LocalTransform lt)
 	{
 		if (!rdc.applyRootMotion)
 			return;
@@ -997,9 +998,20 @@ partial struct ComputeRootMotionJob: IJobEntity
 		
 		var motionDeltaPose = boneData[0];
 		var curEntityTransform = new BoneTransform(lt);
-		var newEntityPose = BoneTransform.Multiply(curEntityTransform, motionDeltaPose);
 		
-		boneData[0] = newEntityPose;
+		if (rmvc.removeBuiltinEntityMovement)
+		{
+			boneData[0] = curEntityTransform;
+		}
+		else
+		{
+			var newEntityPose = BoneTransform.Multiply(curEntityTransform, motionDeltaPose);
+			boneData[0] = newEntityPose;
+		}
+		
+		rmvc.worldVelocity = motionDeltaPose.pos / deltaTime;	
+		TransformHelpers.ComputeWorldTransformMatrix(e, out var localTransformMatrix, ref localTransformLookup, ref parentLookup, ref ptmLookup);
+		rmvc.worldVelocity = math.rotate(localTransformMatrix, rmvc.worldVelocity);
 	}
 }
 

@@ -1,7 +1,7 @@
 {
     "name": "com.rukhanka.animation",
-    "version": "1.9.2",
-    "displayName": "Rukhanka Animation System",
+    "version": "2.2.1",
+    "displayName": "Rukhanka Animation System 2",
     "description": "ECS Animation System",
     "unity": "2022.3",
     "unityRelease": "0f1",

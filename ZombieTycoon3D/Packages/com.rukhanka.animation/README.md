@@ -1,4 +1,4 @@
-# Rukhanka - ECS Animation System
+# Rukhanka Animation System
 
 * Documentation: [https://docs.rukhanka.com](https://docs.rukhanka.com)
 * Youtube channel: [https://www.youtube.com/@rukhankaanimation](https://www.youtube.com/@rukhankaanimation)

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 39064ff186f064e41ba30cef48c769b5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Editor/AmplifyShaderEditor/RukhankaMeshDeformation.asset
+  uploadId: 754107

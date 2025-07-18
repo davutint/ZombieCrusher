@@ -6,13 +6,17 @@ using System.Runtime.InteropServices;
 
 namespace Rukhanka
 {
-public struct ControllerBlob
+public struct ControllerBlob: GenericAssetBlob
 {
 #if RUKHANKA_DEBUG_INFO
 	public BlobString name;
+	public string Name() => name.ToString();
 	public float bakingTime;
+	public float BakingTime() => bakingTime;
 #endif
 	public Hash128 hash;
+	public Hash128 Hash() => hash;
+	
 	public BlobArray<LayerBlob> layers;
 	public BlobArray<ParameterBlob> parameters;
 }
@@ -54,15 +58,6 @@ public struct ParameterBlob
 	public uint hash;
 	public ParameterValue defaultValue;
 	public ControllerParameterType type;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-public struct ParameterPerfectHashTableBlob
-{
-	public BlobArray<int2> seedTable;
-	//	We need indirection array to keep parameters in its original indices (as in authoring Unity.Animator)
-	public BlobArray<int> indirectionTable;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -155,7 +155,8 @@ public struct StateMachineProcessJob: IJobChunk
 			EmitEvent(ref events, AnimatorControllerEventComponent.EventType.StateExit, acc.rtd.srcState.id, acc.layerIndex, acc.rtd.srcState.normalizedDuration);
 				
 			acc.rtd.srcState = acc.rtd.dstState;
-			acc.rtd.dstState = acc.rtd.activeTransition = RuntimeAnimatorData.StateRuntimeData.MakeDefault();
+			acc.rtd.dstState = RuntimeAnimatorData.StateRuntimeData.MakeDefault();
+			acc.rtd.activeTransition = RuntimeAnimatorData.TransitionRuntimeData.MakeDefault();
 		}
 	}
 
@@ -186,7 +187,8 @@ public struct StateMachineProcessJob: IJobChunk
 			{
 				var timeShouldBeInTransition = GetTimeInSecondsShouldBeInTransition(ref t, acc.rtd.srcState, curStateDuration, srcStateDurationFrameDelta);
 				acc.rtd.activeTransition.id	= i;
-				acc.rtd.activeTransition.normalizedDuration = timeShouldBeInTransition / CalculateTransitionDuration(ref t, curStateDuration);
+				acc.rtd.activeTransition.length = GetTransitionLength(ref t);
+				acc.rtd.activeTransition.normalizedDuration = timeShouldBeInTransition / CalculateTransitionDuration(acc.rtd.activeTransition, curStateDuration);
 				var dstStateDur = CalculateStateDuration(ref layer.states[t.targetStateId], runtimeParams);
 				acc.rtd.dstState = InitRuntimeStateData(t.targetStateId);
 				acc.rtd.dstState.normalizedDuration += timeShouldBeInTransition / dstStateDur + t.offset;
@@ -259,6 +261,9 @@ public struct StateMachineProcessJob: IJobChunk
 		var currentStateID = acc.rtd.srcState.id;
 		if (currentStateID < 0)
 			currentStateID = layer.defaultStateIndex;
+		
+		//	Adjust delta time according to the layer animator speed
+		var layerDeltaTime = dt * acc.speed;
 
 		ref var currentState = ref layer.states[currentStateID];
 		var curStateDuration = CalculateStateDuration(ref currentState, runtimeParams);
@@ -269,20 +274,19 @@ public struct StateMachineProcessJob: IJobChunk
 			EmitEvent(ref events, AnimatorControllerEventComponent.EventType.StateEnter, acc.rtd.srcState.id, acc.layerIndex, acc.rtd.srcState.normalizedDuration);
 		}
 
-		var srcStateDurationFrameDelta = CalculateStateFrameDeltaSafe(dt, curStateDuration);
+		var srcStateDurationFrameDelta = CalculateStateFrameDeltaSafe(layerDeltaTime, curStateDuration);
 		acc.rtd.srcState.normalizedDuration += srcStateDurationFrameDelta;
 
 		if (acc.rtd.dstState.id >= 0)
 		{
 			var dstStateDuration = CalculateStateDuration(ref layer.states[acc.rtd.dstState.id], runtimeParams);
-			acc.rtd.dstState.normalizedDuration += CalculateStateFrameDeltaSafe(dt,  dstStateDuration);
+			acc.rtd.dstState.normalizedDuration += CalculateStateFrameDeltaSafe(layerDeltaTime,  dstStateDuration);
 		}
 
 		if (acc.rtd.activeTransition.id >= 0)
 		{
-			ref var currentTransitionBlob = ref currentState.transitions[acc.rtd.activeTransition.id];
-			var transitionDuration = CalculateTransitionDuration(ref currentTransitionBlob, curStateDuration);
-			acc.rtd.activeTransition.normalizedDuration += dt / transitionDuration;
+			var transitionDuration = CalculateTransitionDuration(acc.rtd.activeTransition, curStateDuration);
+			acc.rtd.activeTransition.normalizedDuration += layerDeltaTime / transitionDuration;
 		}
 
 		ExitTransition(ref acc, ref events);
@@ -372,10 +376,18 @@ public struct StateMachineProcessJob: IJobChunk
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float CalculateTransitionDuration(ref TransitionBlob tb, float curStateDuration)
+	//	Negative value means that length is a normalized value from source state length
+	float GetTransitionLength(ref TransitionBlob tb)
 	{
-		var rv = tb.duration;
-		if (!tb.hasFixedDuration)
+		return math.select(-tb.duration, tb.duration, tb.hasFixedDuration);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float CalculateTransitionDuration(in RuntimeAnimatorData.TransitionRuntimeData trd, float curStateDuration)
+	{
+		var rv = math.abs(trd.length);
+		if (trd.length < 0)
 		{
 			rv *= curStateDuration;
 		}
@@ -573,7 +585,7 @@ public struct StateMachineProcessJob: IJobChunk
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool CheckTransitionExitConditions(RuntimeAnimatorData.StateRuntimeData transitionRuntimeData)
+	bool CheckTransitionExitConditions(RuntimeAnimatorData.TransitionRuntimeData transitionRuntimeData)
 	{
 		return transitionRuntimeData.normalizedDuration >= 1;
 	}

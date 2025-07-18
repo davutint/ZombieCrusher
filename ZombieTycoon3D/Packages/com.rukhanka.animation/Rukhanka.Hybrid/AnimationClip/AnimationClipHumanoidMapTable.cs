@@ -68,7 +68,7 @@ public partial class AnimationClipBaker
 			//	--- Left Hand ---
 			//	Thumb 1
 			{ "LeftHand.Thumb.1 Stretched",		new ParsedCurveBinding() { boneName = "Left Thumb Proximal", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
-			{ "LeftHand.Thumb Spread",			new ParsedCurveBinding() { boneName = "Left Thumb Proximal", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
+			{ "LeftHand.Thumb.Spread",			new ParsedCurveBinding() { boneName = "Left Thumb Proximal", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
 			//	Thumb 2
 			{ "LeftHand.Thumb.2 Stretched",		new ParsedCurveBinding() { boneName = "Left Thumb Intermediate", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 			//	Thumb 3
@@ -120,7 +120,7 @@ public partial class AnimationClipBaker
 			//	--- Right Hand ---
 			//	Thumb 1
 			{ "RightHand.Thumb.1 Stretched",	new ParsedCurveBinding() { boneName = "Right Thumb Proximal", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
-			{ "RightHand.Thumb Spread",			new ParsedCurveBinding() { boneName = "Right Thumb Proximal", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
+			{ "RightHand.Thumb.Spread",			new ParsedCurveBinding() { boneName = "Right Thumb Proximal", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
 			//	Thumb 2
 			{ "RightHand.Thumb.2 Stretched",	new ParsedCurveBinding() { boneName = "Right Thumb Intermediate", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 			//	Thumb 3
@@ -148,7 +148,7 @@ public partial class AnimationClipBaker
 			{ "RightHand.Ring.3 Stretched",		new ParsedCurveBinding() { boneName = "Right Ring Distal", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 			//	Little 1
 			{ "RightHand.Little.1 Stretched",	new ParsedCurveBinding() { boneName = "Right Little Proximal", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
-			{ "RightHand.Little.Spread",			new ParsedCurveBinding() { boneName = "Right Little Proximal", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
+			{ "RightHand.Little.Spread",		new ParsedCurveBinding() { boneName = "Right Little Proximal", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
 			//	Little 2
 			{ "RightHand.Little.2 Stretched",	new ParsedCurveBinding() { boneName = "Right Little Intermediate", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 			//	Little 3
@@ -166,7 +166,7 @@ public partial class AnimationClipBaker
 			{ "Left Foot Up-Down",				new ParsedCurveBinding() { boneName = "LeftFoot", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 			{ "Left Foot Twist In-Out",			new ParsedCurveBinding() { boneName = "LeftFoot", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
 			//	LeftToes
-			{ "Left Toes Up-Down",				new ParsedCurveBinding() { boneName = "LeftHand", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
+			{ "Left Toes Up-Down",				new ParsedCurveBinding() { boneName = "LeftToes", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 
 			//	--- Right Leg ---
 			//	RightUpperLeg
@@ -180,7 +180,7 @@ public partial class AnimationClipBaker
 			{ "Right Foot Up-Down",				new ParsedCurveBinding() { boneName = "RightFoot", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 			{ "Right Foot Twist In-Out",		new ParsedCurveBinding() { boneName = "RightFoot", channelIndex = 1, bindingType = BindingType.HumanMuscle }},
 			//	RightToes
-			{ "Right Toes Up-Down",				new ParsedCurveBinding() { boneName = "RightHand", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
+			{ "Right Toes Up-Down",				new ParsedCurveBinding() { boneName = "RightToes", channelIndex = 2, bindingType = BindingType.HumanMuscle }},
 		};
 	}
 }

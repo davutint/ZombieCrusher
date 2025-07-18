@@ -1,5 +1,3 @@
-using Rukhanka;
-using Rukhanka.Editor;
 using Rukhanka.Toolbox;
 using Unity.Mathematics;
 using UnityEditor;
@@ -8,7 +6,7 @@ using UnityEngine.UIElements;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Rukhaka.Editor
+namespace Rukhanka.Editor
 {
 public class RigBlobInfoWindow : EditorWindow
 {
@@ -24,7 +22,7 @@ public class RigBlobInfoWindow : EditorWindow
     [SerializeField]
     private VisualTreeAsset entityRefAsset = default;
 
-    internal static BlobInspector.BlobAssetInfo rigBlob;
+    internal static BlobInspector.BlobAssetInfo<RigDefinitionBlob> rigBlob;
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +40,7 @@ public class RigBlobInfoWindow : EditorWindow
     
     unsafe void FillRigInfo()
     {
-        ref var b = ref rigBlob.blobAsset.Reinterpret<RigDefinitionBlob>().Value;
+        ref var b = ref rigBlob.blobAsset.Value;
         var hashLabel = rootVisualElement.Q<Label>("hashLabel");
         hashLabel.text = b.hash.ToString();
         

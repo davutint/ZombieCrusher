@@ -81,8 +81,9 @@ public class Enemy : MonoBehaviour
         if (ragdollPrefab != null)
         {
             GameObject ragdoll = Instantiate(ragdollPrefab, transform.position, transform.rotation);
-            ApplyRagdollVelocity(ragdoll);
-            StartCoroutine(DestroyRagdollAfterDelay(ragdoll));
+            Destroy(ragdoll, destroyDelay);
+            /*ApplyRagdollVelocity(ragdoll);
+            StartCoroutine(DestroyRagdollAfterDelay(ragdoll));*/
         }
     }
 

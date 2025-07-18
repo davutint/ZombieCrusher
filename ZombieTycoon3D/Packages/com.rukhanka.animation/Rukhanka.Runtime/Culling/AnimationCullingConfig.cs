@@ -55,7 +55,7 @@ public class AnimationCullingConfig: MonoBehaviour
         }
         
     #if HDRP_10_0_0_OR_NEWER
-        var volumes = FindObjectsOfType<Volume>();
+        var volumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
         foreach (var v in volumes)
         {
             if (!v.isGlobal) continue;

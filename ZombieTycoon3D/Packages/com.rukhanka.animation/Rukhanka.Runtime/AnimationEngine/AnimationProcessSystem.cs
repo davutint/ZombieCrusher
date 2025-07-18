@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 using Hash128 = Unity.Entities.Hash128;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,7 +19,7 @@ public partial struct AnimationProcessSystem: ISystem
 {
 	EntityQuery animatedObjectQuery;
 
-	NativeList<int3> bonePosesOffsetsArr;
+	NativeList<int2> bonePosesOffsetsArr;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +31,8 @@ public partial struct AnimationProcessSystem: ISystem
 		bonePosesOffsetsArr = new (Allocator.Persistent);
 
 		var eqb0 = new EntityQueryBuilder(Allocator.Temp)
-		.WithAll<RigDefinitionComponent, AnimationToProcessComponent>();
+		.WithAll<RigDefinitionComponent, AnimationToProcessComponent>()
+		.WithNone<GPUAnimationEngineTag>();
 		animatedObjectQuery = ss.GetEntityQuery(eqb0);
 		
 		ss.RequireForUpdate(animatedObjectQuery);
@@ -71,7 +73,6 @@ public partial struct AnimationProcessSystem: ISystem
 		{
 			chunkBaseEntityIndices = chunkBaseEntityIndices,
 			bonePosesOffsets = bonePosesOffsetsArr,
-			animationToProcessBufferLookup = atpsBufHandle,
 			rigDefinitionTypeHandle = rigDefinitionTypeHandle,
 			cullAnimationsTagLookup = cullAnimationsTagComponentLookup,
 			entities = entitiesArr,
@@ -167,13 +168,9 @@ public partial struct AnimationProcessSystem: ISystem
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	JobHandle ProcessGenericCurves(ref SystemState ss, in RuntimeAnimationData runtimeData, JobHandle dependsOn)
+	JobHandle ProcessAnimatorParameterCurves(ref SystemState ss, JobHandle dependsOn)
 	{
-		var genericCurveProcessJob = new ProcessGenericCurvesJob()
-		{
-			genericAnimatedValues = runtimeData.genericCurveAnimatedValuesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
-		};
+		var genericCurveProcessJob = new ProcessAnimatorParameterCurveJob();
 		var jh = genericCurveProcessJob.ScheduleParallel(dependsOn);
 		return jh;
 	}
@@ -228,7 +225,11 @@ public partial struct AnimationProcessSystem: ISystem
 		var computeRootMotionJob = new ComputeRootMotionJob()
 		{
 			animatedBonePoses = runtimeData.animatedBonesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap
+			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
+			deltaTime = SystemAPI.Time.DeltaTime,
+			parentLookup = SystemAPI.GetComponentLookup<Parent>(true),
+			ptmLookup = SystemAPI.GetComponentLookup<PostTransformMatrix>(true),
+			localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
 		};
 
 		var jh = computeRootMotionJob.ScheduleParallel(dependsOn);
@@ -237,11 +238,29 @@ public partial struct AnimationProcessSystem: ISystem
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	JobHandle AnimateBlendShapeWeights(ref SystemState ss, JobHandle dependsOn)
+	{
+		var animateBlendWeightsJob = new AnimateBlendShapeWeightsJob()
+		{
+			animationToProcessLookup = SystemAPI.GetBufferLookup<AnimationToProcessComponent>(true)
+		};
+		var jh = animateBlendWeightsJob.ScheduleParallel(dependsOn);
+		return jh;
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	[BurstCompile]
 	public void OnUpdate(ref SystemState ss)
 	{
-		var entityCount = animatedObjectQuery.CalculateEntityCount();
 		ref var runtimeData = ref SystemAPI.GetSingletonRW<RuntimeAnimationData>().ValueRW;
+		
+		var entityCount = animatedObjectQuery.CalculateEntityCount();
+		if (entityCount == 0)
+		{
+			runtimeData.entityToDataOffsetMap.Clear();
+			return;
+		}
 		
 		bonePosesOffsetsArr.Resize(entityCount + 1, NativeArrayOptions.UninitializedMemory);
 		var chunkBaseEntityIndices = animatedObjectQuery.CalculateBaseEntityIndexArrayAsync(ss.WorldUpdateAllocator, ss.Dependency, out var baseIndexCalcJH);
@@ -257,12 +276,17 @@ public partial struct AnimationProcessSystem: ISystem
 		
 		//	Define array with bone pose offsets for calculated bone poses
 		var calcBoneOffsetsJH = PrepareComputationData(ref ss, chunkBaseEntityIndices, ref runtimeData, entitiesArr, combinedJH);
-
-		//	User curve calculus
-		var userCurveProcessJH = ProcessGenericCurves(ref ss, runtimeData, calcBoneOffsetsJH);
+		
+		//	Animate blend shape weights
+		var animateBlendShapeWeights = AnimateBlendShapeWeights(ref ss, calcBoneOffsetsJH);
+		
+		//	Curves that control controller parameters
+		var parameterControlByCurvesJob = ProcessAnimatorParameterCurves(ref ss, calcBoneOffsetsJH);
+		
+		var combinedJH2 = JobHandle.CombineDependencies(parameterControlByCurvesJob, animateBlendShapeWeights);
 
 		//	Spawn jobs for animation calculation
-		var computeAnimationJH = AnimationCalculation(ref ss, entitiesArr, runtimeData, userCurveProcessJH);
+		var computeAnimationJH = AnimationCalculation(ref ss, entitiesArr, runtimeData, combinedJH2);
 		
 		//	Copy entities poses into animation buffer for non-animated parts
 		var copyEntityTransformsIntoAnimationBufferJH = CopyEntityBonesToAnimationTransforms(ref ss, ref runtimeData, computeAnimationJH);

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e6899be4c158ecd49bcc3d777ed47968
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/SkinnedMeshBone.hlsl
+  uploadId: 754107

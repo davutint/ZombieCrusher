@@ -32,6 +32,9 @@ namespace ProjectDawn.Navigation.Hybrid
         protected bool m_Grounded = true;
 
         [SerializeField]
+        internal bool m_OptimizePath;
+
+        [SerializeField]
         internal bool m_OverrideAreaCosts;
 
         [SerializeField]
@@ -58,6 +61,7 @@ namespace ProjectDawn.Navigation.Hybrid
             AreaMask = AreaMask,
             AutoRepath = AutoRepath,
             Grounded = m_Grounded,
+            OptimizePath = m_OptimizePath,
             MappingExtent = MappingExtent,
         };
 

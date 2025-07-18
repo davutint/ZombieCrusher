@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 44081113a5222d7478ab69e775eb9b8e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Samples~/Samples/Scenes/23. Runtime
+    Skinned Mesh Swap/Assets/SkinnedFigure_Parts0.prefab
+  uploadId: 754107

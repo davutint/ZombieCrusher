@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Rukhanka;
 using Rukhanka.Editor;
 using Rukhanka.Toolbox;
@@ -8,14 +9,12 @@ using UnityEngine.UIElements;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Rukhaka.Editor
+namespace Rukhanka.Editor
 {
 public class AnimatorControllerBlobInfoWindow : EditorWindow
 {
     [SerializeField]
     private VisualTreeAsset visualTreeAsset = default;
-    [SerializeField]
-    private VisualTreeAsset controllerParameterBlobInfoAsset = default;
     [SerializeField]
     private VisualTreeAsset entityRefAsset = default;
     [SerializeField]
@@ -26,8 +25,35 @@ public class AnimatorControllerBlobInfoWindow : EditorWindow
     private VisualTreeAsset transitionBlobInfoAsset = default;
     [SerializeField]
     private VisualTreeAsset conditionBlobInfoAsset = default;
+    [SerializeField]
+    private VisualTreeAsset listViewLabelAsset = default;
     
-    internal static BlobInspector.BlobAssetInfo controllerBlob;
+    internal static BlobInspector.BlobAssetInfo<ControllerBlob> controllerBlob;
+    
+    readonly string nameColumnName = "name";
+    readonly string hashColumnName = "hash";
+    readonly string defValColumnName = "defaultValue";
+    readonly string typeColumnName = "type";
+    
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    class ParameterListItem
+    {
+        public string name;
+        public uint hash;
+        public string paramValue;
+        public ControllerParameterType paramType;
+        public ParameterListItem(ref ParameterBlob pb)
+        {
+            name = "-";
+        #if RUKHANKA_DEBUG_INFO
+            name = pb.name.ToString();
+        #endif
+            hash = pb.hash;
+            paramValue = GetParameterValueAsString(ref pb);
+            paramType = pb.type;
+        }
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -42,10 +68,31 @@ public class AnimatorControllerBlobInfoWindow : EditorWindow
     }
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void InitMultiListView(VisualElement root, List<ParameterListItem> srcData)
+    {
+        var paramListView = root.Q<MultiColumnListView>("parametersList");
+        
+        paramListView.itemsSource = srcData;
+        
+        paramListView.columns[nameColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        paramListView.columns[nameColumnName].bindCell = (VisualElement ve, int index) => (ve as Label).text = srcData[index].name;
+        
+        paramListView.columns[hashColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        paramListView.columns[hashColumnName].bindCell = (VisualElement ve, int index) => (ve as Label).text = srcData[index].hash.ToString("X");
+        
+        paramListView.columns[defValColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        paramListView.columns[defValColumnName].bindCell = (VisualElement ve, int index) => (ve as Label).text = srcData[index].paramValue;
+        
+        paramListView.columns[typeColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        paramListView.columns[typeColumnName].bindCell = (VisualElement ve, int index) => (ve as Label).text = srcData[index].paramType.ToString();
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     unsafe void FillBlobInfo()
     {
-        ref var b = ref controllerBlob.blobAsset.Reinterpret<ControllerBlob>().Value;
+        ref var b = ref controllerBlob.blobAsset.Value;
         var hashLabel = rootVisualElement.Q<Label>("hashLabel");
         hashLabel.text = b.hash.ToString();
         
@@ -64,34 +111,15 @@ public class AnimatorControllerBlobInfoWindow : EditorWindow
         sizeLabel.text = CommonTools.FormatMemory(controllerBlob.blobAsset.m_data.Header->Length);
         
         ref var blobParameters = ref b.parameters;
-        var parametersFoldout = rootVisualElement.Q<Foldout>("parametersFoldout");
-        parametersFoldout.text = $"{blobParameters.Length} Controller Parameters";
-        
-        //  Fill parameters
-        for (var i = 0; i < blobParameters.Length; ++i)
+        var srcData = new List<ParameterListItem>();
+        for (int i = 0; i < blobParameters.Length; ++i)
         {
             ref var p = ref blobParameters[i];
-            var parameterUIEntry = controllerParameterBlobInfoAsset.Instantiate();
-            
-            if (i % 2 == 0)
-                parameterUIEntry.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 1));
-            
-            var nameLabelP = parameterUIEntry.Q<Label>("nameLabel");
-            var hashLabelP = parameterUIEntry.Q<Label>("hashLabel");
-            var typeLabelP = parameterUIEntry.Q<Label>("typeLabel");
-            var defaultValueLabelP = parameterUIEntry.Q<Label>("defaultValueLabel");
-            
-        #if RUKHANKA_DEBUG_INFO
-            nameLabelP.text = p.name.ToString();
-        #else
-            nameLabelP.text = "-";
-        #endif
-            hashLabelP.text = p.hash.ToString();
-            typeLabelP.text = p.type.ToString();
-            defaultValueLabelP.text = GetParameterValueAsString(ref p);
-            
-            parametersFoldout.Add(parameterUIEntry);
+            var li = new ParameterListItem(ref p);
+            srcData.Add(li);
         }
+        
+        InitMultiListView(rootVisualElement, srcData);
         
         //  Referenced entities view
         var relatedEntitiesView = rootVisualElement.Q("relatedEntitiesView");
@@ -285,7 +313,7 @@ public class AnimatorControllerBlobInfoWindow : EditorWindow
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    string GetParameterValueAsString(ref ParameterBlob pb) => pb.type switch
+    static string GetParameterValueAsString(ref ParameterBlob pb) => pb.type switch
     {
         ControllerParameterType.Bool => pb.defaultValue.boolValue ? "true" : "false",
         ControllerParameterType.Trigger => pb.defaultValue.boolValue ? "true" : "false",

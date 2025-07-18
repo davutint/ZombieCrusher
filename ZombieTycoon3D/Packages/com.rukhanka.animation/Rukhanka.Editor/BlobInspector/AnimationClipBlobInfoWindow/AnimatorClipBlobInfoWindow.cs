@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Rukhanka.Toolbox;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -14,13 +15,15 @@ public class AnimatorClipBlobInfoWindow : EditorWindow
     [SerializeField]
     private VisualTreeAsset visualTreeAsset = default;
     [SerializeField]
-    private VisualTreeAsset boneClipBlobInfoAsset = default;
+    private VisualTreeAsset trackGroupBlobInfoAsset = default;
+    [SerializeField]
+    private VisualTreeAsset trackBlobInfoAsset = default;
     [SerializeField]
     private VisualTreeAsset animationEventInfoAsset = default;
     [SerializeField]
     private VisualTreeAsset entityRefAsset = default;
     
-    internal static BlobInspector.BlobAssetInfo animationClipBlob;
+    internal static BlobInspector.BlobAssetInfo<AnimationClipBlob> animationClipBlob;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +41,7 @@ public class AnimatorClipBlobInfoWindow : EditorWindow
     
     unsafe void FillBlobInfo()
     {
-        ref var b = ref animationClipBlob.blobAsset.Reinterpret<AnimationClipBlob>().Value;
+        ref var b = ref animationClipBlob.blobAsset.Value;
         var hashLabel = rootVisualElement.Q<Label>("hashLabel");
         hashLabel.text = b.hash.ToString();
         
@@ -58,9 +61,6 @@ public class AnimatorClipBlobInfoWindow : EditorWindow
         var cycleOffsetLabel = rootVisualElement.Q<Label>("cycleOffsetLabel");
         cycleOffsetLabel.text = $"{b.cycleOffset}";
         
-        var additivePoseTimeLabel = rootVisualElement.Q<Label>("additivePoseTimeLabel");
-        additivePoseTimeLabel.text = $"{b.additiveReferencePoseTime}";
-        
         var loopedCheckBox = rootVisualElement.Q<Toggle>("loopedCheckBox");
         loopedCheckBox.SetEnabled(false);
         loopedCheckBox.value = b.looped;
@@ -69,12 +69,11 @@ public class AnimatorClipBlobInfoWindow : EditorWindow
         loopPoseBlendCheckBox.SetEnabled(false);
         loopPoseBlendCheckBox.value = b.loopPoseBlend;
         
-        
         var sizeLabel = rootVisualElement.Q<Label>("sizeLabel");
         sizeLabel.text = CommonTools.FormatMemory(animationClipBlob.blobAsset.m_data.Header->Length);
         
-        FillBoneClipFoldout("boneClipInfoFoldout", "Bone Clips", ref b.bones);
-        FillBoneClipFoldout("userCurvesInfoFoldout", "User Curves", ref b.curves);
+        FillTrackSetFoldout("clipTracksInfoFoldout", "Clip Tracks", ref b.clipTracks);
+        FillTrackSetFoldout("additiveRefPoseTrackSetInfoFoldout", "Additive Ref Pose Tracks", ref b.additiveReferencePoseFrame);
         
         ref var events = ref b.events;
         var animationEventsInfoFoldout = rootVisualElement.Q<Foldout>("animationEventsInfoFoldout");
@@ -138,39 +137,55 @@ public class AnimatorClipBlobInfoWindow : EditorWindow
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    void FillBoneClipFoldout(string foldoutName, string caption, ref BlobArray<BoneClipBlob> bones)
+    void FillTrackSetFoldout(string foldoutName, string caption, ref TrackSet ts)
     {
-        var boneClipInfoFoldout = rootVisualElement.Q<Foldout>(foldoutName);
-        boneClipInfoFoldout.text = $"{bones.Length} {caption}";
+        var trackSetInfoFoldout = rootVisualElement.Q<Foldout>(foldoutName);
+        trackSetInfoFoldout.text = $"{ts.trackGroups.Length} {caption}";
         
-        for (int i = 0; i < bones.Length; ++i)
+        for (int i = 0; i < ts.trackGroups.Length - 1; ++i)
         {
-            ref var bone = ref bones[i];
-            var clipInfo = boneClipBlobInfoAsset.Instantiate();
+            var tgRange = new int2(ts.trackGroups[i], ts.trackGroups[i + 1]);
+            var trackGroupInfo = trackGroupBlobInfoAsset.Instantiate();
             
             if (i % 2 == 0)
-                clipInfo.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 1));
+                trackGroupInfo.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 1));
             
-            var hashLabelCI = clipInfo.Q<Label>("hashLabel");
-            var nameLabelCI = clipInfo.Q<Label>("nameLabel");
-            var curveInfoLabelCI = clipInfo.Q<Label>("curveInfoLabel");
-            
-            hashLabelCI.text = $"{bone.hash}";
+            var trackListFoldout = trackGroupInfo.Q<Foldout>("trackList");
         #if RUKHANKA_DEBUG_INFO
-            nameLabelCI.text = $"{bone.name.ToString()}";
+            var tgDebugInfo = ts.trackGroupDebugInfo[i];
+            trackListFoldout.text = $"[{i} {tgDebugInfo.name} Hash: {tgDebugInfo.hash:X}] Track Group Start:Length [{tgRange.x}:{tgRange.y - tgRange.x}]";
         #else
-            nameLabelCI.text = "-";
+            trackListFoldout.text = $"[{i}] Track Group Start:Length [{tgRange.x}:{tgRange.y - tgRange.x}]";
         #endif
             
-            var totalKeyframes = 0;
-            for (var k = 0; k < bone.animationCurves.Length; ++k)
+            var trackInfoHeader = trackBlobInfoAsset.Instantiate();
+            trackListFoldout.Add(trackInfoHeader);
+            for (var l = tgRange.x; l < tgRange.y; ++l)
             {
-                totalKeyframes += bone.animationCurves[k].keyFrames.Length;
+                Track t = ts.tracks[l];
+                var trackInfo = trackBlobInfoAsset.Instantiate();
+                
+                var hashLabel = trackInfo.Q<Label>("hashLabel");
+                var nameLabel = trackInfo.Q<Label>("nameLabel");
+                var bindingTypeLabel = trackInfo.Q<Label>("bindingTypeLabel");
+                var channelIndexLabel = trackInfo.Q<Label>("channelIndexLabel");
+                var keyFrameInfoLabel = trackInfo.Q<Label>("keyFrameInfoLabel");
+                
+            #if RUKHANKA_DEBUG_INFO
+                nameLabel.text = $"{t.name.ToString()}";
+            #else
+                nameLabel.text = "-";
+            #endif
+                
+                hashLabel.text = t.props.ToString("X");
+                bindingTypeLabel.text = t.bindingType.ToString();
+                channelIndexLabel.text = t.channelIndex.ToString();
+                keyFrameInfoLabel.text = $"Start:Length [{t.keyFrameRange.x}:{t.keyFrameRange.y}]";
+                
+                trackListFoldout.Add(trackInfo);
             }
             
-            curveInfoLabelCI.text = $"{bone.animationCurves.Length} curves, {totalKeyframes} keyframes";
-            
-            boneClipInfoFoldout.Add(clipInfo);
+            trackSetInfoFoldout.Add(trackGroupInfo);
         }
     }
 }

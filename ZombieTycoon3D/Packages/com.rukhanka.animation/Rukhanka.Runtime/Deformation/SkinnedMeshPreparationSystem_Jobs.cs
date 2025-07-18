@@ -88,6 +88,8 @@ struct RegisterNewSkinnedMeshesJob: IJob
     public UnsafeAtomicCounter32 totalBlendShapeVerticesCount;
 	[NativeDisableUnsafePtrRestriction]
 	public UnsafeAtomicCounter32 maximumVerticesAcrossAllRegisteredMeshes;
+	[NativeDisableUnsafePtrRestriction]
+	public UnsafeAtomicCounter32 maximumSkinMatrixCountAcrossAllRegisteredMeshes;
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +117,7 @@ struct RegisterNewSkinnedMeshesJob: IJob
 			baseBlendShapeIndex += blendShapesDataSize;
 			
 			maximumVerticesAcrossAllRegisteredMeshes.Reset(math.max(skinnedMeshBlob.boneWeightsIndices.Length, *maximumVerticesAcrossAllRegisteredMeshes.Counter));
+			maximumSkinMatrixCountAcrossAllRegisteredMeshes.Reset(math.max(skinnedMeshBlob.bones.Length, *maximumSkinMatrixCountAcrossAllRegisteredMeshes.Counter));
 			
 			existingSkinnedMeshes.Add(skinnedMeshBlob.hash, smd);
 		}
@@ -148,105 +151,16 @@ struct ResetFrameDataJob: IJob
 		entityToSMRFrameDataMap.Capacity = math.max(frameSkinnedMeshesCount, entityToSMRFrameDataMap.Capacity);
 		frameSkinMatrixCounter.Reset(0);
 		frameBlendShapeWeightCounter.Reset(0);
-		frameDeformedVertexCount.Reset(0);
-	}
-}
-
-//-----------------------------------------------------------------------------------------------------------------//
-
-[BurstCompile]
-partial struct ComputeFrameSkinnedMeshesWithLODsJob: IJobEntity
-{
-	[NativeDisableUnsafePtrRestriction]
-	public UnsafeAtomicCounter32 skinMatrixOffsetCounter;
-	[NativeDisableUnsafePtrRestriction]
-	public UnsafeAtomicCounter32 blendShapeWeightOffsetCounter;
-	[NativeDisableUnsafePtrRestriction]
-	public UnsafeAtomicCounter32 frameDeformedVerticesCounter;
-	[ReadOnly]
-	public ComponentLookup<CullAnimationsTag> cullAnimationsTagLookup;
-	[ReadOnly]
-	public ComponentLookup<LODRange> lodRangeLookup;
-	[ReadOnly]
-	public ComponentLookup<LODWorldReferencePoint> lodWorldRefPointLookup;
-	[ReadOnly]
-	public BufferLookup<Rukhanka.SkinMatrix> skinMatrixBufferLookup;
-	[ReadOnly]
-	public BufferLookup<Rukhanka.BlendShapeWeight> blendShapeWeightBufferLookup;
-	[ReadOnly]
-	public ComponentLookup<AnimatedSkinnedMeshComponent> animatedSkinnedMeshLookup;
-	[ReadOnly]
-	public NativeList<LODGroupExtensions.LODParams> lodAffectors;
-	
-	public NativeParallelHashMap<Entity, SkinnedMeshRendererFrameDeformationData>.ParallelWriter entityToSMRFrameData;
-	
-#if UNITY_EDITOR
-	public bool isEditorWorld;
-#endif
-	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	unsafe void Execute(Entity e, in AnimatedRendererComponent arc)
-	{
-		//	Early out if mesh already registered
-		if (UnsafeParallelHashMapBase<Entity, SkinnedMeshRendererFrameDeformationData>.TryGetFirstValueAtomic(entityToSMRFrameData.m_Writer.m_Buffer, arc.skinnedMeshEntity, out _, out _))
-			return;
-			
-	#if UNITY_EDITOR
-		if (!isEditorWorld)
+		
+	#if RUKHANKA_INPLACE_SKINNING
+		//	In case of in-place skinning frameDeformedVertexCount indexes meshes and not vertices, so reset it to zero here
+		var deformedVertexCountResetValue = 0;
+	#else
+		//	Zero index is considered 'uninitialized' in 'ApplyPreviousFrameDeformedVertexPosition' function in deformed shader code
+		//	Default value starts from one
+		var deformedVertexCountResetValue = 1;
 	#endif
-		if (cullAnimationsTagLookup.HasComponent(arc.animatorEntity) && cullAnimationsTagLookup.IsComponentEnabled(arc.animatorEntity))
-			return;
-	
-		if (!IsLODActive(e))
-			return;
-		
-		var asm = animatedSkinnedMeshLookup[arc.skinnedMeshEntity];
-		var currentDeformedVertexIndex = frameDeformedVerticesCounter.Add(asm.smrInfoBlob.Value.meshVerticesCount);
-		var smrdd = SkinnedMeshRendererFrameDeformationData.MakeDefault();
-		smrdd.deformedVertexIndex = currentDeformedVertexIndex;
-        
-		if (skinMatrixBufferLookup.TryGetBuffer(arc.skinnedMeshEntity, out var smb))
-		{
-			var currentSkinMatrixBufferOffset = skinMatrixOffsetCounter.Add(smb.Length);
-			smrdd.skinMatrixIndex = currentSkinMatrixBufferOffset;
-		}
-		
-		if (blendShapeWeightBufferLookup.TryGetBuffer(arc.skinnedMeshEntity, out var bsw))
-		{
-			var currentBlendShapeWeightOffset = blendShapeWeightOffsetCounter.Add(bsw.Length);
-			smrdd.blendShapeWeightIndex = currentBlendShapeWeightOffset;
-		}
-			
-		entityToSMRFrameData.TryAdd(arc.skinnedMeshEntity, smrdd);
-	}
-    
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float CalculateLODDistance(in LODRange lodRange, in LODWorldReferencePoint lodRefPoint, in LODGroupExtensions.LODParams lodParams)
-	{
-		float rv = lodParams.distanceScale;
-		if (!lodParams.isOrtho)
-			rv *= math.length(lodParams.cameraPos - lodRefPoint.Value);
-		return rv;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool IsLODActive(Entity e)
-	{
-		if (!lodAffectors.IsCreated || !lodRangeLookup.TryGetComponent(e, out var lodRange) || !lodWorldRefPointLookup.TryGetComponent(e, out var lodRefPoint))
-			return true;
-		
-		for (var i = 0; i < lodAffectors.Length; ++i)
-		{
-			var la = lodAffectors[i];
-			var d = CalculateLODDistance(lodRange, lodRefPoint, la);
-			var isLodActive = d < lodRange.MaxDist && d >= lodRange.MinDist;
-			if (isLodActive)
-				return true;
-		}
-		return false;
+		frameDeformedVertexCount.Reset(deformedVertexCountResetValue);
 	}
 }
 
@@ -267,6 +181,13 @@ partial struct ComputeFrameSkinnedMeshesJob: IJobEntity
 	public BufferLookup<Rukhanka.SkinMatrix> skinMatrixBufferLookup;
 	[ReadOnly]
 	public BufferLookup<Rukhanka.BlendShapeWeight> blendShapeWeightBufferLookup;
+	[ReadOnly]
+	[NativeDisableContainerSafetyRestriction]
+	public NativeList<LODGroupExtensions.LODParams> lodAffectors;
+	[ReadOnly]
+	public ComponentLookup<LODRange> lodRangeLookup;
+	[ReadOnly]
+	public ComponentLookup<LODWorldReferencePoint> lodWorldRefPointLookup;
 	
 	public NativeParallelHashMap<Entity, SkinnedMeshRendererFrameDeformationData>.ParallelWriter entityToSMRFrameData;
 	
@@ -276,7 +197,7 @@ partial struct ComputeFrameSkinnedMeshesJob: IJobEntity
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Execute(Entity e, in AnimatedSkinnedMeshComponent asm)
+	void Execute(Entity e, in AnimatedSkinnedMeshComponent asm, in DynamicBuffer<SkinnedMeshRenderEntity> smres)
 	{
 	#if UNITY_EDITOR
 		if (!isEditorWorld)
@@ -284,13 +205,22 @@ partial struct ComputeFrameSkinnedMeshesJob: IJobEntity
 		if (cullAnimationsTagLookup.HasComponent(asm.animatedRigEntity) && cullAnimationsTagLookup.IsComponentEnabled(asm.animatedRigEntity))
 			return;
 		
-		var currentDeformedVertexIndex = frameDeformedVerticesCounter.Add(asm.smrInfoBlob.Value.meshVerticesCount);
-		var smrdd = SkinnedMeshRendererFrameDeformationData.MakeDefault();
-		smrdd.deformedVertexIndex = currentDeformedVertexIndex;
+		if (!IsLODActive(smres.AsNativeArray()))
+			return;
 		
-		if (skinMatrixBufferLookup.TryGetBuffer(e, out var skinMatrices))
+		var smrdd = SkinnedMeshRendererFrameDeformationData.MakeDefault();
+		
+	#if RUKHANKA_INPLACE_SKINNING
+		var currentDeformedMeshIndex = frameDeformedVerticesCounter.Add(1);
+		smrdd.deformedVertexIndex = currentDeformedMeshIndex;
+	#else
+		var currentDeformedVertexIndex = frameDeformedVerticesCounter.Add(asm.smrInfoBlob.Value.meshVerticesCount);
+		smrdd.deformedVertexIndex = currentDeformedVertexIndex;
+	#endif
+        
+		if (skinMatrixBufferLookup.TryGetBuffer(e, out var smb))
 		{
-			var currentSkinMatrixBufferOffset = skinMatrixOffsetCounter.Add(skinMatrices.Length);
+			var currentSkinMatrixBufferOffset = skinMatrixOffsetCounter.Add(smb.Length);
 			smrdd.skinMatrixIndex = currentSkinMatrixBufferOffset;
 		}
 		
@@ -301,6 +231,47 @@ partial struct ComputeFrameSkinnedMeshesJob: IJobEntity
 		}
 		
 		entityToSMRFrameData.TryAdd(e, smrdd);
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float CalculateLODDistance(in LODRange lodRange, in LODWorldReferencePoint lodRefPoint, in LODGroupExtensions.LODParams lodParams)
+	{
+		float rv = lodParams.distanceScale;
+		if (!lodParams.isOrtho)
+			rv *= math.length(lodParams.cameraPos - lodRefPoint.Value);
+		return rv;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool IsLODActive(in NativeArray<SkinnedMeshRenderEntity> smres)
+	{
+		for (var i = 0; i < smres.Length; ++i)
+		{
+			var e = smres[i].value;
+			if (IsLODActive(e))
+				return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool IsLODActive(Entity e)
+	{
+		if (!lodAffectors.IsCreated || !lodRangeLookup.TryGetComponent(e, out var lodRange) || !lodWorldRefPointLookup.TryGetComponent(e, out var lodRefPoint))
+			return true;
+		
+		for (var i = 0; i < lodAffectors.Length; ++i)
+		{
+			var la = lodAffectors[i];
+			var d = CalculateLODDistance(lodRange, lodRefPoint, la);
+			var isLodActive = d < lodRange.MaxDist && d >= lodRange.MinDist;
+			if (isLodActive)
+				return true;
+		}
+		return false;
 	}
 }
 

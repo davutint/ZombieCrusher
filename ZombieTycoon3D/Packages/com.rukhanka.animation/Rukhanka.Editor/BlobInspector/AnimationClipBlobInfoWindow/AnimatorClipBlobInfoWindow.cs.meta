@@ -7,7 +7,9 @@ MonoImporter:
   - m_ViewDataDictionary: {instanceID: 0}
   - visualTreeAsset: {fileID: 9197481963319205126, guid: 547be161a75c99a418c17010dda0234c,
       type: 3}
-  - boneClipBlobInfoAsset: {fileID: 9197481963319205126, guid: 07660a014a4d1f24abec619013960db9,
+  - trackGroupBlobInfoAsset: {fileID: 9197481963319205126, guid: 07660a014a4d1f24abec619013960db9,
+      type: 3}
+  - trackBlobInfoAsset: {fileID: 9197481963319205126, guid: 63bc41214c99e734aa5adc4a69340137,
       type: 3}
   - animationEventInfoAsset: {fileID: 9197481963319205126, guid: d48924796ce90364db884e5b7593aa47,
       type: 3}
@@ -20,8 +22,8 @@ MonoImporter:
   assetBundleVariant: 
 AssetOrigin:
   serializedVersion: 1
-  productId: 241472
-  packageName: Rukhanka - ECS Animation System
-  packageVersion: 1.9.2
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
   assetPath: Packages/com.rukhanka.animation/Rukhanka.Editor/BlobInspector/AnimationClipBlobInfoWindow/AnimatorClipBlobInfoWindow.cs
-  uploadId: 706158
+  uploadId: 754107

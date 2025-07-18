@@ -11,7 +11,7 @@ public struct SkinnedMeshBoneInfo
 #if RUKHANKA_DEBUG_INFO
 	public BlobString name;
 #endif
-	public Hash128 hash;
+	public uint hash;
 	public float4x4 bindPose;
 }
 
@@ -27,13 +27,17 @@ public struct BlendShapeInfo
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public struct SkinnedMeshInfoBlob
+public struct SkinnedMeshInfoBlob: GenericAssetBlob
 {
 #if RUKHANKA_DEBUG_INFO
 	public BlobString skeletonName;
+	public string Name() => skeletonName.ToString();
 	public float bakingTime;
+	public float BakingTime() => bakingTime;
 #endif
 	public Hash128 hash;
+	public Hash128 Hash() => hash;
+	
 	public BlobArray<SkinnedMeshBoneInfo> bones;
 	public BlobArray<BlendShapeInfo> blendShapes;
 	//	Each weight index is bone count for a vertex (lower 8 bits) and start bone weight data index (upper 24 bits)

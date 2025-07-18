@@ -17,8 +17,13 @@ namespace ProjectDawn.Navigation.Editor
     [UpdateAfter(typeof(NavMeshBoundarySystem))]
     public partial struct NavMeshBoundaryGizmosSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<NavMeshBoundary>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var gizmos = GetSingletonRW<GizmosSystem.Singleton>();
             new Job

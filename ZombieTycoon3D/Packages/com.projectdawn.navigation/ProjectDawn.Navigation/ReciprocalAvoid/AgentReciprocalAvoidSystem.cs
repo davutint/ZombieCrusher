@@ -13,8 +13,13 @@ namespace ProjectDawn.Navigation
     [UpdateInGroup(typeof(AgentForceSystemGroup))]
     public partial struct AgentReciprocalAvoidSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<AgentReciprocalAvoid>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var spatial = GetSingleton<AgentSpatialPartitioningSystem.Singleton>();
             float deltaTime = Time.DeltaTime;

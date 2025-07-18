@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a9b6e9921ac72994eb89b8906c292f9e
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/csc.rsp
+  uploadId: 754107

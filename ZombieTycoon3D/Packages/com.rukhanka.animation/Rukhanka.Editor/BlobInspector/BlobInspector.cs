@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Rukhaka.Editor;
 using Rukhanka.Hybrid;
 using Rukhanka.Toolbox;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Entities.LowLevel.Unsafe;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Compilation;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Hash128 = Unity.Entities.Hash128;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -27,9 +24,11 @@ public class BlobInspector : EditorWindow
     [SerializeField]
     private VisualTreeAsset blobCachePaneAsset = default;
     [SerializeField]
-    private VisualTreeAsset blobEntryAsset = default;
-    [SerializeField]
     private VisualTreeAsset blobCacheEntryAsset = default;
+    [SerializeField]
+    private VisualTreeAsset listViewLabelAsset = default;
+    [SerializeField]
+    private VisualTreeAsset listViewInfoBtnAsset = default;
     
     VisualElement
         menuElem,
@@ -49,10 +48,9 @@ public class BlobInspector : EditorWindow
         Total
     }
     
-    internal class BlobAssetInfo
+    internal class BlobAssetInfo<T> where T: unmanaged
     {
-        public BlobType blobType;
-        public UnsafeUntypedBlobAssetReference blobAsset;
+        public BlobAssetReference<T> blobAsset;
         public List<Entity> refEntities;
     }
     
@@ -62,8 +60,19 @@ public class BlobInspector : EditorWindow
         public int totalCount;
     }
         
-    Dictionary<Hash128, BlobAssetInfo> allBlobAssets = new ();
+    List<BlobAssetInfo<ControllerBlob>> allControllerBlobAssets = new ();
+    List<BlobAssetInfo<AnimationClipBlob>> allAnimationClipBlobAssets = new ();
+    List<BlobAssetInfo<RigDefinitionBlob>> allRigBlobAssets = new ();
+    List<BlobAssetInfo<SkinnedMeshInfoBlob>> allSkinnedMeshBlobAssets = new ();
+    List<BlobAssetInfo<AvatarMaskBlob>> allAvatarMaskBlobAssets = new ();
     BlobAssetsSummary blobAssetsSummary;
+    
+    readonly string nameColumnName = "name";
+    readonly string hashColumnName = "hash";
+    readonly string referencesColumnName = "references";
+    readonly string sizeColumnName = "size";
+    readonly string bakingTimeColumnName = "bakingTime";
+    readonly string infoColumnName = "info";
         
     internal static World currentWorld;
 
@@ -168,18 +177,27 @@ public class BlobInspector : EditorWindow
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    unsafe void RegisterBlobAsset(BlobAssetInfo bai, Hash128 hash)
+    unsafe BlobAssetInfo<T> RegisterBlobAsset<T>(BlobAssetReference<T> bar, List<BlobAssetInfo<T>> allBlobs) where T: unmanaged, GenericAssetBlob
     {
         blobAssetsSummary.totalCount += 1;
-        blobAssetsSummary.sizeInBytes += bai.blobAsset.m_data.Header->Length;
-        allBlobAssets.Add(hash, bai);
+        blobAssetsSummary.sizeInBytes += bar.m_data.Header->Length;
+        var alreadyExistIndex = allBlobs.FindIndex(x => x.blobAsset.Value.Hash() == bar.Value.Hash());
+        if (alreadyExistIndex >= 0)
+            return allBlobs[alreadyExistIndex];
+        
+        var rv = new BlobAssetInfo<T>()
+        {
+            blobAsset = bar,
+            refEntities = new ()
+        };
+        allBlobs.Add(rv);
+        return rv;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void GatherAllBlobAssets(World world)
     {
-        allBlobAssets.Clear();
         blobAssetsSummary = new ();
         
         //  Gather blob assets from database
@@ -189,39 +207,31 @@ public class BlobInspector : EditorWindow
         
         if (dbQ.TryGetSingleton<BlobDatabaseSingleton>(out var db))
         {
+            allAnimationClipBlobAssets.Clear();
             foreach (var kv in db.animations)
             {
                 if (!BlobDatabaseSingleton.IsBlobValid(kv.Value))
                     continue;
                 
-                var blobInfoEntry = new BlobAssetInfo()
-                {
-                    blobAsset = UnsafeUntypedBlobAssetReference.Create(kv.Value),
-                    blobType = BlobType.AnimationClip,
-                    refEntities = new ()
-                };
-                RegisterBlobAsset(blobInfoEntry, kv.Key);
+                RegisterBlobAsset(kv.Value, allAnimationClipBlobAssets);
             }
             
+            allAvatarMaskBlobAssets.Clear();
             foreach (var kv in db.avatarMasks)
             {
                 if (!BlobDatabaseSingleton.IsBlobValid(kv.Value))
                     continue;
                 
-                var blobInfoEntry = new BlobAssetInfo()
-                {
-                    blobAsset = UnsafeUntypedBlobAssetReference.Create(kv.Value),
-                    blobType = BlobType.AvatarMask,
-                    refEntities = new ()
-                };
-                RegisterBlobAsset(blobInfoEntry, kv.Key);
+                RegisterBlobAsset(kv.Value, allAvatarMaskBlobAssets);
             }
         }
         
         //  Gather animator, animation and avatar mask blob assets from entities
+        allControllerBlobAssets.Clear();
         var eQ = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<AnimatorControllerLayerComponent>()
             .Build(world.EntityManager);
+        
         var animControllersChunks = eQ.ToArchetypeChunkArray(Allocator.Temp);
         var controllerLayerBufHandle = world.EntityManager.GetBufferTypeHandle<AnimatorControllerLayerComponent>(true);
         var entityHandle = world.EntityManager.GetEntityTypeHandle();
@@ -238,22 +248,17 @@ public class BlobInspector : EditorWindow
                 {
                     var acl = lb[l];
                     
-                    if (!allBlobAssets.TryGetValue(acl.controller.Value.hash, out var blobInfoEntry))
+                    var controllerBlobInfo = RegisterBlobAsset(acl.controller, allControllerBlobAssets);
+                    controllerBlobInfo.refEntities.Add(e);
+                    
+                    ref var layers = ref acl.controller.Value.layers;
+                    for (var m = 0; m < layers.Length; ++m)
                     {
-                        blobInfoEntry = new BlobAssetInfo()
+                        ref var layer = ref layers[m];
+                        foreach (var amb in allAvatarMaskBlobAssets)
                         {
-                            blobAsset = UnsafeUntypedBlobAssetReference.Create(acl.controller),
-                            blobType = BlobType.AnimatorController,
-                            refEntities = new ()
-                        };
-                        RegisterBlobAsset(blobInfoEntry, acl.controller.Value.hash);
-                        
-                        ref var layers = ref acl.controller.Value.layers;
-                        for (var m = 0; m < layers.Length; ++m)
-                        {
-                            ref var layer = ref layers[m];
-                            if (allBlobAssets.TryGetValue(layer.avatarMaskBlobHash, out var avatarMaskBlobInfo))
-                                avatarMaskBlobInfo.refEntities.Add(e);
+                            if (amb.blobAsset.Value.Hash() == layer.avatarMaskBlobHash)
+                                amb.refEntities.Add(e);
                         }
                     }
 
@@ -261,16 +266,18 @@ public class BlobInspector : EditorWindow
                     for (var m = 0; m < anims.Length; ++m)
                     {
                         var anmHash = anims[m];
-                        if (allBlobAssets.TryGetValue(anmHash, out var anmBlob))
-                            anmBlob.refEntities.Add(e);
+                        foreach (var acb in allAnimationClipBlobAssets)
+                        {
+                            if (acb.blobAsset.Value.Hash() == anmHash)
+                                acb.refEntities.Add(e);
+                        }
                     }
-
-                    blobInfoEntry.refEntities.Add(e);
                 }
             }
         }
         
         //  Gather skinned mesh blob assets from entities
+        allSkinnedMeshBlobAssets.Clear();
         var eSMR = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<AnimatedSkinnedMeshComponent>()
             .Build(world.EntityManager);
@@ -287,21 +294,13 @@ public class BlobInspector : EditorWindow
                 var smr = smrs[k];
                 var e = entities[k];
                     
-                if (!allBlobAssets.TryGetValue(smr.smrInfoBlob.Value.hash, out var smrBlobInfo))
-                {
-                    smrBlobInfo = new BlobAssetInfo()
-                    {
-                        blobAsset = UnsafeUntypedBlobAssetReference.Create(smr.smrInfoBlob),
-                        blobType = BlobType.SkinnedMeshInfo,
-                        refEntities = new ()
-                    };
-                    RegisterBlobAsset(smrBlobInfo, smr.smrInfoBlob.Value.hash);
-                }
-                smrBlobInfo.refEntities.Add(e);
+                var skinnedMeshBlobInfo = RegisterBlobAsset(smr.smrInfoBlob, allSkinnedMeshBlobAssets);
+                skinnedMeshBlobInfo.refEntities.Add(e);
             }
         }
         
         //  Gather rig definition blob assets from entities
+        allRigBlobAssets.Clear();
         var eRig = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<RigDefinitionComponent>()
             .Build(world.EntityManager);
@@ -318,16 +317,7 @@ public class BlobInspector : EditorWindow
                 var rigDef = rigs[k];
                 var e = entities[k];
                     
-                if (!allBlobAssets.TryGetValue(rigDef.rigBlob.Value.hash, out var rigBlobInfo))
-                {
-                    rigBlobInfo = new BlobAssetInfo()
-                    {
-                        blobAsset = UnsafeUntypedBlobAssetReference.Create(rigDef.rigBlob),
-                        blobType = BlobType.RigInfo,
-                        refEntities = new ()
-                    };
-                    RegisterBlobAsset(rigBlobInfo, rigDef.rigBlob.Value.hash);
-                }
+                var rigBlobInfo = RegisterBlobAsset(rigDef.rigBlob, allRigBlobAssets);
                 rigBlobInfo.refEntities.Add(e);
             }
         }
@@ -341,7 +331,6 @@ public class BlobInspector : EditorWindow
         var rv = $"Summary: {blobAssetsSummary.totalCount} blob assets, total memory {CommonTools.FormatMemory(blobAssetsSummary.sizeInBytes)}";
         return rv;
     }
-
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -404,82 +393,112 @@ public class BlobInspector : EditorWindow
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    unsafe void CreateBlobAssetList()
+    unsafe void FillMultiColumnViewList<T>(MultiColumnListView lv, List<BlobAssetInfo<T>> allBlobAssets, Action<int> infoBtnClickAction) where T: unmanaged, GenericAssetBlob
     {
-        var groups = new Foldout[]
+        lv.itemsSource = allBlobAssets;
+        
+        lv.columns[infoColumnName].makeCell = () => listViewInfoBtnAsset.Instantiate().Q<Button>("btn");
+        lv.columns[nameColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        lv.columns[hashColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        lv.columns[referencesColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        lv.columns[bakingTimeColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        lv.columns[sizeColumnName].makeCell = () => listViewLabelAsset.Instantiate().Q<Label>("label");
+        
+        lv.columns[infoColumnName].bindCell = (VisualElement ve, int index) =>
+            (ve as Button).clicked += () => infoBtnClickAction(index);
+        lv.columns[referencesColumnName].bindCell = (VisualElement ve, int index) =>
+            (ve as Label).text = allBlobAssets[index].refEntities.Count.ToString();
+        lv.columns[nameColumnName].bindCell = (VisualElement ve, int index) =>
+        #if RUKHANKA_DEBUG_INFO
+            (ve as Label).text = allBlobAssets[index].blobAsset.Value.Name();
+        #else
+            (ve as Label).text = "-";
+        #endif
+        lv.columns[hashColumnName].bindCell = (VisualElement ve, int index) =>
+            (ve as Label).text = allBlobAssets[index].blobAsset.Value.Hash().ToString();
+        lv.columns[bakingTimeColumnName].bindCell = (VisualElement ve, int index) =>
         {
-            blobDBPane.Q<Foldout>("animatorsGroup"),
-            blobDBPane.Q<Foldout>("animationClipsGroup"),
-            blobDBPane.Q<Foldout>("rigsGroup"),
-            blobDBPane.Q<Foldout>("skinnedMeshesGroup"),
-            blobDBPane.Q<Foldout>("avatarMasksGroup"),
+            var bt = -1.0f;
+        #if RUKHANKA_DEBUG_INFO
+            bt = allBlobAssets[index].blobAsset.Value.BakingTime();
+        #endif
+            (ve as Label).text = bt < 0 ? "-" : $"{bt:F3} sec";
         };
         
-        var foldoutLabels = new string[]
+        lv.columns[sizeColumnName].bindCell = (VisualElement ve, int index) =>
+            (ve as Label).text = CommonTools.FormatMemory(allBlobAssets[index].blobAsset.m_data.Header->Length);
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void CreateBlobAssetList()
+    {
+        var animationClipsList = blobDBPane.Q<MultiColumnListView>("animationClipList");
+        Action<int> infoCallback = (idx) =>
         {
-            "Animator Controller Blobs",
-            "Animation Clip Blobs",
-            "Rig Blobs",
-            "Skinned Mesh Blobs",
-            "Avatar Mask Blobs",
+            AnimatorClipBlobInfoWindow.animationClipBlob = allAnimationClipBlobAssets[idx];
+            var wnd = GetWindow<AnimatorClipBlobInfoWindow>();
+            wnd.Show();
         };
+        FillMultiColumnViewList(animationClipsList, allAnimationClipBlobAssets, infoCallback);
         
-        var countArr = new int[(int)BlobType.Total];
-        var memoryArr = new int[(int)BlobType.Total];
-        
-        for (var i = 0; i < (int)BlobType.Total; ++i)
+        var animatorControllersList = blobDBPane.Q<MultiColumnListView>("controllerList");
+        infoCallback = (idx) =>
         {
-            groups[i].Clear();
-        }
+            AnimatorControllerBlobInfoWindow.controllerBlob = allControllerBlobAssets[idx];
+            var wnd = GetWindow<AnimatorControllerBlobInfoWindow>();
+            wnd.Show();
+        };
+        FillMultiColumnViewList(animatorControllersList, allControllerBlobAssets, infoCallback);
         
-        foreach (var ba in allBlobAssets)
+        var rigList = blobDBPane.Q<MultiColumnListView>("rigList");
+        infoCallback = (idx) =>
         {
-            var bti = (int)ba.Value.blobType;
-            countArr[bti] += 1;
-            memoryArr[bti] += ba.Value.blobAsset.m_data.Header->Length;
-            
-            var blobEntry = blobEntryAsset.Instantiate();
-            FillBlobAssetInfoText(blobEntry, ba.Value);
-            if (groups[bti].childCount % 2 == 0)
-                blobEntry.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f, 1));
-            groups[bti].Add(blobEntry);
-        }
+            RigBlobInfoWindow.rigBlob = allRigBlobAssets[idx];
+            var wnd = GetWindow<RigBlobInfoWindow>();
+            wnd.Show();
+        };
+        FillMultiColumnViewList(rigList, allRigBlobAssets, infoCallback);
         
-        for (var i = 0; i < (int)BlobType.Total; ++i)
+        var avatarMaskList = blobDBPane.Q<MultiColumnListView>("avatarMaskList");
+        infoCallback = (idx) =>
         {
-            groups[i].text = $"{countArr[i]} {foldoutLabels[i]} ({CommonTools.FormatMemory(memoryArr[i])})";
-        }
+            AvatarMaskInfoWindow.avatarMaskBlob = allAvatarMaskBlobAssets[idx];
+            var wnd = GetWindow<AvatarMaskInfoWindow>();
+            wnd.Show();
+        };
+        FillMultiColumnViewList(avatarMaskList, allAvatarMaskBlobAssets, infoCallback);
+        
+        var smrList = blobDBPane.Q<MultiColumnListView>("smrList");
+        infoCallback = (idx) =>
+        {
+            SkinnedMeshBlobInfoWindow.skinnedMeshBlob = allSkinnedMeshBlobAssets[idx];
+            var wnd = GetWindow<SkinnedMeshBlobInfoWindow>();
+            wnd.Show();
+        };
+        FillMultiColumnViewList(smrList, allSkinnedMeshBlobAssets, infoCallback);
     }
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    unsafe void FillBlobAssetInfoText(TemplateContainer blobEntry, BlobAssetInfo ba)
+            /*
+    unsafe void FillBlobAssetInfoText(BlobAssetListInfo li, BlobAssetInfo ba)
     {
-        var infoLabel = blobEntry.Q<Label>("infoLabel");
-        var nameLabel = blobEntry.Q<Label>("nameAndHashLabel");
-        var infoBtn = blobEntry.Q<Button>("infoBtn");
-        
         switch (ba.blobType)
         {
         case BlobType.AnimationClip:
         {
             var acb = ba.blobAsset.Reinterpret<AnimationClipBlob>();
-            var nameText = $"[{acb.Value.hash}]";
+            li.name = "-";
         #if RUKHANKA_DEBUG_INFO
-            nameText += $" '{acb.Value.name.ToString()}'";
+            li.name = acb.Value.name.ToString();
         #endif
-            var infoText = $"References: {ba.refEntities.Count}, Size: {CommonTools.FormatMemory(ba.blobAsset.m_data.Header->Length)}";
+            li.references = ba.refEntities.Count;
+            li.size = ba.blobAsset.m_data.Header->Length;
+            li.bakingTime = -1;
         #if RUKHANKA_DEBUG_INFO
-            infoText += $" Baking time: {acb.Value.bakingTime:F3} sec";
+            li.bakingTime = acb.Value.bakingTime;
         #endif
-            infoLabel.text = infoText;
-            nameLabel.text = nameText;
-            infoBtn.clicked += () =>
-            {
-                AnimatorClipBlobInfoWindow.animationClipBlob = ba;
-                var wnd = GetWindow<AnimatorClipBlobInfoWindow>();
-                wnd.Show();
-            };
             break;
         }
         case BlobType.AnimatorController:
@@ -568,6 +587,7 @@ public class BlobInspector : EditorWindow
         }
         }
     }
+        */
     
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

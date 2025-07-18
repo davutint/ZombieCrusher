@@ -22,6 +22,14 @@ public partial struct SkinnedMeshPreparationSystem: ISystem
 
 	public void OnCreate(ref SystemState ss)
 	{
+#if !HYBRID_RENDERER_DISABLED
+        if (!EntitiesGraphicsUtils.IsEntitiesGraphicsSupportedOnSystem())
+#endif
+		{
+			ss.Enabled = false;
+			return;
+		}
+        
 		var deformationRuntimeData = DeformationRuntimeData.Construct(ref ss);
 		ss.EntityManager.CreateSingleton(deformationRuntimeData, "Rukhanka Deformation Runtime Data");
 		
@@ -32,8 +40,8 @@ public partial struct SkinnedMeshPreparationSystem: ISystem
 
 	public void OnDestroy(ref SystemState ss)
 	{
-		ref var deformationRuntimeData = ref SystemAPI.GetSingletonRW<DeformationRuntimeData>().ValueRW;
-		deformationRuntimeData.Dispose();
+		if (SystemAPI.TryGetSingletonRW<DeformationRuntimeData>(out var deformationRuntimeData))
+			deformationRuntimeData.ValueRW.Dispose();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +73,7 @@ public partial struct SkinnedMeshPreparationSystem: ISystem
 	unsafe JobHandle ResetNewFrameData(ref SystemState ss, ref DeformationRuntimeData drd, JobHandle dependsOn)
 	{
 		var frameSkinnedMeshesQuery = SystemAPI.QueryBuilder()
-			.WithAll<Rukhanka.SkinMatrix>()
+            .WithAny<Rukhanka.SkinMatrix, Rukhanka.BlendShapeWeight>()
 			.Build();
 		
 		var resetFrameDataJob = new ResetFrameDataJob()
@@ -117,6 +125,7 @@ public partial struct SkinnedMeshPreparationSystem: ISystem
 			totalBoneWeightsCount = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.totalBoneWeightsCount)),
 			totalBlendShapeVerticesCount = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.totalBlendShapeVerticesCount)),
 			maximumVerticesAcrossAllRegisteredMeshes = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.maximumVerticesAcrossAllRegisteredMeshes)),
+			maximumSkinMatrixCountAcrossAllRegisteredMeshes = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.maximumSkinMatrixCountAcrossAllRegisteredMeshes)),
 		};
 		
 		var registerNewSkinnedMeshesJH = registerNewSkinnedMeshesJob.Schedule(dependsOn);
@@ -127,58 +136,29 @@ public partial struct SkinnedMeshPreparationSystem: ISystem
 
 	unsafe JobHandle ComputeFrameSkinnedMeshData(ref SystemState ss, ref DeformationRuntimeData drd, JobHandle dependsOn)
 	{
-		//	Skinned meshes with LODs. If culling context is present then skin only meshes in visible LOD level
-		if (SystemAPI.TryGetSingleton<AnimationCullingContext>(out var animationCullingContext))
-		{
-			var computeFrameSkinnedMeshesWithLODsJob = new ComputeFrameSkinnedMeshesWithLODsJob()
-			{
-				skinMatrixOffsetCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameSkinMatrixCount)),
-				blendShapeWeightOffsetCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameBlendShapeWeightsCount)),
-				frameDeformedVerticesCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameDeformedVerticesCount)),
-				cullAnimationsTagLookup = SystemAPI.GetComponentLookup<CullAnimationsTag>(true),
-				entityToSMRFrameData = drd.entityToSMRFrameDataMap.AsParallelWriter(),
-				animatedSkinnedMeshLookup = SystemAPI.GetComponentLookup<AnimatedSkinnedMeshComponent>(true),
-				skinMatrixBufferLookup = SystemAPI.GetBufferLookup<Rukhanka.SkinMatrix>(true),
-				blendShapeWeightBufferLookup = SystemAPI.GetBufferLookup<Rukhanka.BlendShapeWeight>(true),
-				lodRangeLookup = SystemAPI.GetComponentLookup<LODRange>(true),
-				lodWorldRefPointLookup = SystemAPI.GetComponentLookup<LODWorldReferencePoint>(true),
-				lodAffectors = animationCullingContext.lodAffectors,
-				
-				//	Disable culling in editor world
-			#if UNITY_EDITOR
-				isEditorWorld = ss.WorldUnmanaged.Flags == WorldFlags.Editor
-			#endif	
-			};
+		//	If culling context is present then skin only meshes in visible LOD level
+		SystemAPI.TryGetSingleton<AnimationCullingContext>(out var animationCullingContext);
 		
-			dependsOn = computeFrameSkinnedMeshesWithLODsJob.ScheduleParallel(dependsOn);
-		}
-		//	Otherwise skin all meshes
-		else
+		var computeFrameSkinnedMeshesJob = new ComputeFrameSkinnedMeshesJob()
 		{
-			var deformedMeshQuery = SystemAPI.QueryBuilder()
-				.WithAll<AnimatedSkinnedMeshComponent>()
-				.WithAny<Rukhanka.SkinMatrix, Rukhanka.BlendShapeWeight>()
-				.Build();
+			skinMatrixOffsetCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameSkinMatrixCount)),
+			blendShapeWeightOffsetCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameBlendShapeWeightsCount)),
+			frameDeformedVerticesCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameDeformedVerticesCount)),
+			cullAnimationsTagLookup = SystemAPI.GetComponentLookup<CullAnimationsTag>(true),
+			entityToSMRFrameData = drd.entityToSMRFrameDataMap.AsParallelWriter(),
+			skinMatrixBufferLookup = SystemAPI.GetBufferLookup<Rukhanka.SkinMatrix>(true),
+			blendShapeWeightBufferLookup = SystemAPI.GetBufferLookup<Rukhanka.BlendShapeWeight>(true),
+			lodRangeLookup = SystemAPI.GetComponentLookup<LODRange>(true),
+			lodWorldRefPointLookup = SystemAPI.GetComponentLookup<LODWorldReferencePoint>(true),
+			lodAffectors = animationCullingContext.lodAffectors,
 			
-			var computeFrameSkinnedMeshesJob = new ComputeFrameSkinnedMeshesJob()
-			{
-				skinMatrixOffsetCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameSkinMatrixCount)),
-				blendShapeWeightOffsetCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameBlendShapeWeightsCount)),
-				frameDeformedVerticesCounter = new UnsafeAtomicCounter32(UnsafeUtility.AddressOf(ref drd.frameDeformedVerticesCount)),
-				cullAnimationsTagLookup = SystemAPI.GetComponentLookup<CullAnimationsTag>(true),
-				entityToSMRFrameData = drd.entityToSMRFrameDataMap.AsParallelWriter(),
-				skinMatrixBufferLookup = SystemAPI.GetBufferLookup<Rukhanka.SkinMatrix>(true),
-				blendShapeWeightBufferLookup = SystemAPI.GetBufferLookup<Rukhanka.BlendShapeWeight>(true),
-				
-				//	Disable culling in editor world
-			#if UNITY_EDITOR
-				isEditorWorld = ss.WorldUnmanaged.Flags == WorldFlags.Editor
-			#endif	
-			};
-			dependsOn = computeFrameSkinnedMeshesJob.ScheduleParallel(deformedMeshQuery, dependsOn);
-		}
+			//	Disable culling in editor world
+		#if UNITY_EDITOR
+			isEditorWorld = ss.WorldUnmanaged.Flags == WorldFlags.Editor
+		#endif	
+		};
+		dependsOn = computeFrameSkinnedMeshesJob.ScheduleParallel(dependsOn);
 		
-	
 		return dependsOn;
 	}
 }

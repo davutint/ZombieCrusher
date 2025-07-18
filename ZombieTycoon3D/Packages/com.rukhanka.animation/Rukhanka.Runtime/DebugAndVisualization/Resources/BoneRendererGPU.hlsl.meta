@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 27c1027c96c0de44cb7d0cd95c1edd82
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/DebugAndVisualization/Resources/BoneRendererGPU.hlsl
+  uploadId: 754107

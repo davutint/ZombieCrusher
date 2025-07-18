@@ -66,12 +66,6 @@ partial struct AnimationApplicationSystem: ISystem
 
 		var fillRigToSkinnedMeshRemapTablesJH = FillRigToSkinBonesRemapTableCache(ref ss, ss.Dependency);
 		
-		//	Copy animated values to corresponding controller parameters
-		var copyAnimatedValuesToParametersJH = CopyAnimatedValuesToControllerParameters(ref ss, runtimeData, ss.Dependency);
-		//	Set blend weights
-		var applyBlendWeightsJH = ApplyBlendShapeWeights(ref ss, runtimeData, ss.Dependency);
-		var combinedJH = JobHandle.CombineDependencies(copyAnimatedValuesToParametersJH, applyBlendWeightsJH);
-
 		//	Propagate local animated transforms to the entities with and without parents
 		var propagateTRSToEntitiesWithParentsJH = PropagateAnimatedBonesToEntitiesTRS(ref ss, runtimeData, boneObjectEntitiesWithParentQuery, true, ss.Dependency);
 		var propagateTRSToEntitiesNoParentsJH = PropagateAnimatedBonesToEntitiesTRS(ref ss, runtimeData, boneObjectEntitiesNoParentQuery, false, propagateTRSToEntitiesWithParentsJH);
@@ -83,7 +77,7 @@ partial struct AnimationApplicationSystem: ISystem
 		//	Update render bounds for meshes that request this
 		var updateRenderBoundsJH = UpdateRenderBounds(ref ss, runtimeData, ss.Dependency);
 
-		ss.Dependency = JobHandle.CombineDependencies(applySkinJH, updateRenderBoundsJH, combinedJH);
+		ss.Dependency = JobHandle.CombineDependencies(applySkinJH, updateRenderBoundsJH);
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +142,7 @@ partial struct AnimationApplicationSystem: ISystem
 		};
 		
 		var q = SystemAPI.QueryBuilder()
-			.WithAll<RenderBounds, DeformedEntity, ShouldUpdateBoundingBoxTag>()
+			.WithAll<RenderBounds, AnimatedRendererComponent, ShouldUpdateBoundingBoxTag>()
 			.Build();
 		
 		var copyBoundsToChildRenderersJH = copyBoundsToChildRenderersJob.ScheduleParallel(q, updateSkinnedMeshBoundsJH);
@@ -167,34 +161,6 @@ partial struct AnimationApplicationSystem: ISystem
 		};
 
 		var jh = propagateAnimationJob.ScheduleParallel(eq, dependsOn);
-		return jh;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	JobHandle CopyAnimatedValuesToControllerParameters(ref SystemState ss, in RuntimeAnimationData runtimeData, JobHandle dependsOn)
-	{
-		var copyAnimValuesToControllerParamsJob = new CopyAnimatedValuesToControllerParametersJob()
-		{
-			genericAnimatedValues = runtimeData.genericCurveAnimatedValuesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
-		};
-		
-		var jh = copyAnimValuesToControllerParamsJob.ScheduleParallel(dependsOn);
-		return jh;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	JobHandle ApplyBlendShapeWeights(ref SystemState ss, in RuntimeAnimationData runtimeData, JobHandle dependsOn)
-	{
-		var applyBlendWeightsJob = new ApplyBlendShapeWeightsJob()
-		{
-			genericAnimatedValues = runtimeData.genericCurveAnimatedValuesBuffer,
-			entityToDataOffsetMap = runtimeData.entityToDataOffsetMap,
-		};
-		
-		var jh = applyBlendWeightsJob.ScheduleParallel(dependsOn);
 		return jh;
 	}
 

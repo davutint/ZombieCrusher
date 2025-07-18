@@ -15,6 +15,7 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
             public static readonly GUIContent AutoRepath = EditorGUIUtility.TrTextContent("Auto Repath", "Should the agent attempt to acquire a new path if the existing path becomes invalid?");
             public static readonly GUIContent Grounded = EditorGUIUtility.TrTextContent("Grounded", "Anchors the agent to the surface. It is useful to disable then used with physics, to allow more freedom motion and precision.");
             public static readonly GUIContent OverrideAreaCosts = EditorGUIUtility.TrTextContent("Override Area Costs", "If enabled, allows overriden area cost for this agent.");
+            public static readonly GUIContent OptimizePath = EditorGUIUtility.TrTextContent("Optimize Path", "This option improves path quality at the expense of performance by using the string-pulling technique. This may be needed if your NavMesh surface is highly non-uniform (e.g., contains long triangles). This happens because when the NavMesh calculates the cost of traveling between nodes, it uses the centers of edges, and with highly non-uniform surfaces, this can lead to errors.");
             public static readonly GUIContent LinkTraversalMode = EditorGUIUtility.TrTextContent("Link Traversal Mode", "Should the agent move across OffMeshLinks automatically?");
             public static readonly GUIContent MappingExtent = EditorGUIUtility.TrTextContent("Mapping Extent", "Maximum distance on each axis will be used when attempting to map the agent's position or destination onto navmesh. The higher the value, the bigger the performance cost.");
         }
@@ -24,6 +25,7 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
         SerializedProperty m_AutoRepath;
         SerializedProperty m_Grounded;
         SerializedProperty m_OverrideAreaCosts;
+        SerializedProperty m_OptimizePath;
         SerializedProperty m_LinkTraversalMode;
         SerializedProperty m_MappingExtent;
 
@@ -35,6 +37,7 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
             AreaMaskField(m_AreaMask, Styles.AreaMask);
             EditorGUILayout.PropertyField(m_AutoRepath, Styles.AutoRepath);
             EditorGUILayout.PropertyField(m_Grounded, Styles.Grounded);
+            EditorGUILayout.PropertyField(m_OptimizePath, Styles.OptimizePath);
             using (new EditorGUI.DisabledScope(Application.isPlaying))
             {
                 EditorGUILayout.PropertyField(m_OverrideAreaCosts, Styles.OverrideAreaCosts);
@@ -82,6 +85,7 @@ namespace ProjectDawn.Navigation.Hybrid.Editor
             m_AreaMask = serializedObject.FindProperty("AreaMask");
             m_AutoRepath = serializedObject.FindProperty("AutoRepath");
             m_Grounded = serializedObject.FindProperty("m_Grounded");
+            m_OptimizePath = serializedObject.FindProperty("m_OptimizePath");
             m_OverrideAreaCosts = serializedObject.FindProperty("m_OverrideAreaCosts");
             m_MappingExtent = serializedObject.FindProperty("MappingExtent");
             m_LinkTraversalMode = serializedObject.FindProperty("m_LinkTraversalMode");

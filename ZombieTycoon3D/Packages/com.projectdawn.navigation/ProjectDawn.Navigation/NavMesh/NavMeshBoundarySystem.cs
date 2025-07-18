@@ -21,8 +21,13 @@ namespace ProjectDawn.Navigation
     [UpdateInGroup(typeof(AgentPathingSystemGroup))]
     public partial struct NavMeshBoundarySystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<NavMeshBoundary>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var navmesh = GetSingleton<NavMeshQuerySystem.Singleton>();
             new NavMeshBoundaryJob

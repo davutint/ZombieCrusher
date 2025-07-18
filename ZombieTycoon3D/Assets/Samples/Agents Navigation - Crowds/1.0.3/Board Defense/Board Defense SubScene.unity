@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -42,8 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -66,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -1561,6 +1558,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1582,6 +1584,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -2501,7 +2504,7 @@ PrefabInstance:
     - target: {fileID: 1945486870515387783, guid: 9a0df1d961a06d34a8c236a21f6c287b, type: 3}
       propertyPath: Prefab
       value: 
-      objectReference: {fileID: 1355275861092370815, guid: 61cf0072135afa44dbe37de58fd96223, type: 3}
+      objectReference: {fileID: 9036522893119170023, guid: 1a2e7968d742b4fefa6a858a21c6d7e2, type: 3}
     - target: {fileID: 2898454494108483926, guid: 9a0df1d961a06d34a8c236a21f6c287b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 45
@@ -3929,6 +3932,10 @@ PrefabInstance:
       propertyPath: m_Surface
       value: 
       objectReference: {fileID: 2012857489}
+    - target: {fileID: 1945486870515387783, guid: 9a0df1d961a06d34a8c236a21f6c287b, type: 3}
+      propertyPath: Prefab
+      value: 
+      objectReference: {fileID: 9036522893119170023, guid: 1a2e7968d742b4fefa6a858a21c6d7e2, type: 3}
     - target: {fileID: 3892306602363195156, guid: 9a0df1d961a06d34a8c236a21f6c287b, type: 3}
       propertyPath: m_Name
       value: Group Red

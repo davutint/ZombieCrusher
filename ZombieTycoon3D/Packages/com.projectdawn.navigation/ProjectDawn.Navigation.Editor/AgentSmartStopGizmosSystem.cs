@@ -12,8 +12,13 @@ namespace ProjectDawn.Navigation.Editor
     //[UpdateAfter(typeof(AgentSmartStopSystem))]
     public partial struct AgentSmartStopGizmosSystem : ISystem
     {
+        void ISystem.OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<AgentSmartStop>();
+        }
+
         [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        void ISystem.OnUpdate(ref SystemState state)
         {
             var gizmos = GetSingletonRW<GizmosSystem.Singleton>();
 

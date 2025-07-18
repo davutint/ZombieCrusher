@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
-        UpdateUI();
+        //update ui
     }
 
     private void OnTriggerEnter(Collider other)
@@ -60,8 +60,8 @@ public class Player : MonoBehaviour
         if (isExploded)
             return;
         
-        currentHealth -= damage;
-        UpdateUI();
+        //currentHealth -= damage;
+       //update ui
         Debug.Log("Alınan Hasar: " + damage + " - Kalan Can: " + currentHealth);
 
         if (currentHealth <= 0)
@@ -107,12 +107,7 @@ public class Player : MonoBehaviour
         // Oyuncu ölüm eventini tetikle
         EventManager.OnPlayerDeath?.Invoke();
         
-        // Game Over panelini göster ve kazanılan coinleri hesapla
-        if (GameplayUIManager.Instance != null)
-        {
-            int earnedCoins = CalculateEarnedCoins();
-            GameplayUIManager.Instance.ShowGameOver(earnedCoins);
-        }
+      
     }
 
     private int CalculateEarnedCoins()
@@ -121,13 +116,7 @@ public class Player : MonoBehaviour
         return 100; // Şimdilik sabit bir değer
     }
 
-    private void UpdateUI()
-    {
-        if (GameplayUIManager.Instance != null)
-        {
-            GameplayUIManager.Instance.UpdateHealthUI(currentHealth);
-        }
-    }
+  
 
     // VehicleStatus'u döndüren property
 
@@ -162,7 +151,7 @@ public class Player : MonoBehaviour
         currentHealth = maxHealth * healthPercentage;
         
         // UI'ı güncelle
-        UpdateUI();
+        
         
         Debug.Log($"Player: Maksimum can değeri {maxHealth} olarak güncellendi. Mevcut can: {currentHealth}");
     }

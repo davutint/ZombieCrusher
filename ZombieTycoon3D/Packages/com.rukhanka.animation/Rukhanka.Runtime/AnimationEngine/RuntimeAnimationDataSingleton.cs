@@ -18,8 +18,6 @@ public struct RuntimeAnimationData: IComponentData
 		public int bonePoseOffset;
 		public int boneFlagsOffset;
 		public int rigBoneCount;
-		public int genericAnimationDataOffset;
-		public int genericAnimationDataSize;
 		
 		public static AnimatedEntityBoneDataProps MakeInvalid()
 		{
@@ -28,25 +26,14 @@ public struct RuntimeAnimationData: IComponentData
 				boneFlagsOffset = -1,
 				bonePoseOffset = -1,
 				rigBoneCount = -1,
-				genericAnimationDataOffset = -1,
-				genericAnimationDataSize = -1
 			};
 		}
-	}
-	
-/////////////////////////////////////////////////////////////////////////////////
-
-	public struct GenericFloatAnimatedValue
-	{
-		public Hash128 hash;
-		public float value;
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////
 	
     internal NativeList<BoneTransform> animatedBonesBuffer;
     internal NativeList<BoneTransform> worldSpaceBonesBuffer;
-    internal NativeList<GenericFloatAnimatedValue> genericCurveAnimatedValuesBuffer;
     internal NativeParallelHashMap<Entity, AnimatedEntityBoneDataProps> entityToDataOffsetMap;
     internal NativeList<int3> boneToEntityArr;
 	internal NativeList<ulong> boneTransformFlagsHolderArr;
@@ -62,7 +49,6 @@ public struct RuntimeAnimationData: IComponentData
 			entityToDataOffsetMap = new (128, Allocator.Persistent),
 			boneToEntityArr = new (Allocator.Persistent),
 			boneTransformFlagsHolderArr = new (Allocator.Persistent),
-			genericCurveAnimatedValuesBuffer = new (Allocator.Persistent)
 		};
 		return rv;
 	}
@@ -76,7 +62,6 @@ public struct RuntimeAnimationData: IComponentData
 		entityToDataOffsetMap.Dispose();
 		boneToEntityArr.Dispose();
 		boneTransformFlagsHolderArr.Dispose();
-		genericCurveAnimatedValuesBuffer.Dispose();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -160,33 +145,6 @@ public struct RuntimeAnimationData: IComponentData
 		var boneInfo = boneToEntityArr[globalBoneIndex];
 		var rv = AnimationTransformFlags.CreateFromBufferRW(boneTransformFlagsArr, boneInfo.z, boneCount);
 		return rv;
-	}
-	
-///////////////////////////////////////////////////////////////////////////////////////////
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static unsafe int FindGenericAnimatedDataIndexByHash
-	(
-		Entity animatedEntity,
-		in NativeParallelHashMap<Entity, AnimatedEntityBoneDataProps> entityToDataOffsetMap,
-		in NativeList<GenericFloatAnimatedValue> genericAnimData,
-		in Hash128 hash
-	)
-	{
-		if (!entityToDataOffsetMap.TryGetValue(animatedEntity, out var entityOffsets))
-			return -1;
-		
-		var spanStart = genericAnimData.GetUnsafeReadOnlyPtr() + entityOffsets.genericAnimationDataOffset;
-		var entityDataSpan = new ReadOnlySpan<GenericFloatAnimatedValue>(spanStart, entityOffsets.genericAnimationDataSize);
-		var h32 = Toolbox.HashUtils.Hash128To32(hash);
-		for (var i = 0; i < entityDataSpan.Length; ++i)
-		{
-			var index = (int)((h32 + i) % entityOffsets.genericAnimationDataSize);
-			var hv = entityDataSpan[index].hash;
-			if (hash == hv)
-				return index + entityOffsets.genericAnimationDataOffset;
-		}
-		return -1;
 	}
 }
 }

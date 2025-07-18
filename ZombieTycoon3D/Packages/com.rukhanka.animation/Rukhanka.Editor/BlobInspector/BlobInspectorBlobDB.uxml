@@ -10,11 +10,56 @@
         </ui:DropdownField>
         <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" text="Skinned mesh blob assets:" name="blobInfoTotal" style="padding-left: 1px; padding-right: 2px; padding-top: 4px; padding-bottom: 4px;" />
         <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" vertical-scroller-visibility="AlwaysVisible" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; border-left-color: rgb(123, 122, 122); border-right-color: rgb(123, 122, 122); border-top-color: rgb(123, 122, 122); border-bottom-color: rgb(123, 122, 122); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
-            <ui:Foldout text="Foldout" name="animationClipsGroup" value="false" />
-            <ui:Foldout text="Foldout" name="animatorsGroup" value="false" />
-            <ui:Foldout text="Foldout" name="rigsGroup" value="false" />
-            <ui:Foldout text="Foldout" name="avatarMasksGroup" value="false" />
-            <ui:Foldout text="Foldout" name="skinnedMeshesGroup" value="false" />
+            <ui:MultiColumnListView name="animationClipList" show-alternating-row-backgrounds="ContentOnly" show-foldout-header="true" header-title="Animation Clip Blobs" allow-add="false" allow-remove="false" show-border="true" selection-type="Single" show-bound-collection-size="true" virtualization-method="FixedHeight" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px;">
+                <ui:Columns stretch-mode="GrowAndFill" resize-preview="false" reorderable="false">
+                    <ui:Column name="info" width="40px" resizable="false" />
+                    <ui:Column stretchable="true" title="Hash" name="hash" />
+                    <ui:Column title="Name" stretchable="true" name="name" />
+                    <ui:Column title="References" stretchable="true" name="references" />
+                    <ui:Column title="Size" stretchable="true" name="size" />
+                    <ui:Column name="bakingTime" title="Baking Time" stretchable="true" />
+                </ui:Columns>
+            </ui:MultiColumnListView>
+            <ui:MultiColumnListView name="controllerList" show-alternating-row-backgrounds="ContentOnly" show-foldout-header="true" header-title="Animator Controllers" allow-add="false" allow-remove="false" show-border="true" selection-type="Single" show-bound-collection-size="true" virtualization-method="FixedHeight" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px;">
+                <ui:Columns stretch-mode="GrowAndFill" resize-preview="false">
+                    <ui:Column stretchable="true" title="Hash" name="hash" />
+                    <ui:Column title="Name" stretchable="true" name="name" />
+                    <ui:Column title="References" stretchable="true" name="references" />
+                    <ui:Column title="Size" stretchable="true" name="size" />
+                    <ui:Column name="bakingTime" title="Baking Time" stretchable="true" />
+                    <ui:Column name="info" width="40px" resizable="false" />
+                </ui:Columns>
+            </ui:MultiColumnListView>
+            <ui:MultiColumnListView name="rigList" show-alternating-row-backgrounds="ContentOnly" show-foldout-header="true" header-title="Rigs" allow-add="false" allow-remove="false" show-border="true" selection-type="Single" show-bound-collection-size="true" virtualization-method="FixedHeight" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px;">
+                <ui:Columns stretch-mode="GrowAndFill" resize-preview="false">
+                    <ui:Column stretchable="true" title="Hash" name="hash" />
+                    <ui:Column title="Name" stretchable="true" name="name" />
+                    <ui:Column title="References" stretchable="true" name="references" />
+                    <ui:Column title="Size" stretchable="true" name="size" />
+                    <ui:Column name="bakingTime" title="Baking Time" stretchable="true" />
+                    <ui:Column name="info" resizable="false" width="40px" />
+                </ui:Columns>
+            </ui:MultiColumnListView>
+            <ui:MultiColumnListView name="avatarMaskList" show-alternating-row-backgrounds="ContentOnly" show-foldout-header="true" header-title="Avatar Masks" allow-add="false" allow-remove="false" show-border="true" selection-type="Single" show-bound-collection-size="true" virtualization-method="FixedHeight" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px;">
+                <ui:Columns stretch-mode="GrowAndFill" resize-preview="false">
+                    <ui:Column stretchable="true" title="Hash" name="hash" />
+                    <ui:Column title="Name" stretchable="true" name="name" />
+                    <ui:Column title="References" stretchable="true" name="references" />
+                    <ui:Column title="Size" stretchable="true" name="size" />
+                    <ui:Column name="bakingTime" title="Baking Time" stretchable="true" />
+                    <ui:Column name="info" resizable="false" width="40px" />
+                </ui:Columns>
+            </ui:MultiColumnListView>
+            <ui:MultiColumnListView name="smrList" show-alternating-row-backgrounds="ContentOnly" show-foldout-header="true" header-title="Skinned Meshes" allow-add="false" allow-remove="false" show-border="true" selection-type="Single" show-bound-collection-size="true" virtualization-method="FixedHeight" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px;">
+                <ui:Columns stretch-mode="GrowAndFill" resize-preview="false">
+                    <ui:Column stretchable="true" title="Hash" name="hash" />
+                    <ui:Column title="Name" stretchable="true" name="name" />
+                    <ui:Column title="References" stretchable="true" name="references" />
+                    <ui:Column title="Size" stretchable="true" name="size" />
+                    <ui:Column name="bakingTime" title="Baking Time" stretchable="true" />
+                    <ui:Column name="info" width="40px" resizable="false" />
+                </ui:Columns>
+            </ui:MultiColumnListView>
         </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,8 +1,13 @@
-#include "DeformationCommon.hlsl"
-#include "CopyInitialMeshData.hlsl"
-#include "CopyInitialMeshBlendShapes.hlsl"
-#include "CreatePerVertexDeformationWorkload.hlsl"
-#include "Skinning.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/ShaderConf.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/Debug.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Deformation/Resources/DeformationCommon.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Deformation/Resources/CopyInitialMeshData.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Deformation/Resources/CopyInitialMeshBlendShapes.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Deformation/Resources/CreatePerVertexDeformationWorkload.hlsl"
+#include "Packages/com.rukhanka.animation/Rukhanka.Runtime/Deformation/Resources/Skinning.hlsl"
+
+//#pragma enable_d3d11_debug_symbols
+//#pragma use_dxc
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -13,5 +18,4 @@
 #pragma kernel Skinning_256
 #pragma kernel Skinning_512
 #pragma kernel Skinning_1024
-
-//#pragma enable_d3d11_debug_symbols
+#pragma kernel Skinning_2048

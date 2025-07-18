@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1d489a2e472267c46a5d755dd5e44aaf
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/RigDefinition.hlsl
+  uploadId: 754107

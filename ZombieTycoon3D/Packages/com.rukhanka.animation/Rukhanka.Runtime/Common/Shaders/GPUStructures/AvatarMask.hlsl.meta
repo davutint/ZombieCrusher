@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6c18bdd7b329d1b40889497acd238107
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/AvatarMask.hlsl
+  uploadId: 754107

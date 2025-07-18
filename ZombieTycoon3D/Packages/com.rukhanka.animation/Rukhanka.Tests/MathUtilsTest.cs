@@ -9,7 +9,7 @@ namespace Rukhanka.Tests
 public class MathUtilsTest
 {
     [Test]
-    unsafe public void ShuffleListTest()
+    public void ShuffleListTest()
     {
 		var sz = 100;
 		var srcArr = new NativeList<int>(128, Allocator.Temp);

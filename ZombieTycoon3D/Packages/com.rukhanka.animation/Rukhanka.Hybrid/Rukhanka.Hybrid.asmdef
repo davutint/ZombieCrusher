@@ -31,6 +31,11 @@
             "name": "com.unity.entities.graphics",
             "expression": "1.2.0-pre.12",
             "define": "ENTITIES_GRAPHICS_V120_OR_NEWER"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "1.1.0",
+            "define": "ENTITIES_V110_OR_NEWER"
         }
     ],
     "noEngineReferences": false

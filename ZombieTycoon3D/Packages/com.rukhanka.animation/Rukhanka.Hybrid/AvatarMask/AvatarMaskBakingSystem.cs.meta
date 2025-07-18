@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 5ee83ceaf7c5a9e4a9c8192105c07930
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Hybrid/AvatarMask/AvatarMaskBakingSystem.cs
+  uploadId: 754107

@@ -40,8 +40,6 @@ public partial class RukhankaSystemsBootstrap: SystemBase
 			var facs = World.CreateSystem<FillAnimationsFromControllerSystem>();
 			var aps = World.CreateSystem<AnimationProcessSystem>();
 			var aas = World.CreateSystem<AnimationApplicationSystem>();
-			var bvcs = World.CreateSystem<BoneVisualizationColoringSystem>();
-			var bvs = World.CreateSystem<BoneVisualizationSystem>();
 			var cs = World.CreateSystem<AnimationCullingSystem>();
 			var ikGroup = World.GetOrCreateSystemManaged<RukhankaAnimationInjectionSystemGroup>();
 			var actxus = World.GetOrCreateSystemManaged<AnimationCullingContextUpdateSystem>();
@@ -53,8 +51,6 @@ public partial class RukhankaSystemsBootstrap: SystemBase
 			sysGroup.AddSystemToUpdateList(aps);
 			sysGroup.AddSystemToUpdateList(ikGroup);
 			sysGroup.AddSystemToUpdateList(aas);
-			sysGroup.AddSystemToUpdateList(bvcs);
-			sysGroup.AddSystemToUpdateList(bvs);
 
 		#if RUKHANKA_WITH_NETCODE
 			var acsForPrediction = World.CreateSystem<AnimatorControllerSystem<PredictedAnimatorControllerQuery>>();

@@ -9,6 +9,7 @@ using static Unity.Entities.SystemAPI;
 namespace ProjectDawn.Navigation.Hybrid
 {
     [BurstCompile]
+    [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial struct AgentSetDestinationDeferredSystem : ISystem
     {
@@ -37,6 +38,7 @@ namespace ProjectDawn.Navigation.Hybrid
             m_Destinations.Dispose();
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             GetSingletonRW<Singleton>();

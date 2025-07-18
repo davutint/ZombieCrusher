@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: da2c42269c831584a8f697a01d5eaac7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Samples~/Samples/SampleAssets/Common/GPUAttachment
+    SimpleGreen.mat
+  uploadId: 754107

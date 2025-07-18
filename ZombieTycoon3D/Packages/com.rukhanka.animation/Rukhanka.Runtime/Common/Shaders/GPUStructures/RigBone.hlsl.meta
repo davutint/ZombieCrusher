@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a4b682d628d7a5f4ab07b948d0360648
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/RigBone.hlsl
+  uploadId: 754107

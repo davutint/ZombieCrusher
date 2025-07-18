@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 534ce040e3a1f104b9496e0b307094e8
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Samples~/Samples/Scenes/23. Runtime
+    Skinned Mesh Swap/Subscene_ECS.unity
+  uploadId: 754107

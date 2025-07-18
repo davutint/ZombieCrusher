@@ -7,6 +7,7 @@ using Unity.Entities;
 using UnityEditor.Animations;
 using UnityEngine;
 using Rukhanka.Toolbox;
+using Unity.Mathematics;
 using Hash128 = Unity.Entities.Hash128;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,38 +194,26 @@ public partial class AnimatorControllerBaker
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static BlobAssetReference<ParameterPerfectHashTableBlob> CreateParametersPerfectHashTableBlobInternal(in NativeArray<uint> hashesArr)
+	public static unsafe BlobAssetReference<PerfectHashTableBlob> CreateParametersPerfectHashTableBlobInternal(in NativeArray<uint> hashesArr)
 	{
-		var hashesReinterpretedArr = hashesArr.Reinterpret<UIntPerfectHashed>();
-		if (!PerfectHash<UIntPerfectHashed>.CreateMinimalPerfectHash(hashesReinterpretedArr, out var seedValues, out var shuffleIndices))
+		if (!Perfect2HashTable.Build(hashesArr, out var pht, out var seed))
 			return default;
 
 		using var bb = new BlobBuilder(Allocator.Temp);
-		ref var ppb = ref bb.ConstructRoot<ParameterPerfectHashTableBlob>();
-		var bbh = bb.Allocate(ref ppb.seedTable, hashesArr.Length);
-		for (var hi = 0; hi < hashesArr.Length; ++hi)
-		{
-			ref var paramRef = ref bbh[hi];
-			paramRef = seedValues[hi];
-		}
-	
-		var bbia = bb.Allocate(ref ppb.indirectionTable, shuffleIndices.Length);
-		for (var ii = 0; ii < shuffleIndices.Length; ++ii)
-		{
-			ref var indirectionIndex = ref bbia[ii];
-			indirectionIndex = shuffleIndices[ii];
-		}
+		ref var ppb = ref bb.ConstructRoot<PerfectHashTableBlob>();
+		ppb.seed = seed;
+		var bbh = bb.Allocate(ref ppb.pht, pht.Length);
+		UnsafeUtility.MemCpy(bbh.GetUnsafePtr(), pht.GetUnsafeReadOnlyPtr(), pht.Length * UnsafeUtility.SizeOf<uint2>());
+		
+		pht.Dispose();
 
-		seedValues.Dispose();
-		shuffleIndices.Dispose();
-
-		var rv = bb.CreateBlobAssetReference<ParameterPerfectHashTableBlob>(Allocator.Persistent);
+		var rv = bb.CreateBlobAssetReference<PerfectHashTableBlob>(Allocator.Persistent);
 		return rv;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsafe BlobAssetReference<ParameterPerfectHashTableBlob> CreateParametersPerfectHashTableBlob(BlobAssetReference<ControllerBlob> cb)
+	unsafe BlobAssetReference<PerfectHashTableBlob> CreateParametersPerfectHashTableBlob(BlobAssetReference<ControllerBlob> cb)
 	{
 		ref var parameters = ref cb.Value.parameters;
 		
@@ -242,7 +231,7 @@ public partial class AnimatorControllerBaker
 		hasher.Update(hashesArr.GetUnsafeReadOnlyPtr(), hashesArr.Length * sizeof(uint));
 		var phtBlobHash = new Hash128(hasher.DigestHash128());
 		
-		var blobAlreadyExists = TryGetBlobAssetReference<ParameterPerfectHashTableBlob>(phtBlobHash, out var phtBlob);
+		var blobAlreadyExists = TryGetBlobAssetReference<PerfectHashTableBlob>(phtBlobHash, out var phtBlob);
 		if (blobAlreadyExists)
 			return phtBlob;
 		
@@ -266,7 +255,7 @@ public partial class AnimatorControllerBaker
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BlobAssetReference<ControllerBlob> BuildControllerBlob(AnimatorController controller)
+	BlobAssetReference<ControllerBlob> BuildControllerBlob(AnimatorController controller, RigDefinitionAuthoring rd)
 	{
 		var controllerHash = BakingUtils.ComputeControllerHash(controller);
 		
@@ -289,7 +278,7 @@ public partial class AnimatorControllerBaker
 	#endif
 		
 		//	Only after failed caches build controller from scratch
-		var controllerDataCollector = new AnimatorControllerDataCollector(controller);
+		var controllerDataCollector = new AnimatorControllerDataCollector(controller, rd);
 		var controllerData = controllerDataCollector.Collect();
 		
 		var bb = new BlobBuilder(Allocator.Temp);

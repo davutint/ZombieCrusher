@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ecfd91f2fbf55b847880b642d5da4cc8
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298480
+  packageName: Rukhanka Animation System 2
+  packageVersion: 2.2.1
+  assetPath: Packages/com.rukhanka.animation/Rukhanka.Runtime/Common/Shaders/GPUStructures/KeyFrame.hlsl
+  uploadId: 754107
