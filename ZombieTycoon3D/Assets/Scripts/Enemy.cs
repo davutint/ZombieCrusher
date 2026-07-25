@@ -24,12 +24,14 @@ public class Enemy : MonoBehaviour
     private OldSpawnManager poolOwner;
     private DeathEffectPool deathEffectPool;
     private ZombieAnimatorLodManager animatorLodManager;
+    private ZombieAiTickManager aiTickManager;
     private Collider[] cachedColliders;
     private bool[] initialColliderStates;
     private Renderer animationRenderer;
     private float currentHealth;
     private bool initialAnimatorState;
     private bool animationGameplaySuppressed;
+    private bool aiGameplaySuppressed;
     private bool hasStarted;
     private bool isDead;
 
@@ -47,6 +49,10 @@ public class Enemy : MonoBehaviour
         {
             ResolvePlayerTarget();
             ResetLifeState();
+        }
+        else
+        {
+            aiTickManager?.Register(this, behaviourRunner);
         }
     }
 
@@ -107,11 +113,13 @@ public class Enemy : MonoBehaviour
         OldSpawnManager owner,
         Transform playerTarget,
         DeathEffectPool effectPool,
-        ZombieAnimatorLodManager lodManager)
+        ZombieAnimatorLodManager lodManager,
+        ZombieAiTickManager tickManager)
     {
         poolOwner = owner;
         deathEffectPool = effectPool;
         animatorLodManager = lodManager;
+        aiTickManager = tickManager;
         target = playerTarget;
         currentHealth = maxHealth;
         isDead = false;
@@ -125,6 +133,7 @@ public class Enemy : MonoBehaviour
         transform.SetPositionAndRotation(position, rotation);
 
         animationGameplaySuppressed = false;
+        aiGameplaySuppressed = false;
         RestoreComponents();
         ResetLifeState();
         gameObject.SetActive(true);
@@ -134,6 +143,7 @@ public class Enemy : MonoBehaviour
         if (hasStarted)
         {
             RestoreBehaviourTree();
+            aiTickManager?.Register(this, behaviourRunner);
         }
 
         animatorLodManager?.Register(this);
@@ -141,6 +151,7 @@ public class Enemy : MonoBehaviour
 
     internal void StoreInPool()
     {
+        aiTickManager?.Unregister(this);
         animatorLodManager?.Unregister(this);
         SetAlive(false);
         AbortBehaviourTree();
@@ -173,6 +184,11 @@ public class Enemy : MonoBehaviour
     internal bool CanAnimateByLod =>
         initialAnimatorState &&
         !animationGameplaySuppressed &&
+        !isDead &&
+        gameObject.activeInHierarchy;
+
+    internal bool CanTickAi =>
+        !aiGameplaySuppressed &&
         !isDead &&
         gameObject.activeInHierarchy;
 
@@ -341,6 +357,7 @@ public class Enemy : MonoBehaviour
     public void HitByCar(float impactForce)
     {
         agent.isStopped = true;
+        aiGameplaySuppressed = true;
         animationGameplaySuppressed = true;
         SetAnimationLodEnabled(false);
 

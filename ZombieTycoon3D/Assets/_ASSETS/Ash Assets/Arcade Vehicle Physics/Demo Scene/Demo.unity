@@ -35169,6 +35169,7 @@ GameObject:
   - component: {fileID: 1798528493}
   - component: {fileID: 1798528494}
   - component: {fileID: 1798528495}
+  - component: {fileID: 1798528496}
   m_Layer: 0
   m_Name: MANAGERS
   m_TagString: Untagged
@@ -35257,6 +35258,7 @@ MonoBehaviour:
   poolWarmupPerFrame: 5
   deathEffectPool: {fileID: 1798528494}
   animatorLodManager: {fileID: 0}
+  aiTickManager: {fileID: 0}
   zombieParent: {fileID: 1974532318}
   currentZombieCount: 0
 --- !u!114 &1798528494
@@ -35289,6 +35291,19 @@ MonoBehaviour:
   maxAnimatedZombies: 128
   evaluationInterval: 0.25
   targetCamera: {fileID: 0}
+--- !u!114 &1798528496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798528486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 487628c83f76955449eec40cfbc5b3a2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieAiTickManager
+  tickIntervalFrames: 4
 --- !u!1 &1802459165
 GameObject:
   m_ObjectHideFlags: 0

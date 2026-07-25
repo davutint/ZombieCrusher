@@ -26,6 +26,9 @@ public class OldSpawnManager : MonoBehaviour
     [Header("Animation LOD")]
     [SerializeField] private ZombieAnimatorLodManager animatorLodManager;
 
+    [Header("AI Tick Budget")]
+    [SerializeField] private ZombieAiTickManager aiTickManager;
+
     public Transform zombieParent;
 
     [SerializeField] private int currentZombieCount;
@@ -80,6 +83,11 @@ public class OldSpawnManager : MonoBehaviour
         if (animatorLodManager == null)
         {
             animatorLodManager = GetComponent<ZombieAnimatorLodManager>();
+        }
+
+        if (aiTickManager == null)
+        {
+            aiTickManager = GetComponent<ZombieAiTickManager>();
         }
 
         if (zombiePrefabs != null)
@@ -149,7 +157,7 @@ public class OldSpawnManager : MonoBehaviour
 
         GameObject zombieObject = Instantiate(prefab, poolCreationPosition, Quaternion.identity, zombieParent);
         Enemy zombie = zombieObject.GetComponent<Enemy>();
-        zombie.ConfigurePool(this, player, deathEffectPool, animatorLodManager);
+        zombie.ConfigurePool(this, player, deathEffectPool, animatorLodManager, aiTickManager);
 
         availableZombies.Enqueue(zombie);
         totalCreatedZombieCount++;
