@@ -1,11 +1,9 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using DestroyIt;
 using RenownedGames.AITree;
 using UnityEngine;
 using UnityEngine.AI;
-using Random = UnityEngine.Random;
+using UnityEngine.Serialization;
 
 public class Enemy : MonoBehaviour
 {
@@ -16,36 +14,265 @@ public class Enemy : MonoBehaviour
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private GameObject meshObject;
 
-    [SerializeField] private float health = 100f;
-    [SerializeField] private GameObject ragdollPrefab;
-    [SerializeField] private float destroyDelay = 3f;
-    private bool isDead = false;
+    [FormerlySerializedAs("health")]
+    [SerializeField] private float maxHealth = 100f;
+    [FormerlySerializedAs("ragdollPrefab")]
+    [SerializeField] private GameObject deathEffectPrefab;
+    [FormerlySerializedAs("destroyDelay")]
+    [SerializeField] private float deathEffectLifetime = 3f;
+
+    private OldSpawnManager poolOwner;
+    private DeathEffectPool deathEffectPool;
+    private ZombieAnimatorLodManager animatorLodManager;
+    private Collider[] cachedColliders;
+    private bool[] initialColliderStates;
+    private Renderer animationRenderer;
+    private float currentHealth;
+    private bool initialAnimatorState;
+    private bool animationGameplaySuppressed;
+    private bool hasStarted;
+    private bool isDead;
 
     private void Awake()
     {
-        // Ragdoll ile ilgili bileşenleri almaya gerek yok.
-        // ragdollBodies = GetComponentsInChildren<Rigidbody>();
-        // ragdollColliders = GetComponentsInChildren<Collider>();
-
-        // Ragdoll'ı devre dışı bırakmaya gerek kalmadı.
-        // RagdollActive(false);
+        CacheComponents();
+        currentHealth = maxHealth;
     }
 
-    void Start()
+    private void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        target = GameObject.FindGameObjectWithTag("Player").transform;
-        behaviourRunner = GetComponent<BehaviourRunner>();
-        animator = GetComponent<Animator>();
+        hasStarted = true;
 
+        if (poolOwner == null)
+        {
+            ResolvePlayerTarget();
+            ResetLifeState();
+        }
+    }
+
+    private void CacheComponents()
+    {
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
+
+        if (behaviourRunner == null)
+        {
+            behaviourRunner = GetComponent<BehaviourRunner>();
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
+
+        if (meshObject != null)
+        {
+            animationRenderer = meshObject.GetComponentInChildren<Renderer>(true);
+        }
+
+        if (animationRenderer == null)
+        {
+            animationRenderer = GetComponentInChildren<Renderer>(true);
+        }
+
+        initialAnimatorState = animator != null && animator.enabled;
+        cachedColliders = GetComponentsInChildren<Collider>(true);
+        initialColliderStates = new bool[cachedColliders.Length];
+
+        for (int i = 0; i < cachedColliders.Length; i++)
+        {
+            initialColliderStates[i] = cachedColliders[i].enabled;
+        }
+    }
+
+    private void ResolvePlayerTarget()
+    {
+        if (target != null)
+        {
+            return;
+        }
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject != null)
+        {
+            target = playerObject.transform;
+        }
+    }
+
+    internal GameObject DeathEffectPrefab => deathEffectPrefab;
+
+    internal void ConfigurePool(
+        OldSpawnManager owner,
+        Transform playerTarget,
+        DeathEffectPool effectPool,
+        ZombieAnimatorLodManager lodManager)
+    {
+        poolOwner = owner;
+        deathEffectPool = effectPool;
+        animatorLodManager = lodManager;
+        target = playerTarget;
+        currentHealth = maxHealth;
+        isDead = false;
+        gameObject.SetActive(false);
+    }
+
+    internal void SpawnFromPool(Vector3 position, Quaternion rotation, Transform parent, Transform playerTarget)
+    {
+        target = playerTarget;
+        transform.SetParent(parent, false);
+        transform.SetPositionAndRotation(position, rotation);
+
+        animationGameplaySuppressed = false;
+        RestoreComponents();
+        ResetLifeState();
+        gameObject.SetActive(true);
+        ResetAnimator();
+        ResetAgent(position);
+
+        if (hasStarted)
+        {
+            RestoreBehaviourTree();
+        }
+
+        animatorLodManager?.Register(this);
+    }
+
+    internal void StoreInPool()
+    {
+        animatorLodManager?.Unregister(this);
+        SetAlive(false);
+        AbortBehaviourTree();
+
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+
+        gameObject.SetActive(false);
+    }
+
+    private void RestoreComponents()
+    {
+        for (int i = 0; i < cachedColliders.Length; i++)
+        {
+            if (cachedColliders[i] != null)
+            {
+                cachedColliders[i].enabled = initialColliderStates[i];
+            }
+        }
+
+        if (animator != null)
+        {
+            animator.enabled = initialAnimatorState && !animationGameplaySuppressed;
+        }
+    }
+
+    internal bool CanAnimateByLod =>
+        initialAnimatorState &&
+        !animationGameplaySuppressed &&
+        !isDead &&
+        gameObject.activeInHierarchy;
+
+    internal bool IsAnimationLodEnabled => animator != null && animator.enabled;
+
+    internal bool TryPrepareAnimationLod(out Renderer renderer)
+    {
+        renderer = animationRenderer;
+        if (animator == null || renderer == null || !initialAnimatorState)
+        {
+            return false;
+        }
+
+        animator.keepAnimatorStateOnDisable = true;
+        animator.cullingMode = AnimatorCullingMode.CullCompletely;
+        return true;
+    }
+
+    internal void SetAnimationLodEnabled(bool value)
+    {
+        if (animator == null)
+        {
+            return;
+        }
+
+        bool shouldEnable = value && CanAnimateByLod;
+        if (animator.enabled != shouldEnable)
+        {
+            animator.enabled = shouldEnable;
+        }
+    }
+
+    private void ResetAnimator()
+    {
+        if (animator != null && animator.enabled)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+        }
+    }
+
+    private void ResetLifeState()
+    {
+        currentHealth = maxHealth;
+        isDead = false;
         SetAlive(true);
         SetPlayer();
     }
 
+    private void ResetAgent(Vector3 position)
+    {
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
+        {
+            return;
+        }
+
+        agent.Warp(position);
+        agent.ResetPath();
+        agent.isStopped = false;
+    }
+
+    private void AbortBehaviourTree()
+    {
+        if (!hasStarted || behaviourRunner == null)
+        {
+            return;
+        }
+
+        BehaviourTree behaviourTree = behaviourRunner.GetBehaviourTree();
+        if (behaviourTree != null && behaviourTree.GetRootNode() != null)
+        {
+            behaviourTree.GetRootNode().Abort();
+        }
+    }
+
+    private void RestoreBehaviourTree()
+    {
+        if (behaviourRunner == null)
+        {
+            return;
+        }
+
+        BehaviourTree behaviourTree = behaviourRunner.GetBehaviourTree();
+        if (behaviourTree == null || behaviourTree.GetRootNode() == null)
+        {
+            return;
+        }
+
+        behaviourTree.GetRootNode().Restore();
+    }
+
     private void SetAlive(bool value)
     {
+        if (behaviourRunner == null)
+        {
+            return;
+        }
+
         Blackboard blackboard = behaviourRunner.GetBlackboard();
-        if (blackboard.TryGetKey("alive", out BoolKey alive))
+        if (blackboard != null && blackboard.TryGetKey("alive", out BoolKey alive))
         {
             alive.SetValue(value);
         }
@@ -55,8 +282,8 @@ public class Enemy : MonoBehaviour
     {
         if (isDead) return;
 
-        health -= damage;
-        if (health <= 0)
+        currentHealth -= damage;
+        if (currentHealth <= 0)
         {
             Die();
         }
@@ -71,42 +298,41 @@ public class Enemy : MonoBehaviour
     private void Die()
     {
         isDead = true;
-        SpawnRagdoll();
+        SpawnDeathEffect();
         EventManager.OnZombieDead?.Invoke(transform.position);
-        Destroy(gameObject);
-    }
 
-    private void SpawnRagdoll()
-    {
-        if (ragdollPrefab != null)
+        if (poolOwner == null || !poolOwner.ReturnZombieToPool(this))
         {
-            GameObject ragdoll = Instantiate(ragdollPrefab, transform.position, transform.rotation);
-            Destroy(ragdoll, destroyDelay);
-            /*ApplyRagdollVelocity(ragdoll);
-            StartCoroutine(DestroyRagdollAfterDelay(ragdoll));*/
+            Destroy(gameObject);
         }
     }
 
-    private void ApplyRagdollVelocity(GameObject ragdoll)
+    private void SpawnDeathEffect()
     {
-        Rigidbody[] rigidbodies = ragdoll.GetComponentsInChildren<Rigidbody>();
-        foreach (Rigidbody rb in rigidbodies)
+        if (deathEffectPrefab == null)
         {
-            rb.linearVelocity = Vector3.zero;
-            rb.AddForce(Random.insideUnitSphere * 5f, ForceMode.Impulse);
+            return;
         }
-    }
 
-    private IEnumerator DestroyRagdollAfterDelay(GameObject ragdoll)
-    {
-        yield return new WaitForSeconds(destroyDelay);
-        Destroy(ragdoll);
+        if (deathEffectPool != null &&
+            deathEffectPool.Play(deathEffectPrefab, transform.position, transform.rotation, deathEffectLifetime))
+        {
+            return;
+        }
+
+        GameObject deathEffect = Instantiate(deathEffectPrefab, transform.position, transform.rotation);
+        Destroy(deathEffect, deathEffectLifetime);
     }
 
     private void SetPlayer()
     {
+        if (behaviourRunner == null || target == null)
+        {
+            return;
+        }
+
         Blackboard blackboard = behaviourRunner.GetBlackboard();
-        if (blackboard.TryGetKey("Player", out TransformKey player))
+        if (blackboard != null && blackboard.TryGetKey("Player", out TransformKey player))
         {
             player.SetValue(target);
         }
@@ -114,11 +340,10 @@ public class Enemy : MonoBehaviour
     
     public void HitByCar(float impactForce)
     {
-        // NavMesh agent durduruluyor ve animatör devre dışı bırakılıyor.
         agent.isStopped = true;
-        if (animator != null)
-            animator.enabled = false;
-        
+        animationGameplaySuppressed = true;
+        SetAnimationLodEnabled(false);
+
         SetAlive(false);
         
         // Enemy'nin kendi Rigidbody'sine kuvvet uygulanıyor.

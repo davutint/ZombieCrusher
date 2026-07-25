@@ -48,8 +48,8 @@ namespace DestroyIt
 
         // Private Variables
         private float _nextUpdate;
-        private List<Destructible> _destroyedObjects;
-        private List<Debris> _debrisPieces;
+        private List<Destructible> _destroyedObjects = new List<Destructible>();
+        private List<Debris> _debrisPieces = new List<Debris>();
         private List<Texture2D> _detailMasks;
 
         // Events
@@ -57,7 +57,7 @@ namespace DestroyIt
         public event Action ActiveDebrisCounterChangedEvent;
 
         // Properties
-        public List<float> DestroyedPrefabCounter { get; private set; }
+        public List<float> DestroyedPrefabCounter { get; private set; } = new List<float>();
 
         public bool IsDestroyedPrefabLimitReached => DestroyedPrefabCounter.Count >= destroyedPrefabLimit;
 
@@ -115,9 +115,16 @@ namespace DestroyIt
                 Debug.LogWarning("DestroyItDebris layer not found. Add a layer named 'DestroyItDebris' to your project if you want debris to ignore other debris when using Cling Points.");
         }
 
+        private void OnEnable()
+        {
+            EnsureRuntimeState();
+            _nextUpdate = Time.time + updateFrequency;
+        }
+
         private void Update()
         {
             if (Time.time < _nextUpdate) return;
+            EnsureRuntimeState();
             
             // Manage Destroyed Prefab counter
             DestroyedPrefabCounter.Update(withinSeconds);
@@ -472,6 +479,20 @@ namespace DestroyIt
         {
             if (ActiveDebrisCounterChangedEvent != null) // first, make sure there is at least one listener.
                 ActiveDebrisCounterChangedEvent(); // if so, trigger the event.
+        }
+
+        private void EnsureRuntimeState()
+        {
+            if (DestroyedPrefabCounter == null)
+                DestroyedPrefabCounter = new List<float>();
+            if (overlapColliders == null || overlapColliders.Length == 0)
+                overlapColliders = new Collider[100];
+            if (_detailMasks == null)
+                _detailMasks = Resources.LoadAll<Texture2D>("ProgressiveDamage").ToList();
+            if (_debrisPieces == null)
+                _debrisPieces = new List<Debris>();
+            if (_destroyedObjects == null)
+                _destroyedObjects = new List<Destructible>();
         }
     }
 }

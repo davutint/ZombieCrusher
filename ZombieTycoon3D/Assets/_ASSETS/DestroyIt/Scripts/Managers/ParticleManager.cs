@@ -19,13 +19,17 @@ namespace DestroyIt
         public static ParticleManager Instance { get; private set; }
         public ActiveParticle[] ActiveParticles 
         { 
-            get => _activeParticles;
-            private set => _activeParticles = value;
+            get
+            {
+                EnsureRuntimeState();
+                return _activeParticles;
+            }
+            private set => _activeParticles = value ?? Array.Empty<ActiveParticle>();
         }
         public bool IsMaxActiveParticles => ActiveParticles.Length >= maxDestroyedParticles;
 
         private float _nextUpdate;
-        private ActiveParticle[] _activeParticles;
+        private ActiveParticle[] _activeParticles = Array.Empty<ActiveParticle>();
         private ParticleManager() { } // hide constructor
 
         // Events
@@ -33,18 +37,26 @@ namespace DestroyIt
 
         public void Awake()
         {
-            ActiveParticles = new ActiveParticle[0];
+            ActiveParticles = Array.Empty<ActiveParticle>();
             Instance = this;
+            _nextUpdate = Time.time + updateFrequency;
+        }
+
+        private void OnEnable()
+        {
+            EnsureRuntimeState();
             _nextUpdate = Time.time + updateFrequency;
         }
 
         public void Update()
         {
             if (!(Time.time > _nextUpdate)) return;
+            EnsureRuntimeState();
+            _nextUpdate = Time.time + updateFrequency;
             if (_activeParticles.Length == 0) return;
 
             int removeIndicesCounter = 0;
-            int[] removeIndices = new int[0];
+            int[] removeIndices = Array.Empty<int>();
             bool isChanged = false;
             for (int i = 0; i < ActiveParticles.Length;i++ )
             {
@@ -60,13 +72,13 @@ namespace DestroyIt
             if (isChanged)
                 FireActiveParticlesCounterChangedEvent();
 
-            // Reset the nextUpdate counter.
-            _nextUpdate = Time.time + updateFrequency; 
         }
 
         /// <summary>Plays a particle effect and adjusts its texture to have maximum damage level progressive damage (if specified).</summary>
         public void PlayEffect(ParticleSystem particle, Destructible destObj, Vector3 pos, Quaternion rot, int parentId)
         {
+            EnsureRuntimeState();
+
             if (particle == null)
                 particle = DestructionManager.Instance.defaultParticle;
 
@@ -158,6 +170,12 @@ namespace DestroyIt
         {
             if (ActiveParticlesCounterChangedEvent != null) // first, make sure there is at least one listener.
                 ActiveParticlesCounterChangedEvent(); // if so, trigger the event.
+        }
+
+        private void EnsureRuntimeState()
+        {
+            if (_activeParticles == null)
+                _activeParticles = Array.Empty<ActiveParticle>();
         }
     }
 }
