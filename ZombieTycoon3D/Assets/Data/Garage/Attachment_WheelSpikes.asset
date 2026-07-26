@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_WheelSpikes
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: wheel-spikes
+  displayName: "Jant B\u0131\xE7aklar\u0131"
+  description: "Yak\u0131n temasta \xE7arpma etkisini art\u0131r\u0131r. Ek d\xF6nen
+    k\xFCtle h\u0131z ve ivmeyi biraz d\xFC\u015F\xFCr\xFCr."
+  slot: 3
+  visualPrefab: {fileID: 1577577700157948, guid: 5e66363e6eeccf941b04f67caf808bdb, type: 3}
+  compatibleVehicles:
+  - vehicleId: ambulance
+    localPosition: {x: -1.43, y: 0.76, z: 1.58}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  - vehicleId: ambulance
+    localPosition: {x: 1.43, y: 0.76, z: 1.58}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  - vehicleId: ambulance
+    localPosition: {x: -1.43, y: 0.76, z: -2.32}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  - vehicleId: ambulance
+    localPosition: {x: 1.43, y: 0.76, z: -2.32}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  modifier:
+    maxSpeed: -2
+    acceleration: -1
+    handling: 1
+    durability: -5
+    impactPower: 0.2

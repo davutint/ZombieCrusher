@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private float impactForce;
     [SerializeField] private Rigidbody rb;
+    [SerializeField, Min(0.1f)] private float impactPower = 1f;
     [SerializeField] private float minImpactSpeed = 10f; // Zombiyi yok etmek için gereken minimum hız
 
     [SerializeField] private int damage;
@@ -19,15 +20,39 @@ public class Player : MonoBehaviour
     
     // Araç patladı mı kontrolü (birden fazla patlama tetiklenmesin diye)
     private bool isExploded = false;
+
+    private Renderer[] vehicleRenderers;
+    private Collider[] vehicleColliders;
+    private bool[] initialRendererStates;
+    private bool[] initialColliderStates;
     
    
     
     
     
-    private void Start()
+    private void Awake()
     {
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody>();
+        }
+
+        vehicleRenderers = GetComponentsInChildren<Renderer>(true);
+        vehicleColliders = GetComponentsInChildren<Collider>(true);
+        initialRendererStates = new bool[vehicleRenderers.Length];
+        initialColliderStates = new bool[vehicleColliders.Length];
+
+        for (int i = 0; i < vehicleRenderers.Length; i++)
+        {
+            initialRendererStates[i] = vehicleRenderers[i].enabled;
+        }
+
+        for (int i = 0; i < vehicleColliders.Length; i++)
+        {
+            initialColliderStates[i] = vehicleColliders[i].enabled;
+        }
+
         currentHealth = maxHealth;
-        //update ui
     }
 
     private void OnTriggerEnter(Collider other)
@@ -37,7 +62,9 @@ public class Player : MonoBehaviour
             float currentSpeed = rb.linearVelocity.magnitude;
             Debug.Log("Çarpma Hızı: " + currentSpeed);
             
-            if (currentSpeed >= minImpactSpeed)
+            float effectiveMinimumImpactSpeed =
+                minImpactSpeed / Mathf.Max(0.1f, impactPower);
+            if (currentSpeed >= effectiveMinimumImpactSpeed)
             {
                 Debug.Log("Minimum hız aşıldı! Zombie yok ediliyor...");
                 Enemy enemy = other.gameObject.GetComponentInParent<Enemy>();
@@ -60,7 +87,7 @@ public class Player : MonoBehaviour
         if (isExploded)
             return;
         
-        //currentHealth -= damage;
+        currentHealth -= damage;
        //update ui
         Debug.Log("Alınan Hasar: " + damage + " - Kalan Can: " + currentHealth);
 
@@ -162,5 +189,41 @@ public class Player : MonoBehaviour
     public float GetCurrentHealth()
     {
         return currentHealth;
+    }
+
+    public void ApplyVehicleStats(VehicleStats stats)
+    {
+        maxHealth = Mathf.Max(1f, stats.durability);
+        impactPower = Mathf.Max(0.1f, stats.impactPower);
+        currentHealth = maxHealth;
+    }
+
+    public void ResetForRun()
+    {
+        isExploded = false;
+        currentHealth = maxHealth;
+
+        for (int i = 0; i < vehicleRenderers.Length; i++)
+        {
+            if (vehicleRenderers[i] != null)
+            {
+                vehicleRenderers[i].enabled = initialRendererStates[i];
+            }
+        }
+
+        for (int i = 0; i < vehicleColliders.Length; i++)
+        {
+            if (vehicleColliders[i] != null)
+            {
+                vehicleColliders[i].enabled = initialColliderStates[i];
+            }
+        }
+
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
     }
 }

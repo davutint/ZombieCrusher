@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_LightPlating
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: light-plating
+  displayName: Hafif Kaplama
+  description: "G\xF6vde dayan\u0131kl\u0131l\u0131\u011F\u0131n\u0131 y\xFCkseltir;
+    ek a\u011F\u0131rl\u0131k h\u0131zlanmay\u0131 ve kontrol\xFC bir miktar d\xFC\u015F\xFCr\xFCr."
+  slot: 1
+  visualPrefab: {fileID: 1837151923621358, guid: 44e6895ba5da26a4b9c17f16428d7750, type: 3}
+  compatibleVehicles:
+  - vehicleId: ambulance
+    localPosition: {x: -1.36, y: 1.45, z: -0.25}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  - vehicleId: ambulance
+    localPosition: {x: 1.36, y: 1.45, z: -0.25}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: -1, y: 1, z: 1}
+  modifier:
+    maxSpeed: -5
+    acceleration: -1.5
+    handling: -1
+    durability: 25
+    impactPower: 0.05

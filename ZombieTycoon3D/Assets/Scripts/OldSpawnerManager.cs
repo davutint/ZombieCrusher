@@ -13,6 +13,7 @@ public class OldSpawnManager : MonoBehaviour
     public Transform player;
     public float spawnDistanceMin = 20f;
     public float spawnDistanceMax = 50f;
+    [SerializeField] private bool spawningEnabled;
     [SerializeField, Min(1)] private int zombiesPerHorde = 10;
     [SerializeField, Min(0.05f)] private float spawnCheckInterval = 1f;
 
@@ -45,6 +46,7 @@ public class OldSpawnManager : MonoBehaviour
     public int CurrentZombieCount => currentZombieCount;
     public int AvailableZombieCount => availableZombies.Count;
     public int TotalCreatedZombieCount => totalCreatedZombieCount;
+    public bool SpawningEnabled => spawningEnabled;
 
     private IEnumerator Start()
     {
@@ -167,7 +169,9 @@ public class OldSpawnManager : MonoBehaviour
     {
         while (true)
         {
-            if (currentZombieCount < maxZombiesInScene && availableZombies.Count > 0)
+            if (spawningEnabled
+                && currentZombieCount < maxZombiesInScene
+                && availableZombies.Count > 0)
             {
                 int spawnCount = Mathf.Min(zombiesPerHorde, maxZombiesInScene - currentZombieCount);
                 SpawnZombieHorde(spawnCount);
@@ -243,6 +247,25 @@ public class OldSpawnManager : MonoBehaviour
         availableZombies.Enqueue(zombie);
         currentZombieCount = activeZombies.Count;
         return true;
+    }
+
+    public void SetSpawningEnabled(bool enabled)
+    {
+        spawningEnabled = enabled;
+    }
+
+    public void DespawnAllToPool()
+    {
+        if (activeZombies.Count == 0)
+        {
+            return;
+        }
+
+        List<Enemy> snapshot = new List<Enemy>(activeZombies);
+        for (int i = 0; i < snapshot.Count; i++)
+        {
+            ReturnZombieToPool(snapshot[i]);
+        }
     }
 }
 

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c24db49e883331542ba8d357030829d4, type: 3}
+  m_Name: GarageCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::GarageCatalog
+  startingVehicle: {fileID: 11400000, guid: c8e4689a5abcc0840919c74550aa10d3, type: 2}
+  vehicles:
+  - {fileID: 11400000, guid: c8e4689a5abcc0840919c74550aa10d3, type: 2}
+  - {fileID: 11400000, guid: 3b8c4a3aa221ffb4cac7a1bde525b0a3, type: 2}
+  - {fileID: 11400000, guid: e0e19b3234f6bf246a28147efa3a8d5e, type: 2}
+  attachments:
+  - {fileID: 11400000, guid: 62e671e717b800f4290d3ee35fc2b19f, type: 2}
+  - {fileID: 11400000, guid: 0ed38dfb8adf49a48b69f9104c61d5e4, type: 2}
+  - {fileID: 11400000, guid: 8030a89a6f874cd4aa8640f77f5b2fc1, type: 2}
+  - {fileID: 11400000, guid: 49a2153c5c1cf014ea52cca44e42078f, type: 2}
+  - {fileID: 11400000, guid: eaca659cfc914c442b92614305f82858, type: 2}

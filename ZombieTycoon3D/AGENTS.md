@@ -41,6 +41,29 @@ Use the source that owns the claim:
 
 When reliable sources conflict, identify the owner of the disputed claim and preserve the conflict until it is resolved. Do not silently choose a convenient version.
 
+## Mandatory Product Decision Approval Gate
+
+Do not implement a material game-design or product decision until the repository owner has explicitly selected or approved the intended direction.
+
+This approval gate includes, but is not limited to:
+
+- vehicle and attachment acquisition: purchase, unlock, reward, discovery, rental, starting ownership, or free selection;
+- currency, prices, economy, rewards, progression, meta-progression, upgrade paths, and content availability;
+- core-loop structure, run goals, fail/win conditions, session length, difficulty progression, and game-over flow;
+- customization slots, attachment restrictions, stat tradeoffs, inventory behavior, save behavior, and player-facing purchase or selection UX.
+
+For any unresolved decision in these areas:
+
+1. Stay read-only and inspect the current code, scenes, prefabs, assets, and historical context.
+2. Explain what is currently true and clearly separate it from assumptions.
+3. Present the viable directions as ideas, including their gameplay and implementation consequences. A recommendation is allowed, but it must remain a proposal.
+4. Ask focused clarification questions and wait until the owner’s intended behavior is unambiguous.
+5. Restate the approved direction and the exact implementation scope before changing code, assets, scenes, data, UI, or documentation.
+
+General continuation requests such as “continue,” “do the next task,” “fix what remains,” or similar wording do not authorize Codex to resolve an unstated product decision. The presence of vendor assets, an old implementation, a partial scaffold, or a technically convenient architecture is also not approval.
+
+Do not create “temporary,” “placeholder,” “foundation,” or “neutral” implementation that encodes one of the unresolved options. If a mistaken assumption has already been implemented, stop extending it, identify the assumption and affected files, and ask the owner whether to revert, retain, or rework it. Do not silently reinterpret the owner’s feedback or compound the mistaken direction.
+
 ## Build and Development
 
 Use Unity `6000.2.7f2`.

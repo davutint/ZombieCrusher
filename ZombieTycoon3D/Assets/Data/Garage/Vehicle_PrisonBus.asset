@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb63a2f879bb6ab4b9766b9542daaea6, type: 3}
+  m_Name: Vehicle_PrisonBus
+  m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
+  vehicleId: prison-bus
+  displayName: "Mahk\xFBm Otob\xFCs\xFC"
+  description: "Yava\u015F fakat y\xFCksek dayan\u0131kl\u0131l\u0131k ve \xE7arpma
+    g\xFCc\xFC sunar."
+  visualPrefab: {fileID: 1063686525367896, guid: fe5ed12131487254b846805388248640, type: 3}
+  previewEuler: {x: 0, y: 28, z: 0}
+  previewScale: 1
+  gameplayLocalPosition: {x: 0, y: 0, z: 0}
+  gameplayLocalEuler: {x: 0, y: 0, z: 0}
+  gameplayScale: 1
+  baseStats:
+    maxSpeed: 75
+    acceleration: 14
+    handling: 7
+    durability: 180
+    impactPower: 1.35

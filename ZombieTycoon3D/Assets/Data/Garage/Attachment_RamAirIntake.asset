@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_RamAirIntake
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: ram-air-intake
+  displayName: "Y\xFCksek Ak\u0131\u015F Emme"
+  description: "Motorun h\u0131z ve ivmesini y\xFCkseltir; hafif g\xF6vde kesintileri
+    dayan\u0131kl\u0131l\u0131\u011F\u0131 azalt\u0131r."
+  slot: 2
+  visualPrefab: {fileID: 1155052706714072, guid: 0014c5be71de957428533bb159c41ee6, type: 3}
+  compatibleVehicles:
+  - vehicleId: ambulance
+    localPosition: {x: 0, y: 1.05, z: 1.85}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  modifier:
+    maxSpeed: 8
+    acceleration: 4
+    handling: -0.5
+    durability: -3
+    impactPower: 0.05

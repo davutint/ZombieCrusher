@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_ZombiePlow
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: zombie-plow
+  displayName: Zombie Plow
+  description: "Kalabal\u0131\u011F\u0131 yararak ilerleyen a\u011F\u0131r \xF6n
+    kep\xE7e. \xC7arpma g\xFCc\xFC i\xE7in h\u0131z ve \xE7eviklikten fedak\xE2rl\u0131k
+    eder."
+  slot: 0
+  visualPrefab: {fileID: 1150652488230542, guid: bc92c9703f92fed428ed998fcfb3d33c, type: 3}
+  compatibleVehicles:
+  - vehicleId: ambulance
+    localPosition: {x: 0, y: 0.72, z: 3.65}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  modifier:
+    maxSpeed: -4
+    acceleration: -2
+    handling: -1
+    durability: 8
+    impactPower: 0.35
