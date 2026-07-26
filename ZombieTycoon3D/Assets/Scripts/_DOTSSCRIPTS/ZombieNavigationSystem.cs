@@ -5,99 +5,77 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-   // Zombie'nin hedefini tutan component
-    public struct ZombieTarget : IComponentData
-    {
-        public Entity targetEntity;
-        public float3 lastKnownPosition;
-        public float3 destination;
-    }
+// Zombie'nin hedefini tutan component
+public struct ZombieTarget : IComponentData
+{
+    public Entity targetEntity;
+    public float3 lastKnownPosition;
+    public float3 destination;
+}
 
-    // Basitleştirilmiş navigation system - sadece AgentBody kullan
+// Basitleştirilmiş navigation system - sadece AgentBody kullan
+[BurstCompile]
+[UpdateInGroup(typeof(SimulationSystemGroup))]
+public partial struct ZombieNavigationSystem : ISystem
+{
+    private float nextUpdateTime;
+    private const float UPDATE_INTERVAL = 0.2f; // Saniyede 5 kez güncelle (her ~12 frame)
+
     [BurstCompile]
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
-    public partial struct ZombieNavigationSystem : ISystem
+    public void OnCreate(ref SystemState state)
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<ZombieTag>();
-        }
-
-        [BurstCompile]
-        public void OnUpdate(ref SystemState state)
-        {
-            // Player vehicle'ı bul
-            Entity playerVehicle = Entity.Null;
-            float3 playerPosition = float3.zero;
-            
-            foreach (var (transform, entity) in 
-                     SystemAPI.Query<RefRO<LocalTransform>>()
-                     .WithAll<VehicleTag>()
-                     .WithEntityAccess())
-            {
-                playerVehicle = entity;
-                playerPosition = transform.ValueRO.Position;
-                break;
-            }
-            
-            if (playerVehicle == Entity.Null)
-                return;
-
-            // Zombie'leri vehicle'a yönlendir
-            foreach (var (zombieComp, transform, entity) in 
-                     SystemAPI.Query<RefRO<ZombieComponent>, RefRO<LocalTransform>>()
-                     .WithAll<ZombieTag>()
-                     .WithEntityAccess())
-            {
-                if (!zombieComp.ValueRO.isAlive)
-                    continue;
-
-                // TODO: Agent Navigation API'sine göre destination set et
-                // Dokümantasyonu kontrol et ve aşağıdaki yöntemlerden birini kullan:
-                
-                // Yöntem 1: AgentBody component'i varsa
-                if (SystemAPI.HasComponent<AgentBody>(entity))
-                {
-                  var agent = SystemAPI.GetComponentRW<AgentBody>(entity);
-                    agent.ValueRW.SetDestination(playerPosition);
-                }
-                
-               
-            }
-        }
+        state.RequireForUpdate<ZombieSpawnSettings>();
+        nextUpdateTime = 0f;
     }
 
-    // Zombie target component'ini ekleyen system
     [BurstCompile]
-    public partial struct ZombieTargetInitSystem : ISystem
+    public void OnUpdate(ref SystemState state)
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
+        float currentTime = (float)SystemAPI.Time.ElapsedTime;
+
+        // Throttling - Her frame güncelleme yapma
+        if (currentTime < nextUpdateTime)
+            return;
+
+        nextUpdateTime = currentTime + UPDATE_INTERVAL;
+
+        // Player vehicle'ı bul (Sadece bir tane olduğunu varsayıyoruz)
+        Entity playerEntity = Entity.Null;
+        float3 playerPosition = float3.zero;
+
+        foreach (var (transform, entity) in
+                 SystemAPI.Query<RefRO<LocalTransform>>()
+                 .WithAll<VehicleTag>() // Player tag'i varsa daha iyi olur ama şimdilik VehicleTag
+                 .WithEntityAccess())
         {
-            state.RequireForUpdate<ZombieTag>();
+            // İlk bulduğumuz aracı hedef alalım
+            playerEntity = entity;
+            playerPosition = transform.ValueRO.Position;
+            break;
         }
 
-        [BurstCompile]
-        public void OnUpdate(ref SystemState state)
+        if (playerEntity == Entity.Null)
+            return;
+
+        // Tüm zombilere hedefi ata
+        foreach (var (target, agent, transform) in
+                 SystemAPI.Query<RefRW<ZombieTarget>, RefRW<AgentBody>, RefRO<LocalTransform>>()
+                 .WithAll<ZombieTag>())
         {
-            var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
-            
-            // Target component'i olmayan zombilere ekle
-            foreach (var (zombieTag, entity) in 
-                     SystemAPI.Query<RefRO<ZombieTag>>()
-                     .WithNone<ZombieTarget>()
-                     .WithEntityAccess())
-            {
-                commandBuffer.AddComponent(entity, new ZombieTarget
-                {
-                    targetEntity = Entity.Null,
-                    lastKnownPosition = float3.zero,
-                    destination = float3.zero
-                });
-            }
-            
-            commandBuffer.Playback(state.EntityManager);
-            commandBuffer.Dispose();
+            // Eğer hedef çok değişmediyse güncelleme (isteğe bağlı optimizasyon)
+            if (math.distancesq(target.ValueRO.lastKnownPosition, playerPosition) < 1.0f)
+                continue;
+
+            target.ValueRW.targetEntity = playerEntity;
+            target.ValueRW.destination = playerPosition;
+            target.ValueRW.lastKnownPosition = playerPosition;
+
+            // Agent'a hedefi ver
+            agent.ValueRW.SetDestination(playerPosition);
+
+            // Eğer durmuşsa hareket ettir
+            if (agent.ValueRO.IsStopped)
+                agent.ValueRW.IsStopped = false;
         }
     }
+}

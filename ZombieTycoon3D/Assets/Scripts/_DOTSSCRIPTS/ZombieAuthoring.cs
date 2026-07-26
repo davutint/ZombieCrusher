@@ -96,10 +96,14 @@ public class ZombieAuthoring : MonoBehaviour
                       $"Sağ Bacak: {limbRefs.rightLeg != Entity.Null}");
             
             // BakeLimbOriginalRotation KALDIRILDI - InitializeLimbRotationsSystem hallediyor
-        
-      
+
+            // ZombieTarget component'i ekle (Runtime'da eklememek için)
+            AddComponent(entity, new ZombieTarget
+            {
+                targetEntity = Entity.Null,
+                lastKnownPosition = float3.zero,
+                destination = float3.zero
+            });
+        }
     }
-    
-       
-}
 }

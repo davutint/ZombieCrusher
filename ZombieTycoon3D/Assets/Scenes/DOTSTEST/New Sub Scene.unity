@@ -620,8 +620,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieSpawnManagerAuthoring
   zombiePrefab: {fileID: 8739104981979653675, guid: 7731e6f7e5e8f4c43b125fefe0131884, type: 3}
-  maxZombieCount: 4000
-  spawnInterval: 1
+  maxZombieCount: 15000
+  spawnInterval: 0.1
   spawnPoints:
   - {fileID: 963713575}
   - {fileID: 1283233081}
