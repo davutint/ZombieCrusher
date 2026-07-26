@@ -8,7 +8,7 @@ PhysicsMaterial:
   m_PrefabAsset: {fileID: 0}
   m_Name: Friction
   serializedVersion: 2
-  m_DynamicFriction: 1.0000001
+  m_DynamicFriction: 1.0000013
   m_StaticFriction: 1
   m_Bounciness: 0
   m_FrictionCombine: 3

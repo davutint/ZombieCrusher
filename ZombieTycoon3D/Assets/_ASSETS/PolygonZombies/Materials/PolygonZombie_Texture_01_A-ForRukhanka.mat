@@ -12,7 +12,8 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _EMISSION
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -124,8 +125,10 @@ Material:
     - _BumpScale: 1
     - _ComputeMeshIndex: 0
     - _Cutoff: 0.5
+    - _DeformedMeshIndex: 0
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _Float: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -148,6 +151,7 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 0}
     - _BloodColor: {r: 0.41911763, g: 0.08320718, b: 0.08320718, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _DeformationParamsForMotionVectors: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColor: {r: 0.13235295, g: 0.13235295, b: 0.13235295, a: 0}
     - _Spec: {r: 1, g: 0.9852941, b: 0.99168354, a: 0}
@@ -165,4 +169,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 9
+  version: 10
