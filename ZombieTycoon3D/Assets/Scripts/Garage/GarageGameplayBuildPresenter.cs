@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ArcadeVP;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -8,17 +9,37 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
     private sealed class VehicleVisualInstance
     {
         public GameObject container;
+        public Transform bodyPivot;
+        public Transform[] frontWheels;
+        public Transform[] rearWheels;
         public readonly Dictionary<string, List<GameObject>> attachments =
             new(StringComparer.Ordinal);
+
+        public bool HasCompleteWheelRig =>
+            frontWheels != null
+            && frontWheels.Length == 2
+            && frontWheels[0] != null
+            && frontWheels[1] != null
+            && rearWheels != null
+            && rearWheels.Length == 2
+            && rearWheels[0] != null
+            && rearWheels[1] != null;
     }
 
     [SerializeField] private Transform gameplayVehicleRoot;
     [SerializeField] private Transform visualRoot;
+    [SerializeField] private ArcadeVehicleController vehicleController;
+    [SerializeField] private BoxCollider vehicleHitbox;
 
     private readonly Dictionary<string, VehicleVisualInstance> vehicleCache =
         new(StringComparer.Ordinal);
     private readonly List<Renderer> originalRenderers = new();
 
+    private Transform originalBodyMesh;
+    private Transform[] originalFrontWheels;
+    private Transform[] originalRearWheels;
+    private Vector3 originalHitboxCenter;
+    private Vector3 originalHitboxSize;
     private VehicleVisualInstance activeInstance;
 
     private void Awake()
@@ -27,6 +48,19 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         {
             gameplayVehicleRoot = transform;
         }
+
+        if (vehicleController == null)
+        {
+            vehicleController =
+                gameplayVehicleRoot.GetComponent<ArcadeVehicleController>();
+        }
+
+        if (vehicleHitbox == null)
+        {
+            vehicleHitbox = gameplayVehicleRoot.GetComponent<BoxCollider>();
+        }
+
+        CacheOriginalRig();
 
         if (visualRoot == null)
         {
@@ -41,6 +75,8 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         {
             Renderer candidate = renderers[i];
             if (candidate != null
+                && (candidate is MeshRenderer
+                    || candidate is SkinnedMeshRenderer)
                 && !candidate.transform.IsChildOf(visualRoot))
             {
                 originalRenderers.Add(candidate);
@@ -59,6 +95,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             SetOriginalRenderersEnabled(true);
             HideCachedVehicles();
             activeInstance = null;
+            RestoreOriginalRig();
             return;
         }
 
@@ -100,6 +137,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
 
         SetOriginalRenderersEnabled(false);
         SetBuildRenderersEnabled(instance.container, true);
+        ConfigureVehicleRig(instance, vehicle);
         visualRoot.gameObject.SetActive(true);
     }
 
@@ -131,9 +169,13 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         container.transform.localRotation = vehicle.GameplayLocalRotation;
         container.transform.localScale = Vector3.one * vehicle.GameplayScale;
 
+        GameObject bodyPivotObject = new GameObject("Body");
+        Transform bodyPivot = bodyPivotObject.transform;
+        bodyPivot.SetParent(container.transform, false);
+
         GameObject visual = Instantiate(
             vehicle.VisualPrefab,
-            container.transform,
+            bodyPivot,
             false);
         visual.name = vehicle.VisualPrefab.name;
         visual.transform.localPosition = Vector3.zero;
@@ -142,8 +184,10 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
 
         VehicleVisualInstance created = new VehicleVisualInstance
         {
-            container = container
+            container = container,
+            bodyPivot = bodyPivot
         };
+        TryCreateWheelRig(created, visual.transform);
         vehicleCache[vehicle.VehicleId] = created;
         return created;
     }
@@ -201,7 +245,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         {
             GameObject attachmentObject = Instantiate(
                 attachment.VisualPrefab,
-                instance.container.transform,
+                instance.bodyPivot,
                 false);
             attachmentObject.name = attachment.VisualPrefab.name;
             attachmentObjects.Add(attachmentObject);
@@ -247,6 +291,185 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             if (originalRenderers[i] != null)
             {
                 originalRenderers[i].enabled = enabled;
+            }
+        }
+    }
+
+    private void CacheOriginalRig()
+    {
+        if (vehicleController != null)
+        {
+            originalBodyMesh = vehicleController.BodyMesh;
+            originalFrontWheels =
+                CloneWheelArray(vehicleController.FrontWheels);
+            originalRearWheels =
+                CloneWheelArray(vehicleController.RearWheels);
+        }
+
+        if (vehicleHitbox != null)
+        {
+            originalHitboxCenter = vehicleHitbox.center;
+            originalHitboxSize = vehicleHitbox.size;
+        }
+    }
+
+    private void RestoreOriginalRig()
+    {
+        if (vehicleController != null)
+        {
+            vehicleController.BodyMesh = originalBodyMesh;
+            vehicleController.FrontWheels =
+                CloneWheelArray(originalFrontWheels);
+            vehicleController.RearWheels =
+                CloneWheelArray(originalRearWheels);
+        }
+
+        if (vehicleHitbox != null)
+        {
+            vehicleHitbox.center = originalHitboxCenter;
+            vehicleHitbox.size = originalHitboxSize;
+        }
+    }
+
+    private void ConfigureVehicleRig(
+        VehicleVisualInstance instance,
+        GarageVehicleDefinition vehicle)
+    {
+        if (vehicleController != null && instance.HasCompleteWheelRig)
+        {
+            instance.bodyPivot.localRotation = Quaternion.identity;
+            ResetWheelRig(instance.frontWheels);
+            ResetWheelRig(instance.rearWheels);
+
+            vehicleController.BodyMesh = instance.bodyPivot;
+            vehicleController.FrontWheels =
+                CloneWheelArray(instance.frontWheels);
+            vehicleController.RearWheels =
+                CloneWheelArray(instance.rearWheels);
+        }
+
+        if (vehicleHitbox != null)
+        {
+            vehicleHitbox.center = vehicle.GameplayColliderCenter;
+            vehicleHitbox.size = vehicle.GameplayColliderSize;
+        }
+    }
+
+    private static void TryCreateWheelRig(
+        VehicleVisualInstance instance,
+        Transform visualRootTransform)
+    {
+        Transform frontLeft =
+            FindWheelVisual(visualRootTransform, "wheel_fl");
+        Transform frontRight =
+            FindWheelVisual(visualRootTransform, "wheel_fr");
+        Transform rearLeft =
+            FindWheelVisual(visualRootTransform, "wheel_rl");
+        Transform rearRight =
+            FindWheelVisual(visualRootTransform, "wheel_rr");
+
+        if (frontLeft == null
+            || frontRight == null
+            || rearLeft == null
+            || rearRight == null)
+        {
+            return;
+        }
+
+        instance.frontWheels = new[]
+        {
+            CreateWheelProxy(instance.container.transform, frontLeft, "WheelFL"),
+            CreateWheelProxy(instance.container.transform, frontRight, "WheelFR")
+        };
+        instance.rearWheels = new[]
+        {
+            CreateWheelProxy(instance.container.transform, rearLeft, "WheelRL"),
+            CreateWheelProxy(instance.container.transform, rearRight, "WheelRR")
+        };
+    }
+
+    private static Transform FindWheelVisual(
+        Transform root,
+        string wheelToken)
+    {
+        Transform[] descendants = root.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < descendants.Length; i++)
+        {
+            Transform candidate = descendants[i];
+            if (candidate == root
+                || candidate.GetComponent<Renderer>() == null)
+            {
+                continue;
+            }
+
+            string normalizedName =
+                candidate.name.Replace("-", "_").ToLowerInvariant();
+            if (normalizedName.Contains(wheelToken))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private static Transform CreateWheelProxy(
+        Transform container,
+        Transform wheelVisual,
+        string proxyName)
+    {
+        Vector3 localPosition =
+            container.InverseTransformPoint(wheelVisual.position);
+        Quaternion localRotation =
+            Quaternion.Inverse(container.rotation) * wheelVisual.rotation;
+
+        GameObject proxyObject = new GameObject(proxyName);
+        Transform proxy = proxyObject.transform;
+        proxy.SetParent(container, false);
+        proxy.localPosition = localPosition;
+        proxy.localRotation = Quaternion.identity;
+
+        GameObject axleObject = new GameObject($"{proxyName} Axel");
+        Transform axle = axleObject.transform;
+        axle.SetParent(proxy, false);
+
+        wheelVisual.SetParent(axle, true);
+        wheelVisual.localPosition = Vector3.zero;
+        wheelVisual.localRotation = localRotation;
+        return proxy;
+    }
+
+    private static Transform[] CloneWheelArray(Transform[] source)
+    {
+        if (source == null)
+        {
+            return Array.Empty<Transform>();
+        }
+
+        Transform[] copy = new Transform[source.Length];
+        Array.Copy(source, copy, source.Length);
+        return copy;
+    }
+
+    private static void ResetWheelRig(Transform[] wheels)
+    {
+        if (wheels == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < wheels.Length; i++)
+        {
+            Transform wheel = wheels[i];
+            if (wheel == null)
+            {
+                continue;
+            }
+
+            wheel.localRotation = Quaternion.identity;
+            if (wheel.childCount > 0)
+            {
+                wheel.GetChild(0).localRotation = Quaternion.identity;
             }
         }
     }

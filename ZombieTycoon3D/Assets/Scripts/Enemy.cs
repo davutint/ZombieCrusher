@@ -29,6 +29,7 @@ public class Enemy : MonoBehaviour
     private bool[] initialColliderStates;
     private Renderer animationRenderer;
     private float currentHealth;
+    private bool initialAgentState;
     private bool initialAnimatorState;
     private bool animationGameplaySuppressed;
     private bool aiGameplaySuppressed;
@@ -72,6 +73,8 @@ public class Enemy : MonoBehaviour
         {
             animator = GetComponent<Animator>();
         }
+
+        initialAgentState = agent != null && agent.enabled;
 
         if (meshObject != null)
         {
@@ -240,7 +243,17 @@ public class Enemy : MonoBehaviour
 
     private void ResetAgent(Vector3 position)
     {
-        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
+        if (agent == null)
+        {
+            return;
+        }
+
+        if (initialAgentState && !agent.enabled)
+        {
+            agent.enabled = true;
+        }
+
+        if (!agent.enabled || !agent.isOnNavMesh)
         {
             return;
         }
@@ -307,8 +320,18 @@ public class Enemy : MonoBehaviour
 
     public void DestroyIt()
     {
-        if (isDead) return;
+        TryDestroy();
+    }
+
+    public bool TryDestroy()
+    {
+        if (isDead)
+        {
+            return false;
+        }
+
         Die();
+        return true;
     }
 
     private void Die()

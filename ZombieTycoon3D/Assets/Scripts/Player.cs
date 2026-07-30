@@ -1,7 +1,4 @@
-using System;
-using DestroyIt;
 using UnityEngine;
-using System.Collections;
 
 public class Player : MonoBehaviour
 {
@@ -10,9 +7,13 @@ public class Player : MonoBehaviour
     [SerializeField, Min(0.1f)] private float impactPower = 1f;
     [SerializeField] private float minImpactSpeed = 10f; // Zombiyi yok etmek için gereken minimum hız
 
-    [SerializeField] private int damage;
-    // Patlama efekti için prefab (Inspector'den atanmalı)
+    [SerializeField, Min(0f)] private float damage = 0.5f;
     [SerializeField] private GameObject explosionEffectPrefab;
+    private const float ExplosionEffectLifetime = 3f;
+    private const int ExplosionEffectInitialPoolSize = 1;
+    private const int ExplosionEffectMaximumPoolSize = 4;
+    private DeathEffectPool effectPool;
+    private VehicleImpactFeedback impactFeedback;
     
     // Oyuncunun maksimum canı
     [SerializeField] private float maxHealth = 100f;
@@ -37,6 +38,16 @@ public class Player : MonoBehaviour
             rb = GetComponent<Rigidbody>();
         }
 
+        if (impactFeedback == null)
+        {
+            impactFeedback = GetComponent<VehicleImpactFeedback>();
+        }
+
+        if (effectPool == null)
+        {
+            effectPool = FindFirstObjectByType<DeathEffectPool>();
+        }
+
         vehicleRenderers = GetComponentsInChildren<Renderer>(true);
         vehicleColliders = GetComponentsInChildren<Collider>(true);
         initialRendererStates = new bool[vehicleRenderers.Length];
@@ -55,28 +66,46 @@ public class Player : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    private void Start()
+    {
+        effectPool?.Register(
+            explosionEffectPrefab,
+            ExplosionEffectInitialPoolSize,
+            ExplosionEffectMaximumPoolSize);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Ragdoll"))
         {
             float currentSpeed = rb.linearVelocity.magnitude;
-            Debug.Log("Çarpma Hızı: " + currentSpeed);
-            
             float effectiveMinimumImpactSpeed =
                 minImpactSpeed / Mathf.Max(0.1f, impactPower);
             if (currentSpeed >= effectiveMinimumImpactSpeed)
             {
-                Debug.Log("Minimum hız aşıldı! Zombie yok ediliyor...");
                 Enemy enemy = other.gameObject.GetComponentInParent<Enemy>();
-                if (enemy != null)
+                if (enemy != null && enemy.TryDestroy())
                 {
-                    enemy.DestroyIt();
+                    float speedStrength = Mathf.InverseLerp(
+                        effectiveMinimumImpactSpeed,
+                        effectiveMinimumImpactSpeed * 3.5f,
+                        currentSpeed);
+                    float attachmentStrength = Mathf.InverseLerp(
+                        0.75f,
+                        1.75f,
+                        impactPower);
+                    float feedbackStrength = Mathf.Clamp01(
+                        0.2f
+                        + speedStrength * 0.55f
+                        + attachmentStrength * 0.25f);
+                    Vector3 impactPosition =
+                        other.ClosestPoint(transform.position);
+                    impactFeedback?.PlayZombieImpact(
+                        impactPosition,
+                        rb.linearVelocity,
+                        feedbackStrength);
                     TakeDamage(damage);
                 }
-            }
-            else
-            {
-                Debug.Log("Çarpma hızı yeterli değil. Minimum gerekli hız: " + minImpactSpeed);
             }
         }
     }
@@ -88,8 +117,6 @@ public class Player : MonoBehaviour
             return;
         
         currentHealth -= damage;
-       //update ui
-        Debug.Log("Alınan Hasar: " + damage + " - Kalan Can: " + currentHealth);
 
         if (currentHealth <= 0)
         {
@@ -104,12 +131,23 @@ public class Player : MonoBehaviour
             return;
         
         isExploded = true;
-        Debug.Log("Araç Patladı!");
 
-        // Patlama efektini spawn et (Prefab üzerinden)
         if (explosionEffectPrefab != null)
         {
-            Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+            bool playedFromPool = effectPool != null
+                && effectPool.Play(
+                    explosionEffectPrefab,
+                    transform.position,
+                    Quaternion.identity,
+                    ExplosionEffectLifetime);
+            if (!playedFromPool)
+            {
+                GameObject explosion = Instantiate(
+                    explosionEffectPrefab,
+                    transform.position,
+                    Quaternion.identity);
+                Destroy(explosion, ExplosionEffectLifetime);
+            }
         }
         
         // Aracın görsel bileşenlerini devre dışı bırak (destroy edilmiyor, sadece görünmez yapılıyor)
@@ -137,18 +175,6 @@ public class Player : MonoBehaviour
       
     }
 
-    private int CalculateEarnedCoins()
-    {
-        // Burada oyun süresine, öldürülen zombie sayısına vs. göre coin hesaplaması yapabilirsiniz
-        return 100; // Şimdilik sabit bir değer
-    }
-
-  
-
-    // VehicleStatus'u döndüren property
-
-    // Upgrade sistemi için gereken metodlar
-    
     /// <summary>
     /// Araç için maksimum can değerini döndürür
     /// </summary>
@@ -177,10 +203,6 @@ public class Player : MonoBehaviour
         // Mevcut canı yeni maksimum değere göre güncelle
         currentHealth = maxHealth * healthPercentage;
         
-        // UI'ı güncelle
-        
-        
-        Debug.Log($"Player: Maksimum can değeri {maxHealth} olarak güncellendi. Mevcut can: {currentHealth}");
     }
     
     /// <summary>

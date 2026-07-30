@@ -1,62 +1,46 @@
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using RenownedGames.AITree;
 using UnityEngine;
+using UnityEngine.AI;
 
 [DisallowMultipleComponent]
 public sealed class ZombieAiTickManager : MonoBehaviour
 {
-    [Header("AI Tick Budget")]
-    [SerializeField, Min(1)] private int tickIntervalFrames = 4;
+    [Header("Direct Steering")]
+    [SerializeField, Min(0.1f)] private float speedMultiplier = 1f;
+    [SerializeField, Min(0f)] private float stoppingDistance = 2f;
+    [SerializeField, Min(1f)] private float turnSpeed = 540f;
 
     private readonly List<Entry> entries = new List<Entry>(512);
     private readonly HashSet<Enemy> registeredEnemies = new HashSet<Enemy>();
 
-    private BehaviourTreeUpdate updateBehaviourTree;
-    private int nextEntryIndex;
+    private Transform navigationTarget;
 
     public int RegisteredCount => entries.Count;
     public int TickedLastFrame { get; private set; }
 
-    private delegate State BehaviourTreeUpdate(BehaviourTree tree);
-
     private void Awake()
     {
-        MethodInfo updateMethod = typeof(BehaviourTree).GetMethod(
-            "OnUpdate",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
-        if (updateMethod == null)
+        OldSpawnManager spawnManager = GetComponent<OldSpawnManager>();
+        if (spawnManager == null || spawnManager.player == null)
         {
-            Debug.LogError("ZombieAiTickManager: BehaviourTree.OnUpdate could not be resolved.", this);
+            Debug.LogError(
+                "ZombieAiTickManager: OldSpawnManager with a player target is required.",
+                this);
             enabled = false;
             return;
         }
 
-        try
-        {
-            updateBehaviourTree = (BehaviourTreeUpdate)Delegate.CreateDelegate(
-                typeof(BehaviourTreeUpdate),
-                updateMethod);
-        }
-        catch (ArgumentException exception)
-        {
-            Debug.LogError(
-                $"ZombieAiTickManager: Behaviour tree update delegate could not be created. {exception.Message}",
-                this);
-            enabled = false;
-        }
+        navigationTarget = spawnManager.player;
     }
 
     private void OnEnable()
     {
-        int activationFrame = Time.frameCount + 1;
         for (int i = 0; i < entries.Count; i++)
         {
             Entry entry = entries[i];
             entry.Managed = false;
-            entry.ActivationFrame = activationFrame;
+            BeginManaging(ref entry);
             entries[i] = entry;
         }
     }
@@ -64,51 +48,21 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     private void Update()
     {
         TickedLastFrame = 0;
-
-        if (updateBehaviourTree == null)
-        {
-            return;
-        }
-
         RemoveDestroyedEntries();
-        int entryCount = entries.Count;
-        if (entryCount == 0)
+
+        if (navigationTarget == null)
         {
             return;
         }
 
-        int interval = Mathf.Max(1, tickIntervalFrames);
-        int tickBudget = Mathf.CeilToInt(entryCount / (float)interval);
-        int visitedCount = 0;
-
-        while (visitedCount < entryCount && TickedLastFrame < tickBudget)
+        float deltaTime = Time.deltaTime;
+        for (int i = 0; i < entries.Count; i++)
         {
-            if (nextEntryIndex >= entries.Count)
-            {
-                nextEntryIndex = 0;
-            }
-
-            int entryIndex = nextEntryIndex;
-            nextEntryIndex++;
-            visitedCount++;
-
-            Entry entry = entries[entryIndex];
+            Entry entry = entries[i];
             if (!entry.Managed)
             {
-                if (Time.frameCount < entry.ActivationFrame)
-                {
-                    continue;
-                }
-
-                entry.Tree.SetUpdateMode(UpdateMode.Custom);
-                entry.Tree.SetTickRate(interval);
-                entry.Runner.enabled = false;
-                entry.Managed = true;
-                entries[entryIndex] = entry;
-            }
-            else if (entry.Tree.GetTickRate() != interval)
-            {
-                entry.Tree.SetTickRate(interval);
+                BeginManaging(ref entry);
+                entries[i] = entry;
             }
 
             if (!entry.Enemy.CanTickAi)
@@ -116,7 +70,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
                 continue;
             }
 
-            updateBehaviourTree(entry.Tree);
+            Steer(entry, navigationTarget.position, deltaTime);
             TickedLastFrame++;
         }
     }
@@ -133,30 +87,38 @@ public sealed class ZombieAiTickManager : MonoBehaviour
 
     internal void Register(Enemy enemy, BehaviourRunner runner)
     {
-        if (!isActiveAndEnabled ||
-            updateBehaviourTree == null ||
-            enemy == null ||
-            runner == null ||
-            registeredEnemies.Contains(enemy))
+        if (!isActiveAndEnabled
+            || enemy == null
+            || runner == null
+            || registeredEnemies.Contains(enemy))
         {
             return;
         }
 
         BehaviourTree tree = runner.GetBehaviourTree();
-        if (tree == null)
+        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
+        if (tree == null || agent == null)
         {
             return;
         }
 
         registeredEnemies.Add(enemy);
-        entries.Add(new Entry(
+        Entry entry = new Entry(
             enemy,
             runner,
             tree,
+            agent,
+            agent.speed,
+            agent.radius,
+            agent.enabled,
+            agent.updatePosition,
+            agent.updateRotation,
+            agent.isStopped,
             tree.GetUpdateMode(),
             tree.GetTickRate(),
-            runner.enabled,
-            Time.frameCount + 1));
+            runner.enabled);
+        BeginManaging(ref entry);
+        entries.Add(entry);
     }
 
     internal void Unregister(Enemy enemy)
@@ -178,9 +140,54 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             int lastIndex = entries.Count - 1;
             entries[i] = entries[lastIndex];
             entries.RemoveAt(lastIndex);
-            nextEntryIndex = 0;
             break;
         }
+    }
+
+    private void BeginManaging(ref Entry entry)
+    {
+        entry.Tree.SetUpdateMode(UpdateMode.Custom);
+        entry.Runner.enabled = false;
+
+        if (entry.Agent.enabled && entry.Agent.isOnNavMesh)
+        {
+            entry.Agent.ResetPath();
+            entry.Agent.isStopped = true;
+        }
+
+        entry.Agent.enabled = false;
+        entry.Managed = true;
+    }
+
+    private void Steer(Entry entry, Vector3 targetPosition, float deltaTime)
+    {
+        Transform enemyTransform = entry.Enemy.transform;
+        Vector3 toTarget = targetPosition - enemyTransform.position;
+        toTarget.y = 0f;
+
+        float distance = toTarget.magnitude;
+        float stopRadius = Mathf.Max(stoppingDistance, entry.AgentRadius);
+        if (distance <= stopRadius || distance <= Mathf.Epsilon)
+        {
+            return;
+        }
+
+        Vector3 direction = toTarget / distance;
+        float moveDistance = Mathf.Min(
+            entry.MoveSpeed * Mathf.Max(0.1f, speedMultiplier) * deltaTime,
+            distance - stopRadius);
+        enemyTransform.position += direction * moveDistance;
+
+        if (!entry.OriginalUpdateRotation)
+        {
+            return;
+        }
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+        enemyTransform.rotation = Quaternion.RotateTowards(
+            enemyTransform.rotation,
+            targetRotation,
+            Mathf.Max(1f, turnSpeed) * deltaTime);
     }
 
     private void RemoveDestroyedEntries()
@@ -197,12 +204,37 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             int lastIndex = entries.Count - 1;
             entries[i] = entries[lastIndex];
             entries.RemoveAt(lastIndex);
-            nextEntryIndex = 0;
         }
     }
 
     private static void RestoreEntry(Entry entry)
     {
+        if (entry.Agent != null)
+        {
+            if (entry.AgentWasEnabled && !entry.Agent.enabled)
+            {
+                if (NavMesh.SamplePosition(
+                    entry.Enemy.transform.position,
+                    out NavMeshHit hit,
+                    5f,
+                    NavMesh.AllAreas))
+                {
+                    entry.Enemy.transform.position = hit.position;
+                    entry.Agent.enabled = true;
+                }
+            }
+
+            if (entry.Agent.enabled)
+            {
+                entry.Agent.updatePosition = entry.OriginalUpdatePosition;
+                entry.Agent.updateRotation = entry.OriginalUpdateRotation;
+                if (entry.Agent.isOnNavMesh)
+                {
+                    entry.Agent.isStopped = entry.OriginalIsStopped;
+                }
+            }
+        }
+
         if (entry.Tree != null)
         {
             entry.Tree.SetUpdateMode(entry.OriginalUpdateMode);
@@ -221,28 +253,46 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             Enemy enemy,
             BehaviourRunner runner,
             BehaviourTree tree,
+            NavMeshAgent agent,
+            float moveSpeed,
+            float agentRadius,
+            bool agentWasEnabled,
+            bool originalUpdatePosition,
+            bool originalUpdateRotation,
+            bool originalIsStopped,
             UpdateMode originalUpdateMode,
             int originalTickRate,
-            bool runnerWasEnabled,
-            int activationFrame)
+            bool runnerWasEnabled)
         {
             Enemy = enemy;
             Runner = runner;
             Tree = tree;
+            Agent = agent;
+            MoveSpeed = moveSpeed;
+            AgentRadius = agentRadius;
+            AgentWasEnabled = agentWasEnabled;
+            OriginalUpdatePosition = originalUpdatePosition;
+            OriginalUpdateRotation = originalUpdateRotation;
+            OriginalIsStopped = originalIsStopped;
             OriginalUpdateMode = originalUpdateMode;
             OriginalTickRate = originalTickRate;
             RunnerWasEnabled = runnerWasEnabled;
-            ActivationFrame = activationFrame;
             Managed = false;
         }
 
         public Enemy Enemy;
         public BehaviourRunner Runner;
         public BehaviourTree Tree;
+        public NavMeshAgent Agent;
+        public float MoveSpeed;
+        public float AgentRadius;
+        public bool AgentWasEnabled;
+        public bool OriginalUpdatePosition;
+        public bool OriginalUpdateRotation;
+        public bool OriginalIsStopped;
         public UpdateMode OriginalUpdateMode;
         public int OriginalTickRate;
         public bool RunnerWasEnabled;
-        public int ActivationFrame;
         public bool Managed;
     }
 }

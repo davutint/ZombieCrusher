@@ -8,7 +8,7 @@
             </ui:VisualElement>
             <ui:VisualElement class="balance-block">
                 <ui:Label text="BAKİYE" class="eyebrow" />
-                <ui:Label text="—" class="balance-value" />
+                <ui:Label name="balance-value" text="0 HURDA" class="balance-value" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -64,9 +64,76 @@
     </ui:VisualElement>
 
     <ui:VisualElement name="mission-hud" class="mission-hud">
-        <ui:VisualElement class="mission-timer-card">
-            <ui:Label text="GÖREV SÜRESİ" class="mission-kicker" />
-            <ui:Label name="mission-timer" text="2:00" class="mission-timer" />
+        <ui:VisualElement class="mission-top-row">
+            <ui:VisualElement name="mission-objective-card" class="mission-hud-card mission-objective-card">
+                <ui:Label text="İMHA HEDEFİ" class="mission-kicker" />
+                <ui:Label name="mission-kills" text="0 / 100" class="mission-primary-value" />
+                <ui:Label name="mission-objective-status" text="100 KILL KALDI" class="mission-support-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-hud-card mission-timer-card">
+                <ui:Label text="GÖREV SÜRESİ" class="mission-kicker" />
+                <ui:Label name="mission-timer" text="2:00" class="mission-timer" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-hud-card mission-score-card">
+                <ui:Label text="PUAN" class="mission-kicker" />
+                <ui:Label name="mission-score" text="0" class="mission-primary-value" />
+                <ui:Label text="HEDEF SONRASI ×2" class="mission-support-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="mission-health-card">
+            <ui:VisualElement class="mission-health-copy">
+                <ui:Label text="ARAÇ DAYANIKLILIĞI" class="mission-kicker" />
+                <ui:Label name="mission-health" text="100 / 100" class="mission-health-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-health-track">
+                <ui:VisualElement name="mission-health-fill" class="mission-health-fill" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="mission-result" class="mission-result">
+        <ui:VisualElement name="mission-result-panel" class="mission-result-panel">
+            <ui:Label text="SAFEHOUSE GÖREV RAPORU" class="mission-result-eyebrow" />
+            <ui:Label name="result-status" text="BAŞARILI" class="mission-result-status" />
+            <ui:Label name="result-title" text="GÖREV TAMAMLANDI" class="mission-result-title" />
+            <ui:Label name="result-description" text="" class="mission-result-description" />
+            <ui:VisualElement class="mission-result-metrics">
+                <ui:VisualElement class="mission-result-metric">
+                    <ui:Label text="İMHA" class="mission-result-metric-label" />
+                    <ui:Label name="result-kills" text="0 / 100" class="mission-result-metric-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-metric">
+                    <ui:Label text="PUAN" class="mission-result-metric-label" />
+                    <ui:Label name="result-score" text="0" class="mission-result-metric-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-metric">
+                    <ui:Label text="BONUS KILL" class="mission-result-metric-label" />
+                    <ui:Label name="result-bonus-kills" text="0" class="mission-result-metric-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-metric">
+                    <ui:Label text="ARAÇ" class="mission-result-metric-label" />
+                    <ui:Label name="result-health" text="0 / 100" class="mission-result-metric-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-result-reward">
+                <ui:VisualElement class="mission-result-reward-row">
+                    <ui:Label text="KILL HURDASI" class="mission-result-reward-label" />
+                    <ui:Label name="result-kill-scrap" text="+0" class="mission-result-reward-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-reward-row">
+                    <ui:Label text="GÖREV BONUSU" class="mission-result-reward-label" />
+                    <ui:Label name="result-success-bonus" text="+0" class="mission-result-reward-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-reward-total">
+                    <ui:Label text="TOPLAM KAZANÇ" class="mission-result-reward-total-label" />
+                    <ui:Label name="result-total-scrap" text="+0 HURDA" class="mission-result-reward-total-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-reward-balance">
+                    <ui:Label text="YENİ BAKİYE" class="mission-result-reward-label" />
+                    <ui:Label name="result-balance" text="0 HURDA" class="mission-result-reward-balance-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="result-button" text="GARAJA DÖN" class="mission-result-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

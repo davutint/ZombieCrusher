@@ -25,6 +25,7 @@ public sealed class GarageUiController : MonoBehaviour
 
     [SerializeField] private UIDocument document;
     [SerializeField] private GarageBuildState buildState;
+    [SerializeField] private GarageEconomyController economy;
     [SerializeField] private GaragePreviewController previewController;
 
     private readonly List<StatElements> statElements = new();
@@ -33,7 +34,27 @@ public sealed class GarageUiController : MonoBehaviour
 
     private VisualElement garageRoot;
     private VisualElement missionHud;
+    private VisualElement missionObjectiveCard;
     private Label missionTimer;
+    private Label missionKills;
+    private Label missionObjectiveStatus;
+    private Label missionScore;
+    private Label missionHealth;
+    private VisualElement missionHealthFill;
+    private VisualElement missionResult;
+    private VisualElement missionResultPanel;
+    private Label resultStatus;
+    private Label resultTitle;
+    private Label resultDescription;
+    private Label resultKills;
+    private Label resultScore;
+    private Label resultBonusKills;
+    private Label resultHealth;
+    private Label resultKillScrap;
+    private Label resultSuccessBonus;
+    private Label resultTotalScrap;
+    private Label resultBalance;
+    private Button resultButton;
     private Button assemblyTab;
     private Button galleryTab;
     private Button partsTab;
@@ -49,6 +70,7 @@ public sealed class GarageUiController : MonoBehaviour
     private Button contextAction;
     private Label contextHint;
     private Label selectedBuildLabel;
+    private Label balanceValue;
     private Button missionButton;
     private VisualElement previewViewport;
 
@@ -56,11 +78,13 @@ public sealed class GarageUiController : MonoBehaviour
     private Vector2 previousPointerPosition;
 
     public event Action MissionRequested;
+    public event Action ResultAcknowledged;
 
     private void Reset()
     {
         document = GetComponent<UIDocument>();
         buildState = GetComponent<GarageBuildState>();
+        economy = GetComponent<GarageEconomyController>();
         previewController = GetComponent<GaragePreviewController>();
     }
 
@@ -76,15 +100,23 @@ public sealed class GarageUiController : MonoBehaviour
             buildState = GetComponent<GarageBuildState>();
         }
 
+        if (economy == null)
+        {
+            economy = GetComponent<GarageEconomyController>();
+        }
+
         if (previewController == null)
         {
             previewController = GetComponent<GaragePreviewController>();
         }
 
-        if (document == null || buildState == null || previewController == null)
+        if (document == null
+            || buildState == null
+            || economy == null
+            || previewController == null)
         {
             Debug.LogError(
-                "GarageUiController: UIDocument, GarageBuildState and GaragePreviewController are required.",
+                "GarageUiController: UIDocument, GarageBuildState, GarageEconomyController and GaragePreviewController are required.",
                 this);
             enabled = false;
             return;
@@ -92,6 +124,7 @@ public sealed class GarageUiController : MonoBehaviour
 
         BindVisualTree();
         buildState.Changed += Refresh;
+        economy.Changed += Refresh;
         Refresh();
     }
 
@@ -101,12 +134,18 @@ public sealed class GarageUiController : MonoBehaviour
         {
             buildState.Changed -= Refresh;
         }
+
+        if (economy != null)
+        {
+            economy.Changed -= Refresh;
+        }
     }
 
     public void ShowGarage()
     {
         garageRoot.style.display = DisplayStyle.Flex;
         missionHud.style.display = DisplayStyle.None;
+        missionResult.style.display = DisplayStyle.None;
         previewController.SetVisible(true);
         activeScreen = GarageScreen.Assembly;
         buildState.ClearPreview();
@@ -117,6 +156,7 @@ public sealed class GarageUiController : MonoBehaviour
     {
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.Flex;
+        missionResult.style.display = DisplayStyle.None;
         previewController.SetVisible(false);
     }
 
@@ -133,12 +173,120 @@ public sealed class GarageUiController : MonoBehaviour
         missionTimer.text = $"{minutesPart:0}:{secondsPart:00}";
     }
 
+    public void UpdateMissionProgress(MissionProgress progress)
+    {
+        if (missionKills == null)
+        {
+            return;
+        }
+
+        missionKills.text = $"{progress.Kills} / {progress.KillTarget}";
+        missionScore.text = progress.Score.ToString("N0");
+        missionObjectiveCard.EnableInClassList(
+            "mission-objective-card--complete",
+            progress.TargetReached);
+        missionObjectiveStatus.text = progress.TargetReached
+            ? $"HEDEF TAMAM · BONUS KILL {progress.BonusKillScore:N0} PUAN"
+            : $"{Mathf.Max(0, progress.KillTarget - progress.Kills)} KILL KALDI";
+    }
+
+    public void UpdateMissionHealth(float currentHealth, float maximumHealth)
+    {
+        if (missionHealth == null)
+        {
+            return;
+        }
+
+        float safeMaximum = Mathf.Max(1f, maximumHealth);
+        float safeCurrent = Mathf.Clamp(currentHealth, 0f, safeMaximum);
+        float ratio = safeCurrent / safeMaximum;
+        missionHealth.text =
+            $"{Mathf.CeilToInt(safeCurrent)} / {Mathf.CeilToInt(safeMaximum)}";
+        missionHealthFill.style.width = Length.Percent(ratio * 100f);
+        missionHealthFill.EnableInClassList(
+            "mission-health-fill--critical",
+            ratio <= 0.3f);
+    }
+
+    public void ShowMissionResult(MissionResult result)
+    {
+        garageRoot.style.display = DisplayStyle.None;
+        missionHud.style.display = DisplayStyle.None;
+        missionResult.style.display = DisplayStyle.Flex;
+        previewController.SetVisible(false);
+
+        resultStatus.text = result.Succeeded ? "BAŞARILI" : "BAŞARISIZ";
+        resultTitle.text = result.Succeeded
+            ? "GÖREV TAMAMLANDI"
+            : result.EndReason == MissionEndReason.VehicleDestroyed
+                ? "ARAÇ PARÇALANDI"
+                : "HEDEF KAÇTI";
+        resultDescription.text = result.Succeeded
+            ? "İmha hedefi tamamlandı. Safehouse ekibi dönüş için hazır."
+            : result.EndReason == MissionEndReason.VehicleDestroyed
+                ? "Araç görev alanında kullanılamaz hâle geldi."
+                : "Süre doldu ancak imha hedefi tamamlanamadı.";
+
+        resultKills.text =
+            $"{result.Progress.Kills} / {result.Progress.KillTarget}";
+        resultScore.text = result.Progress.Score.ToString("N0");
+        resultBonusKills.text = result.Progress.BonusKills.ToString("N0");
+        resultHealth.text =
+            $"{Mathf.CeilToInt(Mathf.Max(0f, result.RemainingHealth))}"
+            + $" / {Mathf.CeilToInt(Mathf.Max(1f, result.MaximumHealth))}";
+        resultKillScrap.text = $"+{result.Reward.KillScrap:N0}";
+        resultSuccessBonus.text = $"+{result.Reward.CompletionBonus:N0}";
+        resultTotalScrap.text = $"+{result.Reward.TotalScrap:N0} HURDA";
+        resultBalance.text = $"{result.Reward.BalanceAfter:N0} HURDA";
+
+        missionResultPanel.EnableInClassList(
+            "mission-result-panel--success",
+            result.Succeeded);
+        missionResultPanel.EnableInClassList(
+            "mission-result-panel--failure",
+            !result.Succeeded);
+        resultStatus.EnableInClassList(
+            "mission-result-status--success",
+            result.Succeeded);
+        resultStatus.EnableInClassList(
+            "mission-result-status--failure",
+            !result.Succeeded);
+    }
+
     private void BindVisualTree()
     {
         VisualElement root = document.rootVisualElement;
         garageRoot = RequireElement<VisualElement>(root, "garage-root");
         missionHud = RequireElement<VisualElement>(root, "mission-hud");
+        missionObjectiveCard =
+            RequireElement<VisualElement>(root, "mission-objective-card");
         missionTimer = RequireElement<Label>(root, "mission-timer");
+        missionKills = RequireElement<Label>(root, "mission-kills");
+        missionObjectiveStatus =
+            RequireElement<Label>(root, "mission-objective-status");
+        missionScore = RequireElement<Label>(root, "mission-score");
+        missionHealth = RequireElement<Label>(root, "mission-health");
+        missionHealthFill =
+            RequireElement<VisualElement>(root, "mission-health-fill");
+        missionResult = RequireElement<VisualElement>(root, "mission-result");
+        missionResultPanel =
+            RequireElement<VisualElement>(root, "mission-result-panel");
+        resultStatus = RequireElement<Label>(root, "result-status");
+        resultTitle = RequireElement<Label>(root, "result-title");
+        resultDescription =
+            RequireElement<Label>(root, "result-description");
+        resultKills = RequireElement<Label>(root, "result-kills");
+        resultScore = RequireElement<Label>(root, "result-score");
+        resultBonusKills =
+            RequireElement<Label>(root, "result-bonus-kills");
+        resultHealth = RequireElement<Label>(root, "result-health");
+        resultKillScrap = RequireElement<Label>(root, "result-kill-scrap");
+        resultSuccessBonus =
+            RequireElement<Label>(root, "result-success-bonus");
+        resultTotalScrap =
+            RequireElement<Label>(root, "result-total-scrap");
+        resultBalance = RequireElement<Label>(root, "result-balance");
+        resultButton = RequireElement<Button>(root, "result-button");
         assemblyTab = RequireElement<Button>(root, "assembly-tab");
         galleryTab = RequireElement<Button>(root, "gallery-tab");
         partsTab = RequireElement<Button>(root, "parts-tab");
@@ -154,6 +302,7 @@ public sealed class GarageUiController : MonoBehaviour
         contextAction = RequireElement<Button>(root, "context-action");
         contextHint = RequireElement<Label>(root, "context-hint");
         selectedBuildLabel = RequireElement<Label>(root, "selected-build");
+        balanceValue = RequireElement<Label>(root, "balance-value");
         missionButton = RequireElement<Button>(root, "mission-button");
         previewViewport = RequireElement<VisualElement>(root, "preview-viewport");
 
@@ -161,6 +310,7 @@ public sealed class GarageUiController : MonoBehaviour
         galleryTab.clicked += () => SwitchScreen(GarageScreen.Gallery);
         partsTab.clicked += () => SwitchScreen(GarageScreen.Parts);
         missionButton.clicked += () => MissionRequested?.Invoke();
+        resultButton.clicked += () => ResultAcknowledged?.Invoke();
 
         previewViewport.RegisterCallback<PointerDownEvent>(OnPreviewPointerDown);
         previewViewport.RegisterCallback<PointerMoveEvent>(OnPreviewPointerMove);
@@ -184,6 +334,7 @@ public sealed class GarageUiController : MonoBehaviour
             return;
         }
 
+        balanceValue.text = $"{economy.Scrap:N0} HURDA";
         UpdateTabs();
         PopulateLeftRail();
         PopulateRightRail();
@@ -258,7 +409,9 @@ public sealed class GarageUiController : MonoBehaviour
         {
             GarageVehicleDefinition vehicle = vehicles[i];
             bool selected = vehicle == buildState.DisplayedVehicle;
-            string suffix = buildState.IsVehicleOwned(vehicle) ? " · SAHİP" : string.Empty;
+            string suffix = buildState.IsVehicleOwned(vehicle)
+                ? " · SAHİP"
+                : $" · {vehicle.Price:N0} HURDA";
             Button button = CreateListButton(vehicle.DisplayName + suffix, selected);
             button.clicked += () => buildState.PreviewVehicle(vehicle);
             leftList.Add(button);
@@ -305,7 +458,7 @@ public sealed class GarageUiController : MonoBehaviour
             bool selected = attachment == buildState.PreviewAttachment;
             string suffix = buildState.IsAttachmentOwned(attachment)
                 ? " · SAHİP"
-                : string.Empty;
+                : $" · {attachment.Price:N0} HURDA";
             Button button = CreateListButton(
                 attachment.DisplayName + suffix,
                 selected);
@@ -386,12 +539,19 @@ public sealed class GarageUiController : MonoBehaviour
         detailDescription.text = vehicle != null ? vehicle.Description : string.Empty;
 
         bool owned = buildState.IsVehicleOwned(vehicle);
-        contextAction.text = owned ? "ARACI SEÇ" : "EDİNME KARARI BEKLİYOR";
-        contextAction.SetEnabled(owned);
+        contextAction.text = owned
+            ? "ARACI SEÇ"
+            : vehicle != null
+                ? $"SATIN AL · {vehicle.Price:N0} HURDA"
+                : "ARAÇ SEÇ";
+        contextAction.SetEnabled(
+            vehicle != null && (owned || economy.CanAfford(vehicle.Price)));
         contextAction.clicked += HandleContextAction;
         contextHint.text = owned
             ? "Seçim Montaj ekranındaki aktif aracı değiştirir."
-            : "Fiyat, para ve kilit sözleşmesi ayrıca onaylanacak.";
+            : vehicle != null && economy.CanAfford(vehicle.Price)
+                ? "Satın alma aracı envantere ekler; otomatik seçmez."
+                : "Bu araç için yeterli Hurda yok.";
     }
 
     private void PopulatePartDetails()
@@ -403,12 +563,20 @@ public sealed class GarageUiController : MonoBehaviour
             attachment != null ? attachment.Description : "Uyumlu parçayı soldan seç.";
 
         bool owned = buildState.IsAttachmentOwned(attachment);
-        contextAction.text = owned ? "MONTAJDA TAK" : "SATIN ALMA KARARI BEKLİYOR";
-        contextAction.SetEnabled(owned);
+        contextAction.text = owned
+            ? "MONTAJDA TAK"
+            : attachment != null
+                ? $"SATIN AL · {attachment.Price:N0} HURDA"
+                : "PARÇA SEÇ";
+        contextAction.SetEnabled(
+            attachment != null
+            && (owned || economy.CanAfford(attachment.Price)));
         contextAction.clicked += HandleContextAction;
         contextHint.text = owned
             ? "Takıldığında önizlenen statlar aktif build olur."
-            : "Parça şu anda yalnız görsel ve stat önizlemesindedir.";
+            : attachment != null && economy.CanAfford(attachment.Price)
+                ? "Satın alma parçayı envantere ekler; montaj ayrı yapılır."
+                : "Bu parça için yeterli Hurda yok.";
     }
 
     private void HandleContextAction()
@@ -420,17 +588,30 @@ public sealed class GarageUiController : MonoBehaviour
                 break;
 
             case GarageScreen.Gallery:
-                if (buildState.SelectOwnedVehicle(buildState.DisplayedVehicle))
+                GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
+                if (buildState.IsVehicleOwned(vehicle)
+                    && buildState.SelectOwnedVehicle(vehicle))
                 {
                     activeScreen = GarageScreen.Assembly;
+                    Refresh();
+                }
+                else if (economy.TryPurchaseVehicle(vehicle))
+                {
                     Refresh();
                 }
                 break;
 
             case GarageScreen.Parts:
-                if (buildState.EquipPreviewPart())
+                GarageAttachmentDefinition attachment =
+                    buildState.PreviewAttachment;
+                if (buildState.IsAttachmentOwned(attachment)
+                    && buildState.EquipPreviewPart())
                 {
                     activeScreen = GarageScreen.Assembly;
+                    Refresh();
+                }
+                else if (economy.TryPurchaseAttachment(attachment))
+                {
                     Refresh();
                 }
                 break;

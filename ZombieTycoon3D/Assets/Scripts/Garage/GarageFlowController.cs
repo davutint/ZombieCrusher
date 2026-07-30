@@ -5,9 +5,13 @@ using UnityEngine;
 public sealed class GarageFlowController : MonoBehaviour
 {
     private const float MissionDurationSeconds = 120f;
+    private const int MissionKillTarget = 100;
+    private const int NormalKillScore = 100;
+    private const int BonusKillScore = 200;
 
     [Header("Garage")]
     [SerializeField] private GarageBuildState buildState;
+    [SerializeField] private GarageEconomyController economy;
     [SerializeField] private GarageUiController garageUi;
     [SerializeField] private GarageGameplayBuildPresenter gameplayBuildPresenter;
 
@@ -20,10 +24,12 @@ public sealed class GarageFlowController : MonoBehaviour
     [SerializeField] private Player player;
     [SerializeField] private Camera gameplayCamera;
     [SerializeField] private OldSpawnManager spawnManager;
+    [SerializeField] private ScoreManager scoreManager;
 
     private Vector3 missionStartPosition;
     private Quaternion missionStartRotation;
     private bool missionActive;
+    private bool resultVisible;
     private float missionTimeRemaining;
     private Vector3 driveStartPosition;
     private Quaternion driveStartRotation;
@@ -41,9 +47,19 @@ public sealed class GarageFlowController : MonoBehaviour
             garageUi = GetComponent<GarageUiController>();
         }
 
+        if (economy == null)
+        {
+            economy = GetComponent<GarageEconomyController>();
+        }
+
         if (gameplayBuildPresenter == null)
         {
             gameplayBuildPresenter = GetComponent<GarageGameplayBuildPresenter>();
+        }
+
+        if (scoreManager == null)
+        {
+            scoreManager = FindFirstObjectByType<ScoreManager>();
         }
     }
 
@@ -52,6 +68,12 @@ public sealed class GarageFlowController : MonoBehaviour
         if (garageUi != null)
         {
             garageUi.MissionRequested += StartMission;
+            garageUi.ResultAcknowledged += HandleResultAcknowledged;
+        }
+
+        if (scoreManager != null)
+        {
+            scoreManager.ProgressChanged += HandleMissionProgressChanged;
         }
 
         EventManager.OnPlayerDeath += HandlePlayerDeath;
@@ -83,10 +105,16 @@ public sealed class GarageFlowController : MonoBehaviour
 
         missionTimeRemaining =
             Mathf.Max(0f, missionTimeRemaining - Time.unscaledDeltaTime);
+        spawnManager.SetMissionProgress(
+            (MissionDurationSeconds - missionTimeRemaining)
+            / MissionDurationSeconds);
         garageUi.UpdateMissionTimer(missionTimeRemaining);
+        garageUi.UpdateMissionHealth(
+            player.GetCurrentHealth(),
+            player.GetMaxHealth());
         if (missionTimeRemaining <= 0f)
         {
-            OpenGarage();
+            EndMission(MissionEndReason.TimeExpired);
         }
     }
 
@@ -95,6 +123,12 @@ public sealed class GarageFlowController : MonoBehaviour
         if (garageUi != null)
         {
             garageUi.MissionRequested -= StartMission;
+            garageUi.ResultAcknowledged -= HandleResultAcknowledged;
+        }
+
+        if (scoreManager != null)
+        {
+            scoreManager.ProgressChanged -= HandleMissionProgressChanged;
         }
 
         EventManager.OnPlayerDeath -= HandlePlayerDeath;
@@ -103,7 +137,8 @@ public sealed class GarageFlowController : MonoBehaviour
     private bool ValidateReferences()
     {
         bool valid = buildState != null
-                     && garageUi != null
+                      && economy != null
+                      && garageUi != null
                      && gameplayBuildPresenter != null
                      && gameplayVehicle != null
                      && vehicleRigidbody != null
@@ -112,7 +147,8 @@ public sealed class GarageFlowController : MonoBehaviour
                      && inputController != null
                      && player != null
                      && gameplayCamera != null
-                     && spawnManager != null;
+                     && spawnManager != null
+                     && scoreManager != null;
 
         if (!valid)
         {
@@ -126,7 +162,9 @@ public sealed class GarageFlowController : MonoBehaviour
 
     private void StartMission()
     {
-        if (missionActive || buildState.SelectedVehicle == null)
+        if (missionActive
+            || resultVisible
+            || buildState.SelectedVehicle == null)
         {
             return;
         }
@@ -139,6 +177,10 @@ public sealed class GarageFlowController : MonoBehaviour
         vehicleController.turn = stats.handling;
         player.ApplyVehicleStats(stats);
         player.ResetForRun();
+        scoreManager.BeginMission(
+            MissionKillTarget,
+            NormalKillScore,
+            BonusKillScore);
         gameplayBuildPresenter.ApplyBuild(
             buildState.SelectedVehicle,
             buildState.GetEquippedAttachments());
@@ -151,18 +193,61 @@ public sealed class GarageFlowController : MonoBehaviour
         gameplayCamera.enabled = true;
         SetGameplayAudioEnabled(true);
 
-        spawnManager.SetSpawningEnabled(true);
         missionActive = true;
+        resultVisible = false;
         missionTimeRemaining = MissionDurationSeconds;
+        spawnManager.BeginMission();
         garageUi.UpdateMissionTimer(missionTimeRemaining);
+        garageUi.UpdateMissionHealth(
+            player.GetCurrentHealth(),
+            player.GetMaxHealth());
         garageUi.HideGarageForMission();
     }
 
     private void OpenGarage()
     {
         missionActive = false;
+        resultVisible = false;
         missionTimeRemaining = 0f;
+        scoreManager.CancelMission();
 
+        StopMissionGameplay(false);
+        gameplayBuildPresenter.SetVisible(false);
+
+        ResetVehiclePose();
+        garageUi.ShowGarage();
+    }
+
+    private void EndMission(MissionEndReason endReason)
+    {
+        if (!missionActive)
+        {
+            return;
+        }
+
+        missionActive = false;
+        MissionProgress progress = scoreManager.FinishMission();
+        bool succeeded =
+            endReason == MissionEndReason.TimeExpired
+            && progress.TargetReached;
+        MissionReward reward =
+            economy.AwardMission(progress, succeeded);
+        MissionResult result = new MissionResult(
+            endReason,
+            succeeded,
+            progress,
+            reward,
+            missionTimeRemaining,
+            player.GetCurrentHealth(),
+            player.GetMaxHealth());
+
+        StopMissionGameplay(true);
+        resultVisible = true;
+        garageUi.ShowMissionResult(result);
+    }
+
+    private void StopMissionGameplay(bool keepGameplayCamera)
+    {
         spawnManager.SetSpawningEnabled(false);
         spawnManager.DespawnAllToPool();
 
@@ -183,12 +268,8 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         driveRigidbody.isKinematic = true;
-        gameplayCamera.enabled = false;
+        gameplayCamera.enabled = keepGameplayCamera;
         SetGameplayAudioEnabled(false);
-        gameplayBuildPresenter.SetVisible(false);
-
-        ResetVehiclePose();
-        garageUi.ShowGarage();
     }
 
     private void ResetVehiclePose()
@@ -217,8 +298,21 @@ public sealed class GarageFlowController : MonoBehaviour
     {
         if (missionActive)
         {
+            EndMission(MissionEndReason.VehicleDestroyed);
+        }
+    }
+
+    private void HandleResultAcknowledged()
+    {
+        if (resultVisible)
+        {
             OpenGarage();
         }
+    }
+
+    private void HandleMissionProgressChanged(MissionProgress progress)
+    {
+        garageUi.UpdateMissionProgress(progress);
     }
 
     private void SetGameplayAudioEnabled(bool enabled)

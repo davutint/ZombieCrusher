@@ -14,8 +14,24 @@ public class OldSpawnManager : MonoBehaviour
     public float spawnDistanceMin = 20f;
     public float spawnDistanceMax = 50f;
     [SerializeField] private bool spawningEnabled;
-    [SerializeField, Min(1)] private int zombiesPerHorde = 10;
-    [SerializeField, Min(0.05f)] private float spawnCheckInterval = 1f;
+
+    [Header("Mission Pressure")]
+    [SerializeField, Range(0.05f, 0.9f)]
+    private float buildUpProgress = 0.375f;
+    [SerializeField, Range(0.1f, 0.95f)]
+    private float surgeProgress = 0.75f;
+    [SerializeField, Min(1)] private int openingActiveTarget = 60;
+    [SerializeField, Min(1)] private int buildUpActiveTarget = 160;
+    [SerializeField, Min(1)] private int surgeActiveTarget = 300;
+    [SerializeField, Min(1)] private int finaleActiveTarget = 450;
+    [SerializeField, Min(1)] private int openingHordeSize = 8;
+    [SerializeField, Min(1)] private int buildUpHordeSize = 12;
+    [SerializeField, Min(1)] private int surgeHordeSize = 17;
+    [SerializeField, Min(1)] private int finaleHordeSize = 22;
+    [SerializeField, Min(0.05f)] private float openingSpawnInterval = 1.25f;
+    [SerializeField, Min(0.05f)] private float buildUpSpawnInterval = 0.9f;
+    [SerializeField, Min(0.05f)] private float surgeSpawnInterval = 0.62f;
+    [SerializeField, Min(0.05f)] private float finaleSpawnInterval = 0.45f;
 
     [Header("Pool Settings")]
     [SerializeField, Min(1)] private int initialPoolSize = 50;
@@ -41,12 +57,20 @@ public class OldSpawnManager : MonoBehaviour
     private int totalCreatedZombieCount;
     private int nextPrefabIndex;
     private Vector3 poolCreationPosition;
-    private WaitForSeconds spawnDelay;
+    private float missionProgress;
+    private int currentActiveTarget;
+    private int currentHordeSize;
+    private float currentSpawnInterval;
+    private float nextSpawnTime;
 
     public int CurrentZombieCount => currentZombieCount;
     public int AvailableZombieCount => availableZombies.Count;
     public int TotalCreatedZombieCount => totalCreatedZombieCount;
     public bool SpawningEnabled => spawningEnabled;
+    public float MissionProgress => missionProgress;
+    public int CurrentActiveTarget => currentActiveTarget;
+    public int CurrentHordeSize => currentHordeSize;
+    public float CurrentSpawnInterval => currentSpawnInterval;
 
     private IEnumerator Start()
     {
@@ -131,7 +155,8 @@ public class OldSpawnManager : MonoBehaviour
         totalCreatedZombieCount = 0;
         currentZombieCount = 0;
         nextPrefabIndex = 0;
-        spawnDelay = new WaitForSeconds(Mathf.Max(0.05f, spawnCheckInterval));
+        SetMissionProgress(0f);
+        nextSpawnTime = Time.unscaledTime;
         return true;
     }
 
@@ -169,16 +194,33 @@ public class OldSpawnManager : MonoBehaviour
     {
         while (true)
         {
-            if (spawningEnabled
-                && currentZombieCount < maxZombiesInScene
-                && availableZombies.Count > 0)
+            if (spawningEnabled && Time.unscaledTime >= nextSpawnTime)
             {
-                int spawnCount = Mathf.Min(zombiesPerHorde, maxZombiesInScene - currentZombieCount);
-                SpawnZombieHorde(spawnCount);
+                nextSpawnTime =
+                    Time.unscaledTime + Mathf.Max(0.05f, currentSpawnInterval);
+                TrySpawnPressureTick();
             }
 
-            yield return spawnDelay;
+            yield return null;
         }
+    }
+
+    private void TrySpawnPressureTick()
+    {
+        int activeTarget = Mathf.Clamp(
+            currentActiveTarget,
+            1,
+            maxZombiesInScene);
+        if (currentZombieCount >= activeTarget
+            || availableZombies.Count == 0)
+        {
+            return;
+        }
+
+        int spawnCount = Mathf.Min(
+            currentHordeSize,
+            activeTarget - currentZombieCount);
+        SpawnZombieHorde(spawnCount);
     }
 
     private void SpawnZombieHorde(int count)
@@ -251,7 +293,102 @@ public class OldSpawnManager : MonoBehaviour
 
     public void SetSpawningEnabled(bool enabled)
     {
+        if (enabled && !spawningEnabled)
+        {
+            nextSpawnTime = Time.unscaledTime;
+        }
+
         spawningEnabled = enabled;
+    }
+
+    public void BeginMission()
+    {
+        SetMissionProgress(0f);
+        SetSpawningEnabled(true);
+    }
+
+    public void SetMissionProgress(float normalizedProgress)
+    {
+        missionProgress = Mathf.Clamp01(normalizedProgress);
+
+        float buildPoint = Mathf.Clamp(buildUpProgress, 0.05f, 0.9f);
+        float surgePoint = Mathf.Clamp(
+            surgeProgress,
+            buildPoint + 0.05f,
+            0.95f);
+
+        if (missionProgress <= buildPoint)
+        {
+            ApplyPressure(
+                Mathf.InverseLerp(0f, buildPoint, missionProgress),
+                openingActiveTarget,
+                buildUpActiveTarget,
+                openingHordeSize,
+                buildUpHordeSize,
+                openingSpawnInterval,
+                buildUpSpawnInterval);
+            return;
+        }
+
+        if (missionProgress <= surgePoint)
+        {
+            ApplyPressure(
+                Mathf.InverseLerp(
+                    buildPoint,
+                    surgePoint,
+                    missionProgress),
+                buildUpActiveTarget,
+                surgeActiveTarget,
+                buildUpHordeSize,
+                surgeHordeSize,
+                buildUpSpawnInterval,
+                surgeSpawnInterval);
+            return;
+        }
+
+        ApplyPressure(
+            Mathf.InverseLerp(surgePoint, 1f, missionProgress),
+            surgeActiveTarget,
+            finaleActiveTarget,
+            surgeHordeSize,
+            finaleHordeSize,
+            surgeSpawnInterval,
+            finaleSpawnInterval);
+    }
+
+    private void ApplyPressure(
+        float progress,
+        int activeTargetFrom,
+        int activeTargetTo,
+        int hordeSizeFrom,
+        int hordeSizeTo,
+        float intervalFrom,
+        float intervalTo)
+    {
+        float smoothedProgress =
+            Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress));
+        int poolLimit = Mathf.Max(1, maxZombiesInScene);
+        currentActiveTarget = Mathf.Clamp(
+            Mathf.RoundToInt(
+                Mathf.Lerp(
+                    activeTargetFrom,
+                    activeTargetTo,
+                    smoothedProgress)),
+            1,
+            poolLimit);
+        currentHordeSize = Mathf.Max(
+            1,
+            Mathf.RoundToInt(
+                Mathf.Lerp(
+                    hordeSizeFrom,
+                    hordeSizeTo,
+                    smoothedProgress)));
+        currentSpawnInterval = Mathf.Max(
+            0.05f,
+            Mathf.Lerp(
+                intervalFrom,
+                intervalTo,
+                smoothedProgress));
     }
 
     public void DespawnAllToPool()

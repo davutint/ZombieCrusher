@@ -14,13 +14,20 @@ public sealed class DeathEffectPool : MonoBehaviour
     {
         public readonly GameObject Prefab;
         public readonly Queue<PooledEffect> Available;
+        public readonly int InitialSize;
+        public readonly int MaximumSize;
         public int TotalCount;
         public bool IsWarming;
 
-        public EffectBucket(GameObject prefab, int capacity)
+        public EffectBucket(
+            GameObject prefab,
+            int initialSize,
+            int maximumSize)
         {
             Prefab = prefab;
-            Available = new Queue<PooledEffect>(capacity);
+            InitialSize = initialSize;
+            MaximumSize = maximumSize;
+            Available = new Queue<PooledEffect>(maximumSize);
         }
     }
 
@@ -129,6 +136,14 @@ public sealed class DeathEffectPool : MonoBehaviour
 
     public void Register(GameObject effectPrefab)
     {
+        Register(effectPrefab, initialPoolSize, maxPoolSizePerPrefab);
+    }
+
+    public void Register(
+        GameObject effectPrefab,
+        int initialSize,
+        int maximumSize)
+    {
         if (effectPrefab == null)
         {
             return;
@@ -136,7 +151,12 @@ public sealed class DeathEffectPool : MonoBehaviour
 
         if (!buckets.TryGetValue(effectPrefab, out EffectBucket bucket))
         {
-            bucket = new EffectBucket(effectPrefab, maxPoolSizePerPrefab);
+            int safeInitialSize = Mathf.Max(1, initialSize);
+            int safeMaximumSize = Mathf.Max(safeInitialSize, maximumSize);
+            bucket = new EffectBucket(
+                effectPrefab,
+                safeInitialSize,
+                safeMaximumSize);
             buckets.Add(effectPrefab, bucket);
         }
 
@@ -171,7 +191,9 @@ public sealed class DeathEffectPool : MonoBehaviour
 
     private void StartWarmupIfNeeded(EffectBucket bucket)
     {
-        if (!isActiveAndEnabled || bucket.IsWarming || bucket.TotalCount >= maxPoolSizePerPrefab)
+        if (!isActiveAndEnabled
+            || bucket.IsWarming
+            || bucket.TotalCount >= bucket.MaximumSize)
         {
             return;
         }
@@ -182,9 +204,11 @@ public sealed class DeathEffectPool : MonoBehaviour
 
     private IEnumerator WarmBucket(EffectBucket bucket)
     {
-        int firstTarget = Mathf.Min(initialPoolSize, maxPoolSizePerPrefab);
+        int firstTarget = Mathf.Min(
+            bucket.InitialSize,
+            bucket.MaximumSize);
         yield return WarmBucketToSize(bucket, firstTarget);
-        yield return WarmBucketToSize(bucket, maxPoolSizePerPrefab);
+        yield return WarmBucketToSize(bucket, bucket.MaximumSize);
         bucket.IsWarming = false;
     }
 
@@ -210,7 +234,7 @@ public sealed class DeathEffectPool : MonoBehaviour
             return bucket.Available.Dequeue();
         }
 
-        if (bucket.TotalCount < maxPoolSizePerPrefab)
+        if (bucket.TotalCount < bucket.MaximumSize)
         {
             return CreateEffect(bucket);
         }

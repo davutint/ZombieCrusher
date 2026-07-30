@@ -94,6 +94,95 @@ public sealed class GarageBuildState : MonoBehaviour
         return attachment != null && ownedAttachmentIds.Contains(attachment.AttachmentId);
     }
 
+    public IEnumerable<string> GetOwnedVehicleIds()
+    {
+        foreach (string vehicleId in ownedVehicleIds)
+        {
+            yield return vehicleId;
+        }
+    }
+
+    public IEnumerable<string> GetOwnedAttachmentIds()
+    {
+        foreach (string attachmentId in ownedAttachmentIds)
+        {
+            yield return attachmentId;
+        }
+    }
+
+    public void RestoreProgression(
+        IReadOnlyList<string> vehicleIds,
+        IReadOnlyList<string> attachmentIds,
+        string selectedVehicleId,
+        IReadOnlyList<string> equippedAttachmentIds)
+    {
+        if (catalog == null)
+        {
+            return;
+        }
+
+        ownedVehicleIds.Clear();
+        GarageVehicleDefinition startingVehicle = catalog.StartingVehicle;
+        if (startingVehicle != null)
+        {
+            ownedVehicleIds.Add(startingVehicle.VehicleId);
+        }
+
+        if (vehicleIds != null)
+        {
+            for (int i = 0; i < vehicleIds.Count; i++)
+            {
+                GarageVehicleDefinition vehicle =
+                    catalog.FindVehicle(vehicleIds[i]);
+                if (vehicle != null)
+                {
+                    ownedVehicleIds.Add(vehicle.VehicleId);
+                }
+            }
+        }
+
+        ownedAttachmentIds.Clear();
+        if (attachmentIds != null)
+        {
+            for (int i = 0; i < attachmentIds.Count; i++)
+            {
+                GarageAttachmentDefinition attachment =
+                    catalog.FindAttachment(attachmentIds[i]);
+                if (attachment != null)
+                {
+                    ownedAttachmentIds.Add(attachment.AttachmentId);
+                }
+            }
+        }
+
+        GarageVehicleDefinition savedVehicle =
+            catalog.FindVehicle(selectedVehicleId);
+        selectedVehicle =
+            savedVehicle != null && IsVehicleOwned(savedVehicle)
+                ? savedVehicle
+                : startingVehicle;
+
+        equipped.Clear();
+        if (equippedAttachmentIds != null && selectedVehicle != null)
+        {
+            for (int i = 0; i < equippedAttachmentIds.Count; i++)
+            {
+                GarageAttachmentDefinition attachment =
+                    catalog.FindAttachment(equippedAttachmentIds[i]);
+                if (attachment != null
+                    && IsAttachmentOwned(attachment)
+                    && attachment.TryGetPose(selectedVehicle.VehicleId, out _))
+                {
+                    SetEquipped(attachment.Slot, attachment);
+                }
+            }
+        }
+
+        previewVehicle = null;
+        previewAttachment = null;
+        Changed?.Invoke();
+    }
+
     public void GrantVehicle(GarageVehicleDefinition vehicle)
     {
         if (vehicle != null && ownedVehicleIds.Add(vehicle.VehicleId))

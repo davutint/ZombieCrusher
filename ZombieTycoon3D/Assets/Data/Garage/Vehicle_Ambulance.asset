@@ -18,9 +18,12 @@ MonoBehaviour:
   visualPrefab: {fileID: 1974828051501874, guid: 23df9b66f37ce374088d8822ba2fe4b4, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1
-  gameplayLocalPosition: {x: 0, y: 0, z: 0}
+  gameplayLocalPosition: {x: 0, y: -1.5247436, z: 0.49999988}
   gameplayLocalEuler: {x: 0, y: 0, z: 0}
   gameplayScale: 1
+  gameplayColliderCenter: {x: 0, y: 0, z: 0}
+  gameplayColliderSize: {x: 2.7069976, y: 2.5105124, z: 6.451269}
+  price: 0
   baseStats:
     maxSpeed: 100
     acceleration: 20

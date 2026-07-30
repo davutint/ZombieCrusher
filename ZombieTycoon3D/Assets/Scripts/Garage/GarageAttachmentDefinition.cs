@@ -32,6 +32,7 @@ public sealed class GarageAttachmentDefinition : ScriptableObject
     [SerializeField] private List<GarageAttachmentPose> compatibleVehicles = new();
 
     [Header("Stat Trade-off")]
+    [SerializeField, Min(0)] private int price;
     [SerializeField] private VehicleStatModifier modifier;
 
     public string AttachmentId => attachmentId;
@@ -39,6 +40,7 @@ public sealed class GarageAttachmentDefinition : ScriptableObject
     public string Description => description;
     public GarageAttachmentSlot Slot => slot;
     public GameObject VisualPrefab => visualPrefab;
+    public int Price => Mathf.Max(0, price);
     public VehicleStatModifier Modifier => modifier;
 
     public bool TryGetPose(string vehicleId, out GarageAttachmentPose pose)
@@ -92,5 +94,6 @@ public sealed class GarageAttachmentDefinition : ScriptableObject
     {
         attachmentId = attachmentId?.Trim();
         displayName = displayName?.Trim();
+        price = Mathf.Max(0, price);
     }
 }
