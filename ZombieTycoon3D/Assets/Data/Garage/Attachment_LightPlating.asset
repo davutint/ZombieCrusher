@@ -34,3 +34,15 @@ MonoBehaviour:
     handling: -1
     durability: 25
     impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 0.85
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "HAFİF KAPLAMA · %15 HASAR AZALTMA"
+    feedbackTone: 1
+  gameplayEffectSummary: "Zombi temasından alınan araç hasarını %15 azaltır ve dayanıklılığa 25 HP ekler."
+  tradeoffSummary: "Koruma karşılığında -5 km/h hız, -1.5 hızlanma ve -1.0 kontrol."

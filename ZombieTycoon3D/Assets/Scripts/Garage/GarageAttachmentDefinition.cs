@@ -3,6 +3,123 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
+public enum GarageAttachmentFeedbackTone
+{
+    Impact,
+    Defense,
+    Repair
+}
+
+[Serializable]
+public struct GarageAttachmentEffect
+{
+    [Header("Build-wide Passive Effect")]
+    [SerializeField] private float damageTakenMultiplier;
+    [SerializeField] private float lateralGripMultiplier;
+    [SerializeField, Min(0f)] private float downforceBonus;
+
+    [Header("Attachment Contact")]
+    [SerializeField] private float contactImpactPowerMultiplier;
+
+    [Header("Kill-based Repair")]
+    [SerializeField, Min(0)] private int repairEveryKills;
+    [SerializeField, Min(0f)] private float repairAmount;
+    [SerializeField, Min(0)] private int maximumRepairs;
+
+    [Header("Runtime Feedback")]
+    [SerializeField] private string feedbackLabel;
+    [SerializeField] private GarageAttachmentFeedbackTone feedbackTone;
+
+    public float DamageTakenMultiplier =>
+        damageTakenMultiplier > 0f ? damageTakenMultiplier : 1f;
+    public float LateralGripMultiplier =>
+        lateralGripMultiplier > 0f ? lateralGripMultiplier : 1f;
+    public float DownforceBonus => Mathf.Max(0f, downforceBonus);
+    public float ContactImpactPowerMultiplier =>
+        contactImpactPowerMultiplier > 0f
+            ? contactImpactPowerMultiplier
+            : 1f;
+    public int RepairEveryKills => Mathf.Max(0, repairEveryKills);
+    public float RepairAmount => Mathf.Max(0f, repairAmount);
+    public int MaximumRepairs => Mathf.Max(0, maximumRepairs);
+    public string FeedbackLabel => feedbackLabel;
+    public GarageAttachmentFeedbackTone FeedbackTone => feedbackTone;
+
+    public bool HasRepair =>
+        RepairEveryKills > 0
+        && RepairAmount > 0f
+        && MaximumRepairs > 0;
+}
+
+[Serializable]
+public struct GarageBuildEffects
+{
+    private float damageTakenMultiplier;
+    private float lateralGripMultiplier;
+    private float downforceBonus;
+    private int repairEveryKills;
+    private float repairAmount;
+    private int maximumRepairs;
+    private string damageFeedbackLabel;
+    private GarageAttachmentFeedbackTone damageFeedbackTone;
+    private string repairFeedbackLabel;
+    private GarageAttachmentFeedbackTone repairFeedbackTone;
+
+    public static GarageBuildEffects Neutral => new GarageBuildEffects
+    {
+        damageTakenMultiplier = 1f,
+        lateralGripMultiplier = 1f
+    };
+
+    public float DamageTakenMultiplier =>
+        damageTakenMultiplier > 0f ? damageTakenMultiplier : 1f;
+    public float LateralGripMultiplier =>
+        lateralGripMultiplier > 0f ? lateralGripMultiplier : 1f;
+    public float DownforceBonus => Mathf.Max(0f, downforceBonus);
+    public int RepairEveryKills => Mathf.Max(0, repairEveryKills);
+    public float RepairAmount => Mathf.Max(0f, repairAmount);
+    public int MaximumRepairs => Mathf.Max(0, maximumRepairs);
+    public string DamageFeedbackLabel => damageFeedbackLabel;
+    public GarageAttachmentFeedbackTone DamageFeedbackTone =>
+        damageFeedbackTone;
+    public string RepairFeedbackLabel => repairFeedbackLabel;
+    public GarageAttachmentFeedbackTone RepairFeedbackTone =>
+        repairFeedbackTone;
+    public bool HasRepair =>
+        RepairEveryKills > 0
+        && RepairAmount > 0f
+        && MaximumRepairs > 0;
+
+    public GarageBuildEffects Apply(GarageAttachmentEffect effect)
+    {
+        GarageBuildEffects result = this;
+        result.damageTakenMultiplier =
+            DamageTakenMultiplier * effect.DamageTakenMultiplier;
+        result.lateralGripMultiplier =
+            LateralGripMultiplier * effect.LateralGripMultiplier;
+        result.downforceBonus = DownforceBonus + effect.DownforceBonus;
+
+        if (effect.DamageTakenMultiplier < 0.999f
+            && !string.IsNullOrWhiteSpace(effect.FeedbackLabel))
+        {
+            result.damageFeedbackLabel = effect.FeedbackLabel;
+            result.damageFeedbackTone = effect.FeedbackTone;
+        }
+
+        if (effect.HasRepair)
+        {
+            result.repairEveryKills = effect.RepairEveryKills;
+            result.repairAmount = effect.RepairAmount;
+            result.maximumRepairs = effect.MaximumRepairs;
+            result.repairFeedbackLabel = effect.FeedbackLabel;
+            result.repairFeedbackTone = effect.FeedbackTone;
+        }
+
+        return result;
+    }
+}
+
+[Serializable]
 public struct GarageAttachmentPose
 {
     [SerializeField] private string vehicleId;
@@ -49,6 +166,13 @@ public sealed class GarageAttachmentDefinition : ScriptableObject
     [SerializeField, Min(0)] private int price;
     [SerializeField] private VehicleStatModifier modifier;
 
+    [Header("Gameplay Effect")]
+    [SerializeField] private GarageAttachmentEffect gameplayEffect;
+    [TextArea(2, 3)]
+    [SerializeField] private string gameplayEffectSummary;
+    [TextArea(2, 3)]
+    [SerializeField] private string tradeoffSummary;
+
     public string AttachmentId => attachmentId;
     public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
     public string Description => description;
@@ -56,6 +180,9 @@ public sealed class GarageAttachmentDefinition : ScriptableObject
     public GameObject VisualPrefab => visualPrefab;
     public int Price => Mathf.Max(0, price);
     public VehicleStatModifier Modifier => modifier;
+    public GarageAttachmentEffect GameplayEffect => gameplayEffect;
+    public string GameplayEffectSummary => gameplayEffectSummary;
+    public string TradeoffSummary => tradeoffSummary;
 
     public bool TryGetPose(string vehicleId, out GarageAttachmentPose pose)
     {

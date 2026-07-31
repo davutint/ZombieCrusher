@@ -421,7 +421,7 @@
 }
 
 .slot-row {
-    min-height: 61px;
+    min-height: 78px;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -445,6 +445,19 @@
     -unity-font-style: bold;
 }
 
+.slot-effect {
+    max-width: 190px;
+    margin-top: 3px;
+    color: var(--text-dim);
+    font-size: 9px;
+    white-space: normal;
+}
+
+.slot-actions {
+    flex-shrink: 0;
+    align-items: flex-end;
+}
+
 .ghost-button {
     color: var(--text-soft);
     background-color: transparent;
@@ -458,6 +471,14 @@
 
 .ghost-button:hover {
     color: var(--accent);
+}
+
+.ghost-button--danger {
+    color: rgba(255, 102, 111, 0.72);
+}
+
+.ghost-button--danger:hover {
+    color: var(--negative);
 }
 
 .detail-block {
@@ -480,6 +501,38 @@
     margin-bottom: 12px;
     color: var(--text-soft);
     font-size: 11px;
+    white-space: normal;
+}
+
+.detail-mechanics {
+    margin-bottom: 12px;
+    padding: 10px 11px;
+    background-color: rgba(255, 255, 255, 0.035);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 7px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 7px;
+}
+
+.detail-mechanic-kicker {
+    color: var(--accent);
+    font-size: 9px;
+    -unity-font-style: bold;
+    letter-spacing: 0.8px;
+}
+
+.detail-mechanic-kicker--tradeoff {
+    margin-top: 8px;
+    color: var(--negative);
+}
+
+.detail-effect,
+.detail-tradeoff {
+    margin-top: 3px;
+    color: var(--text-soft);
+    font-size: 10px;
     white-space: normal;
 }
 
@@ -638,6 +691,38 @@
 
 .mission-objective-card--complete .mission-support-value {
     color: var(--positive);
+}
+
+.mission-effect-feedback {
+    display: none;
+    min-width: 300px;
+    margin-top: 8px;
+    padding: 7px 16px;
+    color: var(--text);
+    background-color: rgba(8, 11, 14, 0.88);
+    border-left-width: 2px;
+    border-left-color: var(--accent);
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    letter-spacing: 0.65px;
+    -unity-text-align: middle-center;
+}
+
+.mission-effect-feedback--impact {
+    border-left-color: rgb(255, 177, 77);
+}
+
+.mission-effect-feedback--defense {
+    border-left-color: var(--accent);
+}
+
+.mission-effect-feedback--repair {
+    color: var(--positive);
+    border-left-color: var(--positive);
 }
 
 .mission-health-card {

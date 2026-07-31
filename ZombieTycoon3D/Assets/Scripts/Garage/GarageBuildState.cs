@@ -59,6 +59,27 @@ public sealed class GarageBuildState : MonoBehaviour
         }
     }
 
+    public GarageBuildEffects CurrentEffects =>
+        CalculateEffects(
+            selectedVehicle,
+            null,
+            replacePreviewSlot: false,
+            includeLoadout: true);
+
+    public GarageBuildEffects PreviewEffects
+    {
+        get
+        {
+            GarageVehicleDefinition vehicle = DisplayedVehicle;
+            bool sameVehicle = vehicle == selectedVehicle;
+            return CalculateEffects(
+                vehicle,
+                sameVehicle ? previewAttachment : null,
+                replacePreviewSlot: sameVehicle && previewAttachment != null,
+                includeLoadout: sameVehicle);
+        }
+    }
+
     private void Awake()
     {
         Initialize();
@@ -318,6 +339,25 @@ public sealed class GarageBuildState : MonoBehaviour
         return null;
     }
 
+    public bool Unequip(GarageAttachmentSlot slot)
+    {
+        for (int i = 0; i < equipped.Count; i++)
+        {
+            if (equipped[i].slot != slot || equipped[i].attachment == null)
+            {
+                continue;
+            }
+
+            equipped.RemoveAt(i);
+            SaveCurrentLoadout();
+            previewAttachment = null;
+            Changed?.Invoke();
+            return true;
+        }
+
+        return false;
+    }
+
     public IEnumerable<GarageAttachmentDefinition> GetEquippedAttachments()
     {
         for (int i = 0; i < equipped.Count; i++)
@@ -404,6 +444,44 @@ public sealed class GarageBuildState : MonoBehaviour
             && extraAttachment.TryGetPose(vehicle.VehicleId, out _))
         {
             result = result.Apply(extraAttachment.Modifier);
+        }
+
+        return result;
+    }
+
+    private GarageBuildEffects CalculateEffects(
+        GarageVehicleDefinition vehicle,
+        GarageAttachmentDefinition extraAttachment,
+        bool replacePreviewSlot,
+        bool includeLoadout)
+    {
+        GarageBuildEffects result = GarageBuildEffects.Neutral;
+        if (vehicle == null)
+        {
+            return result;
+        }
+
+        IReadOnlyList<EquippedEntry> activeLoadout =
+            includeLoadout ? equipped : Array.Empty<EquippedEntry>();
+        for (int i = 0; i < activeLoadout.Count; i++)
+        {
+            GarageAttachmentDefinition attachment = activeLoadout[i].attachment;
+            if (attachment == null
+                || !attachment.TryGetPose(vehicle.VehicleId, out _)
+                || (replacePreviewSlot
+                    && extraAttachment != null
+                    && attachment.Slot == extraAttachment.Slot))
+            {
+                continue;
+            }
+
+            result = result.Apply(attachment.GameplayEffect);
+        }
+
+        if (extraAttachment != null
+            && extraAttachment.TryGetPose(vehicle.VehicleId, out _))
+        {
+            result = result.Apply(extraAttachment.GameplayEffect);
         }
 
         return result;

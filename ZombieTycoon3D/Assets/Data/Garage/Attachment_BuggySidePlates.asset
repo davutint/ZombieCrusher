@@ -42,3 +42,15 @@ MonoBehaviour:
     handling: -0.5
     durability: 18
     impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 0.9
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "YAN PLAKALAR · %10 HASAR AZALTMA"
+    feedbackTone: 1
+  gameplayEffectSummary: "Zombi temasından alınan araç hasarını %10 azaltır ve kırılgan Buggy'ye 18 HP ekler."
+  tradeoffSummary: "Hafif zırh -3 km/h hız, -1.0 hızlanma ve -0.5 kontrol götürür."

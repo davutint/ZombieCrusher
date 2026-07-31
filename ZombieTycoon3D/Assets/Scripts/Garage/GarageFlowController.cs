@@ -39,6 +39,13 @@ public sealed class GarageFlowController : MonoBehaviour
     private PhysicsMaterial originalDriveColliderMaterial;
     private PhysicsMaterial runtimeFrictionMaterial;
     private SphereCollider driveCollider;
+    private GarageBuildEffects activeBuildEffects = GarageBuildEffects.Neutral;
+    private int missionKills;
+    private int repairsUsed;
+    private int nextRepairKill;
+    private float feedbackHideTime;
+    private float nextFeedbackUpdateTime;
+    private bool feedbackVisible;
 
     private void Awake()
     {
@@ -81,6 +88,12 @@ public sealed class GarageFlowController : MonoBehaviour
             scoreManager.ProgressChanged += HandleMissionProgressChanged;
         }
 
+        if (player != null)
+        {
+            player.AttachmentFeedbackRequested +=
+                HandleAttachmentFeedbackRequested;
+        }
+
         EventManager.OnPlayerDeath += HandlePlayerDeath;
     }
 
@@ -111,6 +124,8 @@ public sealed class GarageFlowController : MonoBehaviour
 
         missionTimeRemaining =
             Mathf.Max(0f, missionTimeRemaining - Time.unscaledDeltaTime);
+        ProcessPendingRepair();
+        UpdateFeedbackVisibility();
         spawnManager.SetMissionProgress(
             (MissionDurationSeconds - missionTimeRemaining)
             / MissionDurationSeconds);
@@ -135,6 +150,12 @@ public sealed class GarageFlowController : MonoBehaviour
         if (scoreManager != null)
         {
             scoreManager.ProgressChanged -= HandleMissionProgressChanged;
+        }
+
+        if (player != null)
+        {
+            player.AttachmentFeedbackRequested -=
+                HandleAttachmentFeedbackRequested;
         }
 
         EventManager.OnPlayerDeath -= HandlePlayerDeath;
@@ -200,12 +221,23 @@ public sealed class GarageFlowController : MonoBehaviour
         driveRigidbody.isKinematic = false;
 
         VehicleStats stats = buildState.CurrentStats;
+        activeBuildEffects = buildState.CurrentEffects;
         vehicleController.MaxSpeed = stats.maxSpeed;
         vehicleController.accelaration = stats.acceleration;
         vehicleController.turn = stats.handling;
-        ApplyVehiclePhysics(buildState.SelectedVehicle);
+        ApplyVehiclePhysics(buildState.SelectedVehicle, activeBuildEffects);
         player.ApplyVehicleStats(stats);
+        player.ConfigureBuildEffects(activeBuildEffects);
         player.ResetForRun();
+        missionKills = 0;
+        repairsUsed = 0;
+        nextRepairKill = activeBuildEffects.HasRepair
+            ? activeBuildEffects.RepairEveryKills
+            : int.MaxValue;
+        feedbackHideTime = 0f;
+        nextFeedbackUpdateTime = 0f;
+        garageUi.HideMissionEffectFeedback();
+        feedbackVisible = false;
         scoreManager.BeginMission(
             MissionKillTarget,
             NormalKillScore,
@@ -297,6 +329,22 @@ public sealed class GarageFlowController : MonoBehaviour
         driveRigidbody.isKinematic = true;
         gameplayCamera.enabled = keepGameplayCamera;
         SetGameplayAudioEnabled(false);
+        player.ResetBuildEffects();
+        activeBuildEffects = GarageBuildEffects.Neutral;
+        missionKills = 0;
+        repairsUsed = 0;
+        nextRepairKill = int.MaxValue;
+        feedbackHideTime = 0f;
+        nextFeedbackUpdateTime = 0f;
+        feedbackVisible = false;
+        garageUi.HideMissionEffectFeedback();
+
+        if (buildState != null && buildState.SelectedVehicle != null)
+        {
+            ApplyVehiclePhysics(
+                buildState.SelectedVehicle,
+                GarageBuildEffects.Neutral);
+        }
     }
 
     private void ResetVehiclePose()
@@ -340,6 +388,76 @@ public sealed class GarageFlowController : MonoBehaviour
     private void HandleMissionProgressChanged(MissionProgress progress)
     {
         garageUi.UpdateMissionProgress(progress);
+        if (missionActive)
+        {
+            missionKills = progress.Kills;
+        }
+    }
+
+    private void HandleAttachmentFeedbackRequested(
+        string message,
+        GarageAttachmentFeedbackTone tone)
+    {
+        ShowAttachmentFeedback(message, tone);
+    }
+
+    private void ShowAttachmentFeedback(
+        string message,
+        GarageAttachmentFeedbackTone tone)
+    {
+        if (!missionActive
+            || string.IsNullOrWhiteSpace(message)
+            || Time.unscaledTime < nextFeedbackUpdateTime)
+        {
+            return;
+        }
+
+        nextFeedbackUpdateTime = Time.unscaledTime + 0.08f;
+        feedbackHideTime = Time.unscaledTime + 1.15f;
+        feedbackVisible = true;
+        garageUi.ShowMissionEffectFeedback(message, tone);
+    }
+
+    private void ProcessPendingRepair()
+    {
+        if (!activeBuildEffects.HasRepair
+            || repairsUsed >= activeBuildEffects.MaximumRepairs
+            || missionKills < nextRepairKill)
+        {
+            return;
+        }
+
+        while (repairsUsed < activeBuildEffects.MaximumRepairs
+               && missionKills >= nextRepairKill)
+        {
+            repairsUsed++;
+            nextRepairKill += activeBuildEffects.RepairEveryKills;
+            float restored = player.RestoreHealth(
+                activeBuildEffects.RepairAmount);
+            if (restored <= 0f)
+            {
+                continue;
+            }
+
+            string label = activeBuildEffects.RepairFeedbackLabel;
+            string message = string.IsNullOrWhiteSpace(label)
+                ? $"+{restored:0.#} HP"
+                : $"{label}  ·  +{restored:0.#} HP";
+            ShowAttachmentFeedback(
+                message,
+                activeBuildEffects.RepairFeedbackTone);
+        }
+    }
+
+    private void UpdateFeedbackVisibility()
+    {
+        if (!feedbackVisible || Time.unscaledTime < feedbackHideTime)
+        {
+            return;
+        }
+
+        feedbackVisible = false;
+        garageUi.HideMissionEffectFeedback();
     }
 
     private void SetGameplayAudioEnabled(bool enabled)
@@ -386,7 +504,9 @@ public sealed class GarageFlowController : MonoBehaviour
         }
     }
 
-    private void ApplyVehiclePhysics(GarageVehicleDefinition vehicle)
+    private void ApplyVehiclePhysics(
+        GarageVehicleDefinition vehicle,
+        GarageBuildEffects effects)
     {
         if (vehicle == null)
         {
@@ -400,19 +520,22 @@ public sealed class GarageFlowController : MonoBehaviour
         driveRigidbody.automaticCenterOfMass = false;
         driveRigidbody.centerOfMass = vehicle.DriveCenterOfMass;
         vehicleController.gravity = vehicle.Gravity;
-        vehicleController.downforce = vehicle.Downforce;
+        float lateralGrip =
+            vehicle.LateralGrip * effects.LateralGripMultiplier;
+        vehicleController.downforce =
+            vehicle.Downforce + effects.DownforceBonus;
         vehicleController.frictionCurve =
-            ScaleCurve(baseFrictionCurve, vehicle.LateralGrip);
+            ScaleCurve(baseFrictionCurve, lateralGrip);
 
         if (runtimeFrictionMaterial != null
             && originalFrictionMaterial != null)
         {
             runtimeFrictionMaterial.staticFriction =
                 originalFrictionMaterial.staticFriction
-                * vehicle.LateralGrip;
+                * lateralGrip;
             runtimeFrictionMaterial.dynamicFriction =
                 originalFrictionMaterial.dynamicFriction
-                * vehicle.LateralGrip;
+                * lateralGrip;
         }
     }
 

@@ -35,3 +35,15 @@ MonoBehaviour:
     handling: 0.5
     durability: -4
     impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel:
+    feedbackTone: 0
+  gameplayEffectSummary: "Azami hıza +10 km/h, hızlanmaya +5.0, kontrole +0.5 ve çarpma gücüne +0.05x ekler."
+  tradeoffSummary: "Agresif motor kurulumu aracın dayanıklılığını 4 HP düşürür."

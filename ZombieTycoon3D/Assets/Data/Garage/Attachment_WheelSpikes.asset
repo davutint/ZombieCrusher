@@ -20,99 +20,99 @@ MonoBehaviour:
   visualPrefab: {fileID: 1577577700157948, guid: 5e66363e6eeccf941b04f67caf808bdb, type: 3}
   compatibleVehicles:
   - vehicleId: ambulance
-    localPosition: {x: -1.43, y: 0.76, z: 1.58}
-    localEuler: {x: 0, y: 90, z: 0}
+    localPosition: {x: -1.18103, y: 0.41011, z: 1.97943}
+    localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.43, y: 0.76, z: 1.58}
+    impactZoneCenter: {x: -1.18103, y: 0.41011, z: 1.97943}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: ambulance
-    localPosition: {x: 1.43, y: 0.76, z: 1.58}
-    localEuler: {x: 0, y: -90, z: 0}
+    localPosition: {x: 1.18103, y: 0.41011, z: 1.97943}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.43, y: 0.76, z: 1.58}
+    impactZoneCenter: {x: 1.18103, y: 0.41011, z: 1.97943}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: ambulance
-    localPosition: {x: -1.43, y: 0.76, z: -2.32}
-    localEuler: {x: 0, y: 90, z: 0}
+    localPosition: {x: -1.2966, y: 0.41011, z: -2.02197}
+    localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.43, y: 0.76, z: -2.32}
+    impactZoneCenter: {x: -1.2966, y: 0.41011, z: -2.02197}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: ambulance
-    localPosition: {x: 1.43, y: 0.76, z: -2.32}
-    localEuler: {x: 0, y: -90, z: 0}
+    localPosition: {x: 1.2966, y: 0.41011, z: -2.02197}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.43, y: 0.76, z: -2.32}
+    impactZoneCenter: {x: 1.2966, y: 0.41011, z: -2.02197}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: buggy
-    localPosition: {x: -1.15, y: 0.72, z: 1.45}
-    localEuler: {x: 0, y: 90, z: 0}
+    localPosition: {x: -1.1392, y: 0.51573, z: 1.40126}
+    localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.15, y: 0.72, z: 1.45}
+    impactZoneCenter: {x: -1.1392, y: 0.51573, z: 1.40126}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: buggy
-    localPosition: {x: 1.15, y: 0.72, z: 1.45}
-    localEuler: {x: 0, y: -90, z: 0}
+    localPosition: {x: 1.13835, y: 0.51573, z: 1.40126}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.15, y: 0.72, z: 1.45}
+    impactZoneCenter: {x: 1.13835, y: 0.51573, z: 1.40126}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: buggy
-    localPosition: {x: -1.15, y: 0.72, z: -1.45}
-    localEuler: {x: 0, y: 90, z: 0}
+    localPosition: {x: -1.1392, y: 0.51573, z: -1.20124}
+    localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.15, y: 0.72, z: -1.45}
+    impactZoneCenter: {x: -1.1392, y: 0.51573, z: -1.20124}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: buggy
-    localPosition: {x: 1.15, y: 0.72, z: -1.45}
-    localEuler: {x: 0, y: -90, z: 0}
+    localPosition: {x: 1.13835, y: 0.51573, z: -1.20124}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.15, y: 0.72, z: -1.45}
+    impactZoneCenter: {x: 1.13835, y: 0.51573, z: -1.20124}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 0.9}
   - vehicleId: prison-bus
-    localPosition: {x: -1.82, y: 0.9, z: 2.8}
-    localEuler: {x: 0, y: 90, z: 0}
+    localPosition: {x: -1.42023, y: 0.52869, z: 3.66936}
+    localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.82, y: 0.9, z: 2.8}
+    impactZoneCenter: {x: -1.42023, y: 0.52869, z: 3.66936}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.55, y: 0.9, z: 1}
   - vehicleId: prison-bus
-    localPosition: {x: 1.82, y: 0.9, z: 2.8}
-    localEuler: {x: 0, y: -90, z: 0}
+    localPosition: {x: 1.43521, y: 0.52869, z: 3.66936}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.82, y: 0.9, z: 2.8}
+    impactZoneCenter: {x: 1.43521, y: 0.52869, z: 3.66936}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.55, y: 0.9, z: 1}
   - vehicleId: prison-bus
-    localPosition: {x: -1.82, y: 0.9, z: -2.35}
-    localEuler: {x: 0, y: 90, z: 0}
+    localPosition: {x: -1.37365, y: 0.5269, z: -1.35324}
+    localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.82, y: 0.9, z: -2.35}
+    impactZoneCenter: {x: -1.37365, y: 0.5269, z: -1.35324}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.55, y: 0.9, z: 1}
   - vehicleId: prison-bus
-    localPosition: {x: 1.82, y: 0.9, z: -2.35}
-    localEuler: {x: 0, y: -90, z: 0}
+    localPosition: {x: 1.38863, y: 0.5269, z: -1.35324}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.82, y: 0.9, z: -2.35}
+    impactZoneCenter: {x: 1.38863, y: 0.5269, z: -1.35324}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.55, y: 0.9, z: 1}
   price: 150
@@ -122,3 +122,15 @@ MonoBehaviour:
     handling: 1
     durability: -5
     impactPower: 0.2
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 0.94
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.2
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "JANT BIÇAKLARI · YAN TEMAS"
+    feedbackTone: 0
+  gameplayEffectSummary: "Dört yan temas bölgesinde çarpma gücünü %20 artırır; direksiyon tepkisine +1.0 ekler."
+  tradeoffSummary: "Yan biçme gücü karşılığında tutuş %6, hız 2 km/h, hızlanma 1.0 ve dayanıklılık 5 HP düşer."

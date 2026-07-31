@@ -20,7 +20,7 @@ MonoBehaviour:
   visualPrefab: {fileID: 1744057547907270, guid: 96bd005ab9f0b454ebaf6e79b0f26231, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
-    localPosition: {x: 0, y: 3.55, z: -0.6}
+    localPosition: {x: 0, y: 3.2, z: -0.6}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.25, y: 1.25, z: 1.25}
     createsImpactZone: 0
@@ -34,3 +34,15 @@ MonoBehaviour:
     handling: -0.5
     durability: 12
     impactPower: 0
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 25
+    repairAmount: 6
+    maximumRepairs: 3
+    feedbackLabel: TAVAN ERZAKI
+    feedbackTone: 2
+  gameplayEffectSummary: "Her 25 kill'de 6 HP onarır; bir görevde en fazla 3 kez çalışır. Ayrıca maksimum dayanıklılığa 12 HP ekler."
+  tradeoffSummary: "Tavan yükü -2 km/h hız, -0.5 hızlanma ve -0.5 kontrol götürür."

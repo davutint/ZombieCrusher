@@ -58,3 +58,15 @@ MonoBehaviour:
     handling: -1
     durability: 40
     impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 0.75
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "BARİKAT ZIRHI · %25 HASAR AZALTMA"
+    feedbackTone: 1
+  gameplayEffectSummary: "Zombi temasından alınan araç hasarını %25 azaltır ve ağır gövdeye 40 HP ekler."
+  tradeoffSummary: "Ağır koruma -7 km/h hız, -2.0 hızlanma ve -1.0 kontrol götürür."

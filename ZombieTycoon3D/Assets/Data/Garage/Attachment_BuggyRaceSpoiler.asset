@@ -33,3 +33,15 @@ MonoBehaviour:
     handling: 2
     durability: -2
     impactPower: 0
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1.12
+    downforceBonus: 2
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel:
+    feedbackTone: 0
+  gameplayEffectSummary: "Yüksek hızda tutuşu %12 ve downforce değerini 2 artırır; ayrıca +4 km/h hız ve +2.0 kontrol verir."
+  tradeoffSummary: "Aero kurulumu gövde dayanıklılığından 2 HP götürür."

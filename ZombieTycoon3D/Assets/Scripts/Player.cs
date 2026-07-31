@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
     private const int ExplosionEffectMaximumPoolSize = 4;
     private DeathEffectPool effectPool;
     private VehicleImpactFeedback impactFeedback;
+    private GarageBuildEffects buildEffects = GarageBuildEffects.Neutral;
+    private float nextDefenseFeedbackTime;
     
     // Oyuncunun maksimum canı
     [SerializeField] private float maxHealth = 100f;
@@ -26,6 +28,9 @@ public class Player : MonoBehaviour
     private Collider[] vehicleColliders;
     private bool[] initialRendererStates;
     private bool[] initialColliderStates;
+
+    public event System.Action<string, GarageAttachmentFeedbackTone>
+        AttachmentFeedbackRequested;
     
    
     
@@ -81,14 +86,31 @@ public class Player : MonoBehaviour
 
     public bool TryImpactZombie(Collider other, Vector3 impactSourcePosition)
     {
+        return TryImpactZombie(
+            other,
+            impactSourcePosition,
+            1f,
+            null,
+            GarageAttachmentFeedbackTone.Impact);
+    }
+
+    public bool TryImpactZombie(
+        Collider other,
+        Vector3 impactSourcePosition,
+        float contactImpactPowerMultiplier,
+        string contactFeedbackLabel,
+        GarageAttachmentFeedbackTone contactFeedbackTone)
+    {
         if (other == null || !other.gameObject.CompareTag("Ragdoll"))
         {
             return false;
         }
 
         float currentSpeed = rb.linearVelocity.magnitude;
+        float effectiveImpactPower =
+            impactPower * Mathf.Max(0.1f, contactImpactPowerMultiplier);
         float effectiveMinimumImpactSpeed =
-            minImpactSpeed / Mathf.Max(0.1f, impactPower);
+            minImpactSpeed / Mathf.Max(0.1f, effectiveImpactPower);
         if (currentSpeed < effectiveMinimumImpactSpeed)
         {
             return false;
@@ -107,7 +129,7 @@ public class Player : MonoBehaviour
         float attachmentStrength = Mathf.InverseLerp(
             0.75f,
             1.75f,
-            impactPower);
+            effectiveImpactPower);
         float feedbackStrength = Mathf.Clamp01(
             0.2f
             + speedStrength * 0.55f
@@ -117,7 +139,28 @@ public class Player : MonoBehaviour
             impactPosition,
             rb.linearVelocity,
             feedbackStrength);
-        TakeDamage(damage);
+        float appliedDamage =
+            damage * Mathf.Max(0f, buildEffects.DamageTakenMultiplier);
+        float preventedDamage = Mathf.Max(0f, damage - appliedDamage);
+        TakeDamage(appliedDamage);
+
+        if (!string.IsNullOrWhiteSpace(contactFeedbackLabel))
+        {
+            AttachmentFeedbackRequested?.Invoke(
+                contactFeedbackLabel,
+                contactFeedbackTone);
+        }
+        else if (preventedDamage > 0.0001f
+                 && Time.unscaledTime >= nextDefenseFeedbackTime
+                 && !string.IsNullOrWhiteSpace(
+                     buildEffects.DamageFeedbackLabel))
+        {
+            nextDefenseFeedbackTime = Time.unscaledTime + 0.6f;
+            AttachmentFeedbackRequested?.Invoke(
+                buildEffects.DamageFeedbackLabel,
+                buildEffects.DamageFeedbackTone);
+        }
+
         return true;
     }
 
@@ -231,10 +274,35 @@ public class Player : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    public void ConfigureBuildEffects(GarageBuildEffects effects)
+    {
+        buildEffects = effects;
+        nextDefenseFeedbackTime = 0f;
+    }
+
+    public void ResetBuildEffects()
+    {
+        buildEffects = GarageBuildEffects.Neutral;
+        nextDefenseFeedbackTime = 0f;
+    }
+
+    public float RestoreHealth(float amount)
+    {
+        if (isExploded || amount <= 0f || currentHealth >= maxHealth)
+        {
+            return 0f;
+        }
+
+        float previousHealth = currentHealth;
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        return currentHealth - previousHealth;
+    }
+
     public void ResetForRun()
     {
         isExploded = false;
         currentHealth = maxHealth;
+        nextDefenseFeedbackTime = 0f;
 
         for (int i = 0; i < vehicleRenderers.Length; i++)
         {

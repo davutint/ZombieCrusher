@@ -35,3 +35,15 @@ MonoBehaviour:
     handling: -1
     durability: 8
     impactPower: 0.35
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.3
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "ZOMBİ PULLUĞU · AĞIR BİÇME"
+    feedbackTone: 0
+  gameplayEffectSummary: "Geniş ön temas alanında çarpma gücünü %30 artırır; kalabalığı düşük hızda biçmeyi kolaylaştırır."
+  tradeoffSummary: "+0.35x çarpma gücü ve +8 HP; -4 km/h hız, -2.0 hızlanma ve -1.0 kontrol."

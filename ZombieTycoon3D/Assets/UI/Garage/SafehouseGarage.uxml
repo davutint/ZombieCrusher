@@ -51,6 +51,12 @@
                 <ui:VisualElement class="detail-block">
                     <ui:Label name="detail-title" text="Ambulans" class="detail-title" />
                     <ui:Label name="detail-description" text="" class="detail-description" />
+                    <ui:VisualElement name="detail-mechanics" class="detail-mechanics">
+                        <ui:Label text="PASIF ETKI" class="detail-mechanic-kicker" />
+                        <ui:Label name="detail-effect" text="" class="detail-effect" />
+                        <ui:Label text="BEDEL" class="detail-mechanic-kicker detail-mechanic-kicker--tradeoff" />
+                        <ui:Label name="detail-tradeoff" text="" class="detail-tradeoff" />
+                    </ui:VisualElement>
                     <ui:Button name="context-action" text="2:00 GÖREVE ÇIK" class="primary-action" />
                     <ui:Label name="context-hint" text="" class="context-hint" />
                 </ui:VisualElement>
@@ -80,6 +86,7 @@
                 <ui:Label text="HEDEF SONRASI ×2" class="mission-support-value" />
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:Label name="mission-effect-feedback" text="" class="mission-effect-feedback" />
         <ui:VisualElement class="mission-health-card">
             <ui:VisualElement class="mission-health-copy">
                 <ui:Label text="ARAÇ DAYANIKLILIĞI" class="mission-kicker" />

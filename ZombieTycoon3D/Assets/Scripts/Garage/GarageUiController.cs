@@ -67,12 +67,16 @@ public sealed class GarageUiController : MonoBehaviour
     private ScrollView rightList;
     private Label detailTitle;
     private Label detailDescription;
+    private VisualElement detailMechanics;
+    private Label detailEffect;
+    private Label detailTradeoff;
     private Button contextAction;
     private Label contextHint;
     private Label selectedBuildLabel;
     private Label balanceValue;
     private Button missionButton;
     private VisualElement previewViewport;
+    private Label missionEffectFeedback;
 
     private bool pointerDragging;
     private Vector2 previousPointerPosition;
@@ -208,6 +212,36 @@ public sealed class GarageUiController : MonoBehaviour
             ratio <= 0.3f);
     }
 
+    public void ShowMissionEffectFeedback(
+        string message,
+        GarageAttachmentFeedbackTone tone)
+    {
+        if (missionEffectFeedback == null)
+        {
+            return;
+        }
+
+        missionEffectFeedback.text = message;
+        missionEffectFeedback.style.display = DisplayStyle.Flex;
+        missionEffectFeedback.EnableInClassList(
+            "mission-effect-feedback--impact",
+            tone == GarageAttachmentFeedbackTone.Impact);
+        missionEffectFeedback.EnableInClassList(
+            "mission-effect-feedback--defense",
+            tone == GarageAttachmentFeedbackTone.Defense);
+        missionEffectFeedback.EnableInClassList(
+            "mission-effect-feedback--repair",
+            tone == GarageAttachmentFeedbackTone.Repair);
+    }
+
+    public void HideMissionEffectFeedback()
+    {
+        if (missionEffectFeedback != null)
+        {
+            missionEffectFeedback.style.display = DisplayStyle.None;
+        }
+    }
+
     public void ShowMissionResult(MissionResult result)
     {
         garageRoot.style.display = DisplayStyle.None;
@@ -299,12 +333,18 @@ public sealed class GarageUiController : MonoBehaviour
         rightList = RequireElement<ScrollView>(root, "right-list");
         detailTitle = RequireElement<Label>(root, "detail-title");
         detailDescription = RequireElement<Label>(root, "detail-description");
+        detailMechanics =
+            RequireElement<VisualElement>(root, "detail-mechanics");
+        detailEffect = RequireElement<Label>(root, "detail-effect");
+        detailTradeoff = RequireElement<Label>(root, "detail-tradeoff");
         contextAction = RequireElement<Button>(root, "context-action");
         contextHint = RequireElement<Label>(root, "context-hint");
         selectedBuildLabel = RequireElement<Label>(root, "selected-build");
         balanceValue = RequireElement<Label>(root, "balance-value");
         missionButton = RequireElement<Button>(root, "mission-button");
         previewViewport = RequireElement<VisualElement>(root, "preview-viewport");
+        missionEffectFeedback =
+            RequireElement<Label>(root, "mission-effect-feedback");
 
         assemblyTab.clicked += () => SwitchScreen(GarageScreen.Assembly);
         galleryTab.clicked += () => SwitchScreen(GarageScreen.Gallery);
@@ -518,6 +558,7 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void PopulateEquippedSlots()
     {
+        detailMechanics.style.display = DisplayStyle.None;
         rightTitle.text = "TAKILI PARÇALAR";
         detailTitle.text = buildState.SelectedVehicle != null
             ? buildState.SelectedVehicle.DisplayName
@@ -547,6 +588,14 @@ public sealed class GarageUiController : MonoBehaviour
             value.AddToClassList("slot-value");
             copy.Add(slotLabel);
             copy.Add(value);
+            if (equipped != null
+                && !string.IsNullOrWhiteSpace(
+                    equipped.GameplayEffectSummary))
+            {
+                Label effect = new Label(equipped.GameplayEffectSummary);
+                effect.AddToClassList("slot-effect");
+                copy.Add(effect);
+            }
 
             Button change = new Button(() =>
             {
@@ -558,8 +607,22 @@ public sealed class GarageUiController : MonoBehaviour
             };
             change.AddToClassList("ghost-button");
 
+            VisualElement actions = new VisualElement();
+            actions.AddToClassList("slot-actions");
+            actions.Add(change);
+            if (equipped != null)
+            {
+                Button remove = new Button(() => buildState.Unequip(slot))
+                {
+                    text = "ÇIKAR"
+                };
+                remove.AddToClassList("ghost-button");
+                remove.AddToClassList("ghost-button--danger");
+                actions.Add(remove);
+            }
+
             row.Add(copy);
-            row.Add(change);
+            row.Add(actions);
             rightList.Add(row);
         }
     }
@@ -591,6 +654,7 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void PopulateVehicleDetails()
     {
+        detailMechanics.style.display = DisplayStyle.None;
         rightTitle.text = "ARAÇ DETAYI";
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         detailTitle.text = vehicle != null ? vehicle.DisplayName : "Araç seç";
@@ -614,11 +678,18 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void PopulatePartDetails()
     {
+        detailMechanics.style.display = DisplayStyle.Flex;
         rightTitle.text = "PARÇA DETAYI";
         GarageAttachmentDefinition attachment = buildState.PreviewAttachment;
         detailTitle.text = attachment != null ? attachment.DisplayName : "Parça seç";
         detailDescription.text =
             attachment != null ? attachment.Description : "Uyumlu parçayı soldan seç.";
+        detailEffect.text = attachment != null
+            ? attachment.GameplayEffectSummary
+            : "Parçanın gerçek pasif etkisi burada görünür.";
+        detailTradeoff.text = attachment != null
+            ? attachment.TradeoffSummary
+            : "Her avantajın sürüş veya dayanıklılık bedeli burada görünür.";
 
         bool owned = buildState.IsAttachmentOwned(attachment);
         contextAction.text = owned

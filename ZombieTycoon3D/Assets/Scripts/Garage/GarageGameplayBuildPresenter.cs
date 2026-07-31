@@ -333,7 +333,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             zoneCollider.isTrigger = true;
             VehicleAttachmentHitZone hitZone =
                 zoneObject.AddComponent<VehicleAttachmentHitZone>();
-            hitZone.Configure(player);
+            hitZone.Configure(player, attachment.GameplayEffect);
 
             runtime.hitZone = hitZone;
             runtime.hitZoneCollider = zoneCollider;
@@ -347,7 +347,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         runtime.hitZoneCollider.size = pose.ImpactZoneSize;
         runtime.hitZoneCollider.isTrigger = true;
         runtime.hitZoneCollider.enabled = true;
-        runtime.hitZone.Configure(player);
+        runtime.hitZone.Configure(player, attachment.GameplayEffect);
         runtime.hitZone.gameObject.SetActive(true);
     }
 

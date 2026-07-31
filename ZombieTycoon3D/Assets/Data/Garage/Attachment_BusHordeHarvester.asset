@@ -34,3 +34,15 @@ MonoBehaviour:
     handling: -1
     durability: 14
     impactPower: 0.35
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.4
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "SÜRÜ BİÇERDÖVERİ · AĞIR TEMAS"
+    feedbackTone: 0
+  gameplayEffectSummary: "Çok geniş ön temas alanında çarpma gücünü %40 artırır; yoğun sürüyü yararak ilerler."
+  tradeoffSummary: "+14 HP ve +0.35x çarpma gücü; -6 km/h hız, -3.0 hızlanma ve -1.0 kontrol."

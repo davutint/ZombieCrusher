@@ -34,3 +34,15 @@ MonoBehaviour:
     handling: -0.5
     durability: 6
     impactPower: 0.25
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.2
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "ÇİVİ TAMPONU · HIZLI DARBE"
+    feedbackTone: 0
+  gameplayEffectSummary: "Kompakt ön temas alanında çarpma gücünü %20 artırır ve düşük hızlı ezmeyi destekler."
+  tradeoffSummary: "+6 HP ve +0.25x çarpma gücü; -2 km/h hız, -1.0 hızlanma ve -0.5 kontrol."

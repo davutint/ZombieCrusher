@@ -42,3 +42,15 @@ MonoBehaviour:
     handling: 0
     durability: -2
     impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel:
+    feedbackTone: 0
+  gameplayEffectSummary: "Ağır motora +5 km/h azami hız, +3.0 hızlanma ve +0.05x çarpma gücü kazandırır."
+  tradeoffSummary: "Ek egzoz yükü araç dayanıklılığını 2 HP düşürür."

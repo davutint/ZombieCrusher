@@ -30,3 +30,15 @@ MonoBehaviour:
     handling: -0.5
     durability: -3
     impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel:
+    feedbackTone: 0
+  gameplayEffectSummary: "Azami hıza +8 km/h, hızlanmaya +4.0 ve çarpma gücüne +0.05x ekler."
+  tradeoffSummary: "Açık performans kurulumu -0.5 kontrol ve -3 HP dayanıklılık götürür."
