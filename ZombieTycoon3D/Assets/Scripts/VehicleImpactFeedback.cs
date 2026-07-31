@@ -1,4 +1,3 @@
-using System.Collections;
 using Cinemachine;
 using UnityEngine;
 
@@ -10,16 +9,9 @@ public sealed class VehicleImpactFeedback : MonoBehaviour
     [SerializeField] private CinemachineImpulseSource impulseSource;
     [SerializeField, Min(0f)] private float minimumImpulseStrength = 0.2f;
     [SerializeField, Min(0f)] private float maximumImpulseStrength = 0.65f;
-
-    [Header("Hit Stop")]
-    [SerializeField, Range(0.01f, 1f)] private float hitStopTimeScale = 0.08f;
-    [SerializeField, Min(0f)] private float minimumHitStopSeconds = 0.012f;
-    [SerializeField, Min(0f)] private float maximumHitStopSeconds = 0.035f;
     [SerializeField, Min(0f)] private float feedbackCooldownSeconds = 0.055f;
 
-    private Coroutine hitStopRoutine;
     private float nextFeedbackTime;
-    private float timeScaleBeforeHitStop = 1f;
 
     private void Reset()
     {
@@ -41,8 +33,6 @@ public sealed class VehicleImpactFeedback : MonoBehaviour
     {
         maximumImpulseStrength =
             Mathf.Max(minimumImpulseStrength, maximumImpulseStrength);
-        maximumHitStopSeconds =
-            Mathf.Max(minimumHitStopSeconds, maximumHitStopSeconds);
         feedbackCooldownSeconds = Mathf.Max(0f, feedbackCooldownSeconds);
 
         if (impulseSource == null)
@@ -51,16 +41,6 @@ public sealed class VehicleImpactFeedback : MonoBehaviour
         }
 
         ConfigureImpulseSource();
-    }
-
-    private void OnDisable()
-    {
-        if (hitStopRoutine != null)
-        {
-            StopCoroutine(hitStopRoutine);
-            hitStopRoutine = null;
-            Time.timeScale = timeScaleBeforeHitStop;
-        }
     }
 
     public void PlayZombieImpact(
@@ -90,27 +70,6 @@ public sealed class VehicleImpactFeedback : MonoBehaviour
                 worldPosition,
                 direction * impulseStrength);
         }
-
-        if (hitStopRoutine != null)
-        {
-            StopCoroutine(hitStopRoutine);
-            Time.timeScale = timeScaleBeforeHitStop;
-        }
-
-        float duration = Mathf.Lerp(
-            minimumHitStopSeconds,
-            maximumHitStopSeconds,
-            strength);
-        hitStopRoutine = StartCoroutine(PlayHitStop(duration));
-    }
-
-    private IEnumerator PlayHitStop(float duration)
-    {
-        timeScaleBeforeHitStop = Time.timeScale;
-        Time.timeScale = Mathf.Min(timeScaleBeforeHitStop, hitStopTimeScale);
-        yield return new WaitForSecondsRealtime(duration);
-        Time.timeScale = timeScaleBeforeHitStop;
-        hitStopRoutine = null;
     }
 
     private void ConfigureImpulseSource()

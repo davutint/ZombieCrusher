@@ -5,6 +5,9 @@ using UnityEngine.AI;
 
 public class OldSpawnManager : MonoBehaviour
 {
+    private const int PoolNavMeshWaitFrameLimit = 120;
+    private const float PoolNavMeshSampleRadius = 10f;
+
     [Header("Zombie Prefabs")]
     public List<GameObject> zombiePrefabs;
 
@@ -79,6 +82,26 @@ public class OldSpawnManager : MonoBehaviour
             yield break;
         }
 
+        bool foundPoolCreationPosition = false;
+        for (int frame = 0; frame < PoolNavMeshWaitFrameLimit; frame++)
+        {
+            if (TryGetPoolCreationPosition(out poolCreationPosition))
+            {
+                foundPoolCreationPosition = true;
+                break;
+            }
+
+            yield return null;
+        }
+
+        if (!foundPoolCreationPosition)
+        {
+            Debug.LogError(
+                "OldSpawnManager: A valid NavMesh position could not be found for the zombie pool.",
+                this);
+            yield break;
+        }
+
         int firstSpawnPoolSize = Mathf.Clamp(initialPoolSize, 1, maxZombiesInScene);
         yield return WarmPoolToSize(firstSpawnPoolSize);
 
@@ -144,12 +167,6 @@ public class OldSpawnManager : MonoBehaviour
             return false;
         }
 
-        if (!TryGetRandomSpawnPosition(out poolCreationPosition))
-        {
-            Debug.LogError("OldSpawnManager: A valid NavMesh position could not be found for the zombie pool.", this);
-            return false;
-        }
-
         availableZombies.Clear();
         activeZombies.Clear();
         totalCreatedZombieCount = 0;
@@ -158,6 +175,22 @@ public class OldSpawnManager : MonoBehaviour
         SetMissionProgress(0f);
         nextSpawnTime = Time.unscaledTime;
         return true;
+    }
+
+    private bool TryGetPoolCreationPosition(out Vector3 position)
+    {
+        if (NavMesh.SamplePosition(
+                player.position,
+                out NavMeshHit hit,
+                PoolNavMeshSampleRadius,
+                NavMesh.AllAreas))
+        {
+            position = hit.position;
+            return true;
+        }
+
+        position = default;
+        return false;
     }
 
     private IEnumerator WarmPoolToSize(int targetSize)
