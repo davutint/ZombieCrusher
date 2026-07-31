@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_BusBarricadeArmor
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: bus-barricade-armor
+  displayName: "Barikat Z\u0131rh\u0131"
+  description: "Otob\xFCs\xFCn iki yan\u0131n\u0131 \xE7oklu barikat plakalar\u0131yla
+    kaplar ve b\xFCy\xFCk dayan\u0131kl\u0131l\u0131k kazand\u0131r\u0131r."
+  slot: 1
+  visualPrefab: {fileID: 1417429084167010, guid: a2a7efe7a8052de49a858aca56080c48, type: 3}
+  compatibleVehicles:
+  - vehicleId: prison-bus
+    localPosition: {x: -1.76, y: 1.55, z: 1.75}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 1.6, y: 1.4, z: 1}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  - vehicleId: prison-bus
+    localPosition: {x: -1.76, y: 1.55, z: -1.75}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 1.6, y: 1.4, z: 1}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  - vehicleId: prison-bus
+    localPosition: {x: 1.76, y: 1.55, z: 1.75}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 1.6, y: 1.4, z: 1}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  - vehicleId: prison-bus
+    localPosition: {x: 1.76, y: 1.55, z: -1.75}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 1.6, y: 1.4, z: 1}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  price: 330
+  modifier:
+    maxSpeed: -7
+    acceleration: -2
+    handling: -1
+    durability: 40
+    impactPower: 0.05

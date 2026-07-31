@@ -34,6 +34,11 @@ public sealed class GarageFlowController : MonoBehaviour
     private Vector3 driveStartPosition;
     private Quaternion driveStartRotation;
     private AudioSource[] gameplayAudioSources;
+    private AnimationCurve baseFrictionCurve;
+    private PhysicsMaterial originalFrictionMaterial;
+    private PhysicsMaterial originalDriveColliderMaterial;
+    private PhysicsMaterial runtimeFrictionMaterial;
+    private SphereCollider driveCollider;
 
     private void Awake()
     {
@@ -93,6 +98,7 @@ public sealed class GarageFlowController : MonoBehaviour
         driveStartRotation = driveRigidbody.rotation;
         gameplayAudioSources =
             gameplayVehicle.GetComponentsInChildren<AudioSource>(true);
+        PrepareRuntimeFriction();
         OpenGarage();
     }
 
@@ -134,6 +140,26 @@ public sealed class GarageFlowController : MonoBehaviour
         EventManager.OnPlayerDeath -= HandlePlayerDeath;
     }
 
+    private void OnDestroy()
+    {
+        if (runtimeFrictionMaterial == null)
+        {
+            return;
+        }
+
+        if (vehicleController != null)
+        {
+            vehicleController.frictionMaterial = originalFrictionMaterial;
+        }
+
+        if (driveCollider != null)
+        {
+            driveCollider.sharedMaterial = originalDriveColliderMaterial;
+        }
+
+        Destroy(runtimeFrictionMaterial);
+    }
+
     private bool ValidateReferences()
     {
         bool valid = buildState != null
@@ -170,11 +196,14 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         ResetVehiclePose();
+        vehicleRigidbody.isKinematic = false;
+        driveRigidbody.isKinematic = false;
 
         VehicleStats stats = buildState.CurrentStats;
         vehicleController.MaxSpeed = stats.maxSpeed;
         vehicleController.accelaration = stats.acceleration;
         vehicleController.turn = stats.handling;
+        ApplyVehiclePhysics(buildState.SelectedVehicle);
         player.ApplyVehicleStats(stats);
         player.ResetForRun();
         scoreManager.BeginMission(
@@ -186,8 +215,6 @@ public sealed class GarageFlowController : MonoBehaviour
             buildState.GetEquippedAttachments());
         gameplayBuildPresenter.SetVisible(true);
 
-        vehicleRigidbody.isKinematic = false;
-        driveRigidbody.isKinematic = false;
         vehicleController.enabled = true;
         inputController.enabled = true;
         gameplayCamera.enabled = true;
@@ -329,5 +356,105 @@ public sealed class GarageFlowController : MonoBehaviour
                 gameplayAudioSources[i].enabled = enabled;
             }
         }
+    }
+
+    private void PrepareRuntimeFriction()
+    {
+        baseFrictionCurve = CopyCurve(vehicleController.frictionCurve);
+        driveCollider = driveRigidbody.GetComponent<SphereCollider>();
+        originalDriveColliderMaterial =
+            driveCollider != null ? driveCollider.sharedMaterial : null;
+        originalFrictionMaterial = vehicleController.frictionMaterial;
+        if (originalFrictionMaterial == null && driveCollider != null)
+        {
+            originalFrictionMaterial = originalDriveColliderMaterial;
+        }
+
+        if (originalFrictionMaterial == null)
+        {
+            return;
+        }
+
+        runtimeFrictionMaterial = Instantiate(originalFrictionMaterial);
+        runtimeFrictionMaterial.name =
+            originalFrictionMaterial.name + " (Garage Runtime)";
+        runtimeFrictionMaterial.hideFlags = HideFlags.DontSave;
+        vehicleController.frictionMaterial = runtimeFrictionMaterial;
+        if (driveCollider != null)
+        {
+            driveCollider.sharedMaterial = runtimeFrictionMaterial;
+        }
+    }
+
+    private void ApplyVehiclePhysics(GarageVehicleDefinition vehicle)
+    {
+        if (vehicle == null)
+        {
+            return;
+        }
+
+        vehicleRigidbody.mass = vehicle.BodyMass;
+        vehicleRigidbody.automaticCenterOfMass = false;
+        vehicleRigidbody.centerOfMass = vehicle.CenterOfMass;
+        driveRigidbody.mass = vehicle.DriveMass;
+        driveRigidbody.automaticCenterOfMass = false;
+        driveRigidbody.centerOfMass = vehicle.DriveCenterOfMass;
+        vehicleController.gravity = vehicle.Gravity;
+        vehicleController.downforce = vehicle.Downforce;
+        vehicleController.frictionCurve =
+            ScaleCurve(baseFrictionCurve, vehicle.LateralGrip);
+
+        if (runtimeFrictionMaterial != null
+            && originalFrictionMaterial != null)
+        {
+            runtimeFrictionMaterial.staticFriction =
+                originalFrictionMaterial.staticFriction
+                * vehicle.LateralGrip;
+            runtimeFrictionMaterial.dynamicFriction =
+                originalFrictionMaterial.dynamicFriction
+                * vehicle.LateralGrip;
+        }
+    }
+
+    private static AnimationCurve CopyCurve(AnimationCurve source)
+    {
+        if (source == null)
+        {
+            return new AnimationCurve();
+        }
+
+        AnimationCurve copy = new AnimationCurve(source.keys)
+        {
+            preWrapMode = source.preWrapMode,
+            postWrapMode = source.postWrapMode
+        };
+        return copy;
+    }
+
+    private static AnimationCurve ScaleCurve(
+        AnimationCurve source,
+        float multiplier)
+    {
+        if (source == null)
+        {
+            return new AnimationCurve();
+        }
+
+        Keyframe[] keys = source.keys;
+        for (int i = 0; i < keys.Length; i++)
+        {
+            Keyframe key = keys[i];
+            key.value *= multiplier;
+            key.inTangent *= multiplier;
+            key.outTangent *= multiplier;
+            keys[i] = key;
+        }
+
+        AnimationCurve scaled = new AnimationCurve(keys)
+        {
+            preWrapMode = source.preWrapMode,
+            postWrapMode = source.postWrapMode
+        };
+        return scaled;
     }
 }

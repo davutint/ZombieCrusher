@@ -76,38 +76,49 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Ragdoll"))
+        TryImpactZombie(other, transform.position);
+    }
+
+    public bool TryImpactZombie(Collider other, Vector3 impactSourcePosition)
+    {
+        if (other == null || !other.gameObject.CompareTag("Ragdoll"))
         {
-            float currentSpeed = rb.linearVelocity.magnitude;
-            float effectiveMinimumImpactSpeed =
-                minImpactSpeed / Mathf.Max(0.1f, impactPower);
-            if (currentSpeed >= effectiveMinimumImpactSpeed)
-            {
-                Enemy enemy = other.gameObject.GetComponentInParent<Enemy>();
-                if (enemy != null && enemy.TryDestroy())
-                {
-                    float speedStrength = Mathf.InverseLerp(
-                        effectiveMinimumImpactSpeed,
-                        effectiveMinimumImpactSpeed * 3.5f,
-                        currentSpeed);
-                    float attachmentStrength = Mathf.InverseLerp(
-                        0.75f,
-                        1.75f,
-                        impactPower);
-                    float feedbackStrength = Mathf.Clamp01(
-                        0.2f
-                        + speedStrength * 0.55f
-                        + attachmentStrength * 0.25f);
-                    Vector3 impactPosition =
-                        other.ClosestPoint(transform.position);
-                    impactFeedback?.PlayZombieImpact(
-                        impactPosition,
-                        rb.linearVelocity,
-                        feedbackStrength);
-                    TakeDamage(damage);
-                }
-            }
+            return false;
         }
+
+        float currentSpeed = rb.linearVelocity.magnitude;
+        float effectiveMinimumImpactSpeed =
+            minImpactSpeed / Mathf.Max(0.1f, impactPower);
+        if (currentSpeed < effectiveMinimumImpactSpeed)
+        {
+            return false;
+        }
+
+        Enemy enemy = other.gameObject.GetComponentInParent<Enemy>();
+        if (enemy == null || !enemy.TryDestroy())
+        {
+            return false;
+        }
+
+        float speedStrength = Mathf.InverseLerp(
+            effectiveMinimumImpactSpeed,
+            effectiveMinimumImpactSpeed * 3.5f,
+            currentSpeed);
+        float attachmentStrength = Mathf.InverseLerp(
+            0.75f,
+            1.75f,
+            impactPower);
+        float feedbackStrength = Mathf.Clamp01(
+            0.2f
+            + speedStrength * 0.55f
+            + attachmentStrength * 0.25f);
+        Vector3 impactPosition = other.ClosestPoint(impactSourcePosition);
+        impactFeedback?.PlayZombieImpact(
+            impactPosition,
+            rb.linearVelocity,
+            feedbackStrength);
+        TakeDamage(damage);
+        return true;
     }
 
     // Hasar uygulama metodu

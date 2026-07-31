@@ -30,3 +30,10 @@ MonoBehaviour:
     handling: 14
     durability: 70
     impactPower: 0.8
+  bodyMass: 0.72
+  driveMass: 0.78
+  gravity: 6.5
+  downforce: 4
+  lateralGrip: 1.15
+  centerOfMass: {x: 0, y: -0.08, z: 0}
+  driveCenterOfMass: {x: 0, y: -0.04, z: 0}

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_BusHordeHarvester
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: bus-horde-harvester
+  displayName: "S\xFCr\xFC Bi\xE7erd\xF6veri"
+  description: "Prison Bus i\xE7in a\u011F\u0131r \xF6n bi\xE7erd\xF6ver. Kalabal\u0131\u011F\u0131
+    yarar fakat h\u0131zlanma ve manevray\u0131 d\xFC\u015F\xFCr\xFCr."
+  slot: 0
+  visualPrefab: {fileID: 1857705056884696, guid: 421dceaa53a7bff4399dcdbae4ad55db, type: 3}
+  compatibleVehicles:
+  - vehicleId: prison-bus
+    localPosition: {x: 0, y: 0.85, z: 4.75}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.75, y: 1.2, z: 1.2}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0, y: 0.9, z: 4.92}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 3.4, y: 1.35, z: 1.15}
+  price: 320
+  modifier:
+    maxSpeed: -6
+    acceleration: -3
+    handling: -1
+    durability: 14
+    impactPower: 0.35

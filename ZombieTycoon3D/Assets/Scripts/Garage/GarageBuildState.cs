@@ -2,6 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
+public sealed class GarageVehicleLoadoutData
+{
+    public string vehicleId;
+    public List<string> attachmentIds = new();
+}
+
 [DisallowMultipleComponent]
 public sealed class GarageBuildState : MonoBehaviour
 {
@@ -18,6 +25,8 @@ public sealed class GarageBuildState : MonoBehaviour
 
     private readonly HashSet<string> ownedVehicleIds = new(StringComparer.Ordinal);
     private readonly HashSet<string> ownedAttachmentIds = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, List<EquippedEntry>> vehicleLoadouts =
+        new(StringComparer.Ordinal);
 
     private GarageVehicleDefinition previewVehicle;
     private GarageAttachmentDefinition previewAttachment;
@@ -30,7 +39,11 @@ public sealed class GarageBuildState : MonoBehaviour
     public GarageAttachmentDefinition PreviewAttachment => previewAttachment;
 
     public VehicleStats CurrentStats =>
-        CalculateStats(selectedVehicle, null, replacePreviewSlot: false);
+        CalculateStats(
+            selectedVehicle,
+            null,
+            replacePreviewSlot: false,
+            includeLoadout: true);
 
     public VehicleStats PreviewStats
     {
@@ -41,7 +54,8 @@ public sealed class GarageBuildState : MonoBehaviour
             return CalculateStats(
                 vehicle,
                 sameVehicle ? previewAttachment : null,
-                replacePreviewSlot: sameVehicle && previewAttachment != null);
+                replacePreviewSlot: sameVehicle && previewAttachment != null,
+                includeLoadout: sameVehicle);
         }
     }
 
@@ -79,6 +93,10 @@ public sealed class GarageBuildState : MonoBehaviour
             }
         }
 
+        vehicleLoadouts.Clear();
+        RemoveIncompatibleEntries(equipped, selectedVehicle);
+        SaveCurrentLoadout();
+
         previewVehicle = null;
         previewAttachment = null;
         Changed?.Invoke();
@@ -114,7 +132,7 @@ public sealed class GarageBuildState : MonoBehaviour
         IReadOnlyList<string> vehicleIds,
         IReadOnlyList<string> attachmentIds,
         string selectedVehicleId,
-        IReadOnlyList<string> equippedAttachmentIds)
+        IReadOnlyList<GarageVehicleLoadoutData> savedLoadouts)
     {
         if (catalog == null)
         {
@@ -162,21 +180,47 @@ public sealed class GarageBuildState : MonoBehaviour
                 ? savedVehicle
                 : startingVehicle;
 
-        equipped.Clear();
-        if (equippedAttachmentIds != null && selectedVehicle != null)
+        vehicleLoadouts.Clear();
+        if (savedLoadouts != null)
         {
-            for (int i = 0; i < equippedAttachmentIds.Count; i++)
+            for (int i = 0; i < savedLoadouts.Count; i++)
             {
-                GarageAttachmentDefinition attachment =
-                    catalog.FindAttachment(equippedAttachmentIds[i]);
-                if (attachment != null
-                    && IsAttachmentOwned(attachment)
-                    && attachment.TryGetPose(selectedVehicle.VehicleId, out _))
+                GarageVehicleLoadoutData savedLoadout = savedLoadouts[i];
+                GarageVehicleDefinition vehicle =
+                    savedLoadout != null
+                        ? catalog.FindVehicle(savedLoadout.vehicleId)
+                        : null;
+                if (vehicle == null || savedLoadout.attachmentIds == null)
                 {
-                    SetEquipped(attachment.Slot, attachment);
+                    continue;
+                }
+
+                if (!vehicleLoadouts.TryGetValue(
+                        vehicle.VehicleId,
+                        out List<EquippedEntry> loadout))
+                {
+                    loadout = new List<EquippedEntry>();
+                    vehicleLoadouts[vehicle.VehicleId] = loadout;
+                }
+
+                for (int attachmentIndex = 0;
+                     attachmentIndex < savedLoadout.attachmentIds.Count;
+                     attachmentIndex++)
+                {
+                    GarageAttachmentDefinition attachment =
+                        catalog.FindAttachment(
+                            savedLoadout.attachmentIds[attachmentIndex]);
+                    if (attachment != null
+                        && IsAttachmentOwned(attachment)
+                        && attachment.TryGetPose(vehicle.VehicleId, out _))
+                    {
+                        SetEquipped(loadout, attachment.Slot, attachment);
+                    }
                 }
             }
         }
+
+        LoadSelectedLoadout();
 
         previewVehicle = null;
         previewAttachment = null;
@@ -206,10 +250,11 @@ public sealed class GarageBuildState : MonoBehaviour
             return false;
         }
 
+        SaveCurrentLoadout();
         selectedVehicle = vehicle;
         previewVehicle = null;
         previewAttachment = null;
-        RemoveIncompatibleEquippedAttachments();
+        LoadSelectedLoadout();
         Changed?.Invoke();
         return true;
     }
@@ -285,10 +330,52 @@ public sealed class GarageBuildState : MonoBehaviour
         }
     }
 
+    public List<GarageVehicleLoadoutData> CreateLoadoutSaveData()
+    {
+        SaveCurrentLoadout();
+        List<GarageVehicleLoadoutData> result = new();
+        IReadOnlyList<GarageVehicleDefinition> vehicles = catalog?.Vehicles;
+        if (vehicles == null)
+        {
+            return result;
+        }
+
+        for (int i = 0; i < vehicles.Count; i++)
+        {
+            GarageVehicleDefinition vehicle = vehicles[i];
+            if (vehicle == null
+                || !vehicleLoadouts.TryGetValue(
+                    vehicle.VehicleId,
+                    out List<EquippedEntry> loadout))
+            {
+                continue;
+            }
+
+            GarageVehicleLoadoutData data = new GarageVehicleLoadoutData
+            {
+                vehicleId = vehicle.VehicleId
+            };
+            for (int entryIndex = 0; entryIndex < loadout.Count; entryIndex++)
+            {
+                GarageAttachmentDefinition attachment =
+                    loadout[entryIndex].attachment;
+                if (attachment != null)
+                {
+                    data.attachmentIds.Add(attachment.AttachmentId);
+                }
+            }
+
+            result.Add(data);
+        }
+
+        return result;
+    }
+
     private VehicleStats CalculateStats(
         GarageVehicleDefinition vehicle,
         GarageAttachmentDefinition extraAttachment,
-        bool replacePreviewSlot)
+        bool replacePreviewSlot,
+        bool includeLoadout)
     {
         if (vehicle == null)
         {
@@ -296,9 +383,11 @@ public sealed class GarageBuildState : MonoBehaviour
         }
 
         VehicleStats result = vehicle.BaseStats;
-        for (int i = 0; i < equipped.Count; i++)
+        IReadOnlyList<EquippedEntry> activeLoadout =
+            includeLoadout ? equipped : Array.Empty<EquippedEntry>();
+        for (int i = 0; i < activeLoadout.Count; i++)
         {
-            GarageAttachmentDefinition attachment = equipped[i].attachment;
+            GarageAttachmentDefinition attachment = activeLoadout[i].attachment;
             if (attachment == null
                 || !attachment.TryGetPose(vehicle.VehicleId, out _)
                 || (replacePreviewSlot
@@ -324,41 +413,75 @@ public sealed class GarageBuildState : MonoBehaviour
         GarageAttachmentSlot slot,
         GarageAttachmentDefinition attachment)
     {
-        for (int i = 0; i < equipped.Count; i++)
+        SetEquipped(equipped, slot, attachment);
+        SaveCurrentLoadout();
+    }
+
+    private static void SetEquipped(
+        List<EquippedEntry> loadout,
+        GarageAttachmentSlot slot,
+        GarageAttachmentDefinition attachment)
+    {
+        for (int i = 0; i < loadout.Count; i++)
         {
-            if (equipped[i].slot != slot)
+            if (loadout[i].slot != slot)
             {
                 continue;
             }
 
-            EquippedEntry entry = equipped[i];
+            EquippedEntry entry = loadout[i];
             entry.attachment = attachment;
-            equipped[i] = entry;
+            loadout[i] = entry;
             return;
         }
 
-        equipped.Add(new EquippedEntry
+        loadout.Add(new EquippedEntry
         {
             slot = slot,
             attachment = attachment
         });
     }
 
-    private void RemoveIncompatibleEquippedAttachments()
+    private void SaveCurrentLoadout()
     {
         if (selectedVehicle == null)
         {
-            equipped.Clear();
             return;
         }
 
-        for (int i = equipped.Count - 1; i >= 0; i--)
+        vehicleLoadouts[selectedVehicle.VehicleId] =
+            new List<EquippedEntry>(equipped);
+    }
+
+    private void LoadSelectedLoadout()
+    {
+        equipped.Clear();
+        if (selectedVehicle != null
+            && vehicleLoadouts.TryGetValue(
+                selectedVehicle.VehicleId,
+                out List<EquippedEntry> loadout))
         {
-            GarageAttachmentDefinition attachment = equipped[i].attachment;
+            equipped.AddRange(loadout);
+        }
+    }
+
+    private static void RemoveIncompatibleEntries(
+        List<EquippedEntry> loadout,
+        GarageVehicleDefinition vehicle)
+    {
+        if (vehicle == null)
+        {
+            loadout.Clear();
+            return;
+        }
+
+        for (int i = loadout.Count - 1; i >= 0; i--)
+        {
+            GarageAttachmentDefinition attachment = loadout[i].attachment;
             if (attachment == null
-                || !attachment.TryGetPose(selectedVehicle.VehicleId, out _))
+                || !attachment.TryGetPose(vehicle.VehicleId, out _))
             {
-                equipped.RemoveAt(i);
+                loadout.RemoveAt(i);
             }
         }
     }

@@ -6,13 +6,25 @@ using UnityEngine;
 [RequireComponent(typeof(GarageBuildState))]
 public sealed class GarageEconomyController : MonoBehaviour
 {
-    private const int CurrentSaveVersion = 1;
-    private const string SaveKey = "zt3d.garage-progression.v1";
+    private const int CurrentSaveVersion = 2;
+    private const string SaveKey = "zt3d.garage-progression.v2";
+    private const string LegacySaveKey = "zt3d.garage-progression.v1";
 
     [Serializable]
     private sealed class SaveData
     {
         public int version = CurrentSaveVersion;
+        public int scrap;
+        public string selectedVehicleId;
+        public List<string> ownedVehicleIds = new();
+        public List<string> ownedAttachmentIds = new();
+        public List<GarageVehicleLoadoutData> vehicleLoadouts = new();
+    }
+
+    [Serializable]
+    private sealed class LegacySaveData
+    {
+        public int version = 1;
         public int scrap;
         public string selectedVehicleId;
         public List<string> ownedVehicleIds = new();
@@ -161,60 +173,124 @@ public sealed class GarageEconomyController : MonoBehaviour
 
     private void LoadProgression()
     {
+        bool migratedLegacySave = false;
         restoring = true;
         try
         {
             ResetToDefaultProgression();
-            if (!PlayerPrefs.HasKey(SaveKey))
+            if (PlayerPrefs.HasKey(SaveKey))
             {
+                RestoreCurrentSave(PlayerPrefs.GetString(SaveKey));
                 return;
             }
 
-            string json = PlayerPrefs.GetString(SaveKey);
-            SaveData data;
-            try
+            if (PlayerPrefs.HasKey(LegacySaveKey))
             {
-                data = JsonUtility.FromJson<SaveData>(json);
+                migratedLegacySave =
+                    RestoreLegacySave(PlayerPrefs.GetString(LegacySaveKey));
             }
-            catch (Exception exception)
-            {
-                Debug.LogWarning(
-                    $"Garage progression save was corrupt and has been reset. {exception.Message}",
-                    this);
-                PlayerPrefs.DeleteKey(SaveKey);
-                PlayerPrefs.Save();
-                return;
-            }
-
-            if (data == null)
-            {
-                Debug.LogWarning(
-                    "Garage progression save was empty and has been reset.",
-                    this);
-                PlayerPrefs.DeleteKey(SaveKey);
-                PlayerPrefs.Save();
-                return;
-            }
-
-            if (data.version != CurrentSaveVersion)
-            {
-                Debug.LogWarning(
-                    $"Garage progression save version {data.version} is unsupported; defaults are being used.",
-                    this);
-                return;
-            }
-
-            scrap = Mathf.Max(0, data.scrap);
-            buildState.RestoreProgression(
-                data.ownedVehicleIds,
-                data.ownedAttachmentIds,
-                data.selectedVehicleId,
-                data.equippedAttachmentIds);
         }
         finally
         {
             restoring = false;
         }
+
+        if (migratedLegacySave)
+        {
+            SaveProgression();
+        }
+    }
+
+    private void RestoreCurrentSave(string json)
+    {
+        SaveData data;
+        try
+        {
+            data = JsonUtility.FromJson<SaveData>(json);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogWarning(
+                $"Garage progression v2 save was corrupt and has been reset. {exception.Message}",
+                this);
+            ArchiveCorruptSave(SaveKey, json);
+            return;
+        }
+
+        if (data == null)
+        {
+            Debug.LogWarning(
+                "Garage progression v2 save was empty and has been reset.",
+                this);
+            ArchiveCorruptSave(SaveKey, json);
+            return;
+        }
+
+        if (data.version != CurrentSaveVersion)
+        {
+            Debug.LogWarning(
+                $"Garage progression save version {data.version} is unsupported; defaults are being used.",
+                this);
+            return;
+        }
+
+        scrap = Mathf.Max(0, data.scrap);
+        buildState.RestoreProgression(
+            data.ownedVehicleIds,
+            data.ownedAttachmentIds,
+            data.selectedVehicleId,
+            data.vehicleLoadouts);
+    }
+
+    private bool RestoreLegacySave(string json)
+    {
+        LegacySaveData data;
+        try
+        {
+            data = JsonUtility.FromJson<LegacySaveData>(json);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogWarning(
+                $"Garage progression v1 save was corrupt and has been reset. {exception.Message}",
+                this);
+            ArchiveCorruptSave(LegacySaveKey, json);
+            return false;
+        }
+
+        if (data == null || data.version != 1)
+        {
+            Debug.LogWarning(
+                "Garage progression v1 save could not be migrated; defaults are being used.",
+                this);
+            return false;
+        }
+
+        List<GarageVehicleLoadoutData> loadouts = new();
+        if (!string.IsNullOrWhiteSpace(data.selectedVehicleId))
+        {
+            loadouts.Add(new GarageVehicleLoadoutData
+            {
+                vehicleId = data.selectedVehicleId,
+                attachmentIds = data.equippedAttachmentIds
+                                ?? new List<string>()
+            });
+        }
+
+        scrap = Mathf.Max(0, data.scrap);
+        buildState.RestoreProgression(
+            data.ownedVehicleIds,
+            data.ownedAttachmentIds,
+            data.selectedVehicleId,
+            loadouts);
+        return true;
+    }
+
+    private static void ArchiveCorruptSave(string saveKey, string json)
+    {
+        PlayerPrefs.SetString(saveKey + ".corrupt", json ?? string.Empty);
+        PlayerPrefs.DeleteKey(saveKey);
+        PlayerPrefs.Save();
     }
 
     private void ResetToDefaultProgression()
@@ -253,11 +329,7 @@ public sealed class GarageEconomyController : MonoBehaviour
             data.ownedAttachmentIds.Add(attachmentId);
         }
 
-        foreach (GarageAttachmentDefinition attachment
-                 in buildState.GetEquippedAttachments())
-        {
-            data.equippedAttachmentIds.Add(attachment.AttachmentId);
-        }
+        data.vehicleLoadouts = buildState.CreateLoadoutSaveData();
 
         PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(data));
         PlayerPrefs.Save();

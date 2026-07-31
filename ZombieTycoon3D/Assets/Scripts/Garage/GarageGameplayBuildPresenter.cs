@@ -6,13 +6,20 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class GarageGameplayBuildPresenter : MonoBehaviour
 {
+    private sealed class AttachmentRuntimeInstance
+    {
+        public GameObject visual;
+        public VehicleAttachmentHitZone hitZone;
+        public BoxCollider hitZoneCollider;
+    }
+
     private sealed class VehicleVisualInstance
     {
         public GameObject container;
         public Transform bodyPivot;
         public Transform[] frontWheels;
         public Transform[] rearWheels;
-        public readonly Dictionary<string, List<GameObject>> attachments =
+        public readonly Dictionary<string, List<AttachmentRuntimeInstance>> attachments =
             new(StringComparer.Ordinal);
 
         public bool HasCompleteWheelRig =>
@@ -30,6 +37,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
     [SerializeField] private Transform visualRoot;
     [SerializeField] private ArcadeVehicleController vehicleController;
     [SerializeField] private BoxCollider vehicleHitbox;
+    [SerializeField] private Player player;
 
     private readonly Dictionary<string, VehicleVisualInstance> vehicleCache =
         new(StringComparer.Ordinal);
@@ -58,6 +66,11 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         if (vehicleHitbox == null)
         {
             vehicleHitbox = gameplayVehicleRoot.GetComponent<BoxCollider>();
+        }
+
+        if (player == null)
+        {
+            player = gameplayVehicleRoot.GetComponent<Player>();
         }
 
         CacheOriginalRig();
@@ -117,9 +130,10 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             }
         }
 
-        foreach (KeyValuePair<string, List<GameObject>> pair in instance.attachments)
+        foreach (KeyValuePair<string, List<AttachmentRuntimeInstance>> pair
+                 in instance.attachments)
         {
-            List<GameObject> attachmentObjects = pair.Value;
+            List<AttachmentRuntimeInstance> attachmentObjects = pair.Value;
             if (attachmentObjects == null)
             {
                 continue;
@@ -128,9 +142,16 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             bool active = desiredAttachments.Contains(pair.Key);
             for (int i = 0; i < attachmentObjects.Count; i++)
             {
-                if (attachmentObjects[i] != null)
+                AttachmentRuntimeInstance attachmentObject = attachmentObjects[i];
+                if (attachmentObject?.visual != null)
                 {
-                    attachmentObjects[i].SetActive(active);
+                    attachmentObject.visual.SetActive(active);
+                }
+
+                if (attachmentObject?.hitZone != null)
+                {
+                    attachmentObject.hitZone.gameObject.SetActive(active);
+                    attachmentObject.hitZoneCollider.enabled = active;
                 }
             }
         }
@@ -214,7 +235,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         }
     }
 
-    private static void ShowAttachment(
+    private void ShowAttachment(
         VehicleVisualInstance instance,
         GarageVehicleDefinition vehicle,
         GarageAttachmentDefinition attachment,
@@ -234,10 +255,10 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         desiredAttachments.Add(attachment.AttachmentId);
         if (!instance.attachments.TryGetValue(
                 attachment.AttachmentId,
-                out List<GameObject> attachmentObjects)
+                out List<AttachmentRuntimeInstance> attachmentObjects)
             || attachmentObjects == null)
         {
-            attachmentObjects = new List<GameObject>(poseCount);
+            attachmentObjects = new List<AttachmentRuntimeInstance>(poseCount);
             instance.attachments[attachment.AttachmentId] = attachmentObjects;
         }
 
@@ -248,12 +269,16 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
                 instance.bodyPivot,
                 false);
             attachmentObject.name = attachment.VisualPrefab.name;
-            attachmentObjects.Add(attachmentObject);
+            attachmentObjects.Add(new AttachmentRuntimeInstance
+            {
+                visual = attachmentObject
+            });
         }
 
         for (int i = 0; i < attachmentObjects.Count; i++)
         {
-            GameObject attachmentObject = attachmentObjects[i];
+            AttachmentRuntimeInstance runtime = attachmentObjects[i];
+            GameObject attachmentObject = runtime.visual;
             GarageAttachmentPose pose = default;
             bool active = i < poseCount
                           && attachment.TryGetPose(
@@ -270,7 +295,60 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             attachmentTransform.localPosition = pose.LocalPosition;
             attachmentTransform.localRotation = pose.LocalRotation;
             attachmentTransform.localScale = pose.LocalScale;
+            ConfigureImpactZone(
+                instance,
+                attachment,
+                runtime,
+                pose,
+                i);
         }
+    }
+
+    private void ConfigureImpactZone(
+        VehicleVisualInstance instance,
+        GarageAttachmentDefinition attachment,
+        AttachmentRuntimeInstance runtime,
+        GarageAttachmentPose pose,
+        int poseIndex)
+    {
+        if (!pose.CreatesImpactZone)
+        {
+            if (runtime.hitZone != null)
+            {
+                runtime.hitZone.gameObject.SetActive(false);
+                runtime.hitZoneCollider.enabled = false;
+            }
+
+            return;
+        }
+
+        if (runtime.hitZone == null)
+        {
+            GameObject zoneObject = new GameObject(
+                $"ImpactZone_{attachment.AttachmentId}_{poseIndex}");
+            zoneObject.layer = gameplayVehicleRoot.gameObject.layer;
+            zoneObject.transform.SetParent(instance.bodyPivot, false);
+
+            BoxCollider zoneCollider = zoneObject.AddComponent<BoxCollider>();
+            zoneCollider.isTrigger = true;
+            VehicleAttachmentHitZone hitZone =
+                zoneObject.AddComponent<VehicleAttachmentHitZone>();
+            hitZone.Configure(player);
+
+            runtime.hitZone = hitZone;
+            runtime.hitZoneCollider = zoneCollider;
+        }
+
+        Transform zoneTransform = runtime.hitZone.transform;
+        zoneTransform.localPosition = pose.ImpactZoneCenter;
+        zoneTransform.localRotation = pose.ImpactZoneRotation;
+        zoneTransform.localScale = Vector3.one;
+        runtime.hitZoneCollider.center = Vector3.zero;
+        runtime.hitZoneCollider.size = pose.ImpactZoneSize;
+        runtime.hitZoneCollider.isTrigger = true;
+        runtime.hitZoneCollider.enabled = true;
+        runtime.hitZone.Configure(player);
+        runtime.hitZone.gameObject.SetActive(true);
     }
 
     private void HideCachedVehicles()

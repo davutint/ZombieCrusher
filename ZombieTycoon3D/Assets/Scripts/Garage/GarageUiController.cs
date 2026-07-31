@@ -420,8 +420,24 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void PopulatePartFilters()
     {
+        GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
+        List<GarageAttachmentSlot> compatibleSlots = new();
         foreach (GarageAttachmentSlot slot in Enum.GetValues(typeof(GarageAttachmentSlot)))
         {
+            if (VehicleSupportsSlot(vehicle, slot))
+            {
+                compatibleSlots.Add(slot);
+            }
+        }
+
+        if (compatibleSlots.Count > 0 && !compatibleSlots.Contains(partsFilter))
+        {
+            partsFilter = compatibleSlots[0];
+        }
+
+        for (int i = 0; i < compatibleSlots.Count; i++)
+        {
+            GarageAttachmentSlot slot = compatibleSlots[i];
             string label = GetSlotLabel(slot);
             Button button = new Button(() =>
             {
@@ -443,6 +459,7 @@ public sealed class GarageUiController : MonoBehaviour
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         IReadOnlyList<GarageAttachmentDefinition> attachments =
             buildState.Catalog.Attachments;
+        bool addedPart = false;
 
         for (int i = 0; i < attachments.Count; i++)
         {
@@ -464,6 +481,17 @@ public sealed class GarageUiController : MonoBehaviour
                 selected);
             button.clicked += () => buildState.PreviewPart(attachment);
             leftList.Add(button);
+            addedPart = true;
+        }
+
+        if (!addedPart)
+        {
+            Label emptyState = new Label(
+                vehicle != null
+                    ? "Bu araç için bu kategoride uyumlu parça yok."
+                    : "Önce bir araç seç.");
+            emptyState.AddToClassList("empty-state");
+            leftList.Add(emptyState);
         }
     }
 
@@ -502,6 +530,11 @@ public sealed class GarageUiController : MonoBehaviour
 
         foreach (GarageAttachmentSlot slot in Enum.GetValues(typeof(GarageAttachmentSlot)))
         {
+            if (!VehicleSupportsSlot(buildState.SelectedVehicle, slot))
+            {
+                continue;
+            }
+
             GarageAttachmentDefinition equipped = buildState.GetEquipped(slot);
             VisualElement row = new VisualElement();
             row.AddToClassList("slot-row");
@@ -529,6 +562,31 @@ public sealed class GarageUiController : MonoBehaviour
             row.Add(change);
             rightList.Add(row);
         }
+    }
+
+    private bool VehicleSupportsSlot(
+        GarageVehicleDefinition vehicle,
+        GarageAttachmentSlot slot)
+    {
+        if (vehicle == null || buildState.Catalog == null)
+        {
+            return false;
+        }
+
+        IReadOnlyList<GarageAttachmentDefinition> attachments =
+            buildState.Catalog.Attachments;
+        for (int i = 0; i < attachments.Count; i++)
+        {
+            GarageAttachmentDefinition attachment = attachments[i];
+            if (attachment != null
+                && attachment.Slot == slot
+                && attachment.TryGetPose(vehicle.VehicleId, out _))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void PopulateVehicleDetails()
@@ -809,6 +867,8 @@ public sealed class GarageUiController : MonoBehaviour
             GarageAttachmentSlot.Armor => "ZIRH",
             GarageAttachmentSlot.Engine => "MOTOR",
             GarageAttachmentSlot.Wheels => "TEKERLEK",
+            GarageAttachmentSlot.RearAero => "ARKA / AERO",
+            GarageAttachmentSlot.RoofUtility => "TAVAN / EKİPMAN",
             _ => slot.ToString().ToUpperInvariant()
         };
     }

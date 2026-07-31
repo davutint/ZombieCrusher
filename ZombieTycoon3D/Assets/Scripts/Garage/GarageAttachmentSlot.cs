@@ -3,5 +3,7 @@ public enum GarageAttachmentSlot
     Front,
     Armor,
     Engine,
-    Wheels
+    Wheels,
+    RearAero,
+    RoofUtility
 }

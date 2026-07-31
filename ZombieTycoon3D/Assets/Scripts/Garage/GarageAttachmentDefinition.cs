@@ -10,11 +10,25 @@ public struct GarageAttachmentPose
     [SerializeField] private Vector3 localEuler;
     [SerializeField] private Vector3 localScale;
 
+    [Header("Gameplay Contact")]
+    [SerializeField] private bool createsImpactZone;
+    [SerializeField] private Vector3 impactZoneCenter;
+    [SerializeField] private Vector3 impactZoneEuler;
+    [SerializeField] private Vector3 impactZoneSize;
+
     public string VehicleId => vehicleId;
     public Vector3 LocalPosition => localPosition;
     public Quaternion LocalRotation => Quaternion.Euler(localEuler);
     public Vector3 LocalScale =>
         localScale.sqrMagnitude < 0.0001f ? Vector3.one : localScale;
+    public bool CreatesImpactZone =>
+        createsImpactZone && impactZoneSize.sqrMagnitude > 0.0001f;
+    public Vector3 ImpactZoneCenter => impactZoneCenter;
+    public Quaternion ImpactZoneRotation => Quaternion.Euler(impactZoneEuler);
+    public Vector3 ImpactZoneSize => new Vector3(
+        Mathf.Max(0.01f, Mathf.Abs(impactZoneSize.x)),
+        Mathf.Max(0.01f, Mathf.Abs(impactZoneSize.y)),
+        Mathf.Max(0.01f, Mathf.Abs(impactZoneSize.z)));
 }
 
 [CreateAssetMenu(fileName = "GarageAttachment", menuName = "Zombie Tycoon/Garage/Attachment")]

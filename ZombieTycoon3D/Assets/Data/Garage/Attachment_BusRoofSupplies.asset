@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_BusRoofSupplies
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: bus-roof-supplies
+  displayName: Tavan Erzak Paketi
+  description: "Uzun g\xF6revler i\xE7in tavana sabitlenen korumal\u0131 erzak ve
+    yak\u0131t paketi."
+  slot: 5
+  visualPrefab: {fileID: 1744057547907270, guid: 96bd005ab9f0b454ebaf6e79b0f26231, type: 3}
+  compatibleVehicles:
+  - vehicleId: prison-bus
+    localPosition: {x: 0, y: 3.55, z: -0.6}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.25, y: 1.25, z: 1.25}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  price: 190
+  modifier:
+    maxSpeed: -2
+    acceleration: -0.5
+    handling: -0.5
+    durability: 12
+    impactPower: 0
