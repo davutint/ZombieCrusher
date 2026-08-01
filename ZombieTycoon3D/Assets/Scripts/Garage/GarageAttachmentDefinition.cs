@@ -120,9 +120,20 @@ public struct GarageBuildEffects
 }
 
 [Serializable]
+public enum GarageAttachmentAnchor
+{
+    Body,
+    FrontLeftWheel,
+    FrontRightWheel,
+    RearLeftWheel,
+    RearRightWheel
+}
+
+[Serializable]
 public struct GarageAttachmentPose
 {
     [SerializeField] private string vehicleId;
+    [SerializeField] private GarageAttachmentAnchor anchor;
     [SerializeField] private Vector3 localPosition;
     [SerializeField] private Vector3 localEuler;
     [SerializeField] private Vector3 localScale;
@@ -134,6 +145,7 @@ public struct GarageAttachmentPose
     [SerializeField] private Vector3 impactZoneSize;
 
     public string VehicleId => vehicleId;
+    public GarageAttachmentAnchor Anchor => anchor;
     public Vector3 LocalPosition => localPosition;
     public Quaternion LocalRotation => Quaternion.Euler(localEuler);
     public Vector3 LocalScale =>

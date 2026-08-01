@@ -19,6 +19,8 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         public Transform bodyPivot;
         public Transform[] frontWheels;
         public Transform[] rearWheels;
+        public readonly Dictionary<GarageAttachmentAnchor, Transform> anchors =
+            new();
         public readonly Dictionary<string, List<AttachmentRuntimeInstance>> attachments =
             new(StringComparer.Ordinal);
 
@@ -31,6 +33,14 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             && rearWheels.Length == 2
             && rearWheels[0] != null
             && rearWheels[1] != null;
+
+        public Transform GetAnchor(GarageAttachmentAnchor anchor)
+        {
+            return anchors.TryGetValue(anchor, out Transform result)
+                && result != null
+                    ? result
+                    : bodyPivot;
+        }
     }
 
     [SerializeField] private Transform gameplayVehicleRoot;
@@ -208,6 +218,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             container = container,
             bodyPivot = bodyPivot
         };
+        created.anchors[GarageAttachmentAnchor.Body] = bodyPivot;
         TryCreateWheelRig(created, visual.transform);
         vehicleCache[vehicle.VehicleId] = created;
         return created;
@@ -292,6 +303,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             }
 
             Transform attachmentTransform = attachmentObject.transform;
+            attachmentTransform.SetParent(instance.GetAnchor(pose.Anchor), false);
             attachmentTransform.localPosition = pose.LocalPosition;
             attachmentTransform.localRotation = pose.LocalRotation;
             attachmentTransform.localScale = pose.LocalScale;
@@ -464,6 +476,39 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
             CreateWheelProxy(instance.container.transform, rearLeft, "WheelRL"),
             CreateWheelProxy(instance.container.transform, rearRight, "WheelRR")
         };
+
+        RegisterWheelAnchor(
+            instance,
+            GarageAttachmentAnchor.FrontLeftWheel,
+            instance.frontWheels[0]);
+        RegisterWheelAnchor(
+            instance,
+            GarageAttachmentAnchor.FrontRightWheel,
+            instance.frontWheels[1]);
+        RegisterWheelAnchor(
+            instance,
+            GarageAttachmentAnchor.RearLeftWheel,
+            instance.rearWheels[0]);
+        RegisterWheelAnchor(
+            instance,
+            GarageAttachmentAnchor.RearRightWheel,
+            instance.rearWheels[1]);
+    }
+
+    private static void RegisterWheelAnchor(
+        VehicleVisualInstance instance,
+        GarageAttachmentAnchor anchorType,
+        Transform wheelProxy)
+    {
+        if (wheelProxy == null || wheelProxy.childCount == 0)
+        {
+            return;
+        }
+
+        GameObject anchorObject = new GameObject($"AttachmentAnchor_{anchorType}");
+        Transform anchor = anchorObject.transform;
+        anchor.SetParent(wheelProxy.GetChild(0), false);
+        instance.anchors[anchorType] = anchor;
     }
 
     private static Transform FindWheelVisual(

@@ -164,6 +164,16 @@ public class Player : MonoBehaviour
         return true;
     }
 
+    public void SetMayhemIntensity(float normalizedIntensity)
+    {
+        impactFeedback?.SetMayhemIntensity(normalizedIntensity);
+    }
+
+    public void PlayMayhemTierReached(MayhemTier tier)
+    {
+        impactFeedback?.PlayMayhemTierReached(tier);
+    }
+
     // Hasar uygulama metodu
     private void TakeDamage(float damage)
     {

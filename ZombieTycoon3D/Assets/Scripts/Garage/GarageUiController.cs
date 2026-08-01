@@ -7,6 +7,8 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public sealed class GarageUiController : MonoBehaviour
 {
+    private const int MissionHealthSegmentCount = 8;
+
     private enum GarageScreen
     {
         Assembly,
@@ -37,10 +39,20 @@ public sealed class GarageUiController : MonoBehaviour
     private VisualElement missionObjectiveCard;
     private Label missionTimer;
     private Label missionKills;
-    private Label missionObjectiveStatus;
     private Label missionScore;
+    private VisualElement missionMayhemCard;
+    private Label missionMayhemTier;
+    private Label missionMayhemMultiplier;
+    private VisualElement missionMayhemFill;
+    private VisualElement missionMayhemAnnouncement;
+    private Label missionMayhemAnnouncementLabel;
+    private Label missionVehicleName;
+    private VisualElement missionSpeedometer;
+    private VisualElement missionSpeedNeedle;
+    private Label missionCurrentSpeed;
     private Label missionHealth;
-    private VisualElement missionHealthFill;
+    private readonly VisualElement[] missionHealthSegments =
+        new VisualElement[MissionHealthSegmentCount];
     private VisualElement missionResult;
     private VisualElement missionResultPanel;
     private Label resultStatus;
@@ -50,6 +62,9 @@ public sealed class GarageUiController : MonoBehaviour
     private Label resultScore;
     private Label resultBonusKills;
     private Label resultHealth;
+    private VisualElement resultMayhem;
+    private Label resultMayhemTier;
+    private Label resultBestChain;
     private Label resultKillScrap;
     private Label resultSuccessBonus;
     private Label resultTotalScrap;
@@ -80,6 +95,15 @@ public sealed class GarageUiController : MonoBehaviour
 
     private bool pointerDragging;
     private Vector2 previousPointerPosition;
+    private float mayhemAnnouncementHideTime;
+    private float mayhemPulseEndTime;
+    private bool mayhemAnnouncementVisible;
+    private bool mayhemCardPulsing;
+    private int displayedMissionSeconds = int.MinValue;
+    private int displayedMissionSpeed = int.MinValue;
+    private int displayedMissionHealth = int.MinValue;
+    private int displayedMissionMaxHealth = int.MinValue;
+    private float missionGaugeMaximumSpeed = 120f;
 
     public event Action MissionRequested;
     public event Action ResultAcknowledged;
@@ -145,11 +169,30 @@ public sealed class GarageUiController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        float currentTime = Time.unscaledTime;
+        if (mayhemAnnouncementVisible
+            && currentTime >= mayhemAnnouncementHideTime)
+        {
+            mayhemAnnouncementVisible = false;
+            missionMayhemAnnouncement.style.display = DisplayStyle.None;
+        }
+
+        if (mayhemCardPulsing && currentTime >= mayhemPulseEndTime)
+        {
+            mayhemCardPulsing = false;
+            missionMayhemCard.RemoveFromClassList(
+                "mission-mayhem-card--pulse");
+        }
+    }
+
     public void ShowGarage()
     {
         garageRoot.style.display = DisplayStyle.Flex;
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.None;
+        HideMayhemAnnouncement();
         previewController.SetVisible(true);
         activeScreen = GarageScreen.Assembly;
         buildState.ClearPreview();
@@ -161,6 +204,7 @@ public sealed class GarageUiController : MonoBehaviour
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.Flex;
         missionResult.style.display = DisplayStyle.None;
+        HideMayhemAnnouncement();
         previewController.SetVisible(false);
     }
 
@@ -172,6 +216,12 @@ public sealed class GarageUiController : MonoBehaviour
         }
 
         int seconds = Mathf.Max(0, Mathf.CeilToInt(remainingSeconds));
+        if (seconds == displayedMissionSeconds)
+        {
+            return;
+        }
+
+        displayedMissionSeconds = seconds;
         int minutesPart = seconds / 60;
         int secondsPart = seconds % 60;
         missionTimer.text = $"{minutesPart:0}:{secondsPart:00}";
@@ -189,9 +239,100 @@ public sealed class GarageUiController : MonoBehaviour
         missionObjectiveCard.EnableInClassList(
             "mission-objective-card--complete",
             progress.TargetReached);
-        missionObjectiveStatus.text = progress.TargetReached
-            ? $"HEDEF TAMAM · BONUS KILL {progress.BonusKillScore:N0} PUAN"
-            : $"{Mathf.Max(0, progress.KillTarget - progress.Kills)} KILL KALDI";
+    }
+
+    public void UpdateMayhem(MayhemProgress progress)
+    {
+        if (missionMayhemCard == null)
+        {
+            return;
+        }
+
+        missionMayhemTier.text = MayhemRules.GetLabel(progress.Tier);
+        missionMayhemMultiplier.text =
+            $"x{progress.ScoreMultiplier:0.00}";
+        missionMayhemFill.style.width =
+            Length.Percent(Mathf.Clamp01(progress.Meter01) * 100f);
+        ApplyMayhemTierClass(missionMayhemCard, progress.Tier);
+    }
+
+    public void ShowMayhemTierReached(MayhemProgress progress)
+    {
+        if (missionMayhemAnnouncement == null)
+        {
+            return;
+        }
+
+        missionMayhemAnnouncementLabel.text =
+            $"{MayhemRules.GetLabel(progress.Tier)}   x{progress.ScoreMultiplier:0.00}";
+        ApplyMayhemTierClass(
+            missionMayhemAnnouncement,
+            progress.Tier);
+        missionMayhemAnnouncement.style.display = DisplayStyle.Flex;
+        mayhemAnnouncementVisible = true;
+        mayhemAnnouncementHideTime = Time.unscaledTime + 0.95f;
+
+        missionMayhemCard.AddToClassList("mission-mayhem-card--pulse");
+        mayhemCardPulsing = true;
+        mayhemPulseEndTime = Time.unscaledTime + 0.24f;
+    }
+
+    public void ConfigureMissionVehicle(
+        string vehicleName,
+        float maximumSpeed)
+    {
+        if (missionVehicleName == null)
+        {
+            return;
+        }
+
+        missionVehicleName.text = string.IsNullOrWhiteSpace(vehicleName)
+            ? "ARAÇ"
+            : vehicleName.ToUpperInvariant();
+        displayedMissionSpeed = int.MinValue;
+        missionGaugeMaximumSpeed = Mathf.Max(40f, maximumSpeed);
+        missionCurrentSpeed.text = "0";
+        UpdateMissionSpeedometer(0f);
+    }
+
+    public void UpdateMissionTelemetry(
+        float currentSpeed,
+        float currentHealth,
+        float maximumHealth)
+    {
+        if (missionCurrentSpeed == null)
+        {
+            return;
+        }
+
+        int roundedSpeed = Mathf.Max(
+            0,
+            Mathf.RoundToInt(Mathf.Abs(currentSpeed)));
+        if (roundedSpeed != displayedMissionSpeed)
+        {
+            displayedMissionSpeed = roundedSpeed;
+            missionCurrentSpeed.text = roundedSpeed.ToString();
+        }
+
+        UpdateMissionSpeedometer(Mathf.Abs(currentSpeed));
+        UpdateMissionHealth(currentHealth, maximumHealth);
+    }
+
+    private void UpdateMissionSpeedometer(float currentSpeed)
+    {
+        if (missionSpeedNeedle == null || missionSpeedometer == null)
+        {
+            return;
+        }
+
+        float speedRatio = Mathf.Clamp01(
+            currentSpeed / Mathf.Max(1f, missionGaugeMaximumSpeed));
+        float needleAngle = Mathf.Lerp(-120f, 120f, speedRatio);
+        missionSpeedNeedle.style.rotate =
+            new Rotate(Angle.Degrees(needleAngle));
+        missionSpeedometer.EnableInClassList(
+            "mission-speedometer--fast",
+            speedRatio >= 0.86f);
     }
 
     public void UpdateMissionHealth(float currentHealth, float maximumHealth)
@@ -204,12 +345,34 @@ public sealed class GarageUiController : MonoBehaviour
         float safeMaximum = Mathf.Max(1f, maximumHealth);
         float safeCurrent = Mathf.Clamp(currentHealth, 0f, safeMaximum);
         float ratio = safeCurrent / safeMaximum;
-        missionHealth.text =
-            $"{Mathf.CeilToInt(safeCurrent)} / {Mathf.CeilToInt(safeMaximum)}";
-        missionHealthFill.style.width = Length.Percent(ratio * 100f);
-        missionHealthFill.EnableInClassList(
-            "mission-health-fill--critical",
-            ratio <= 0.3f);
+        int roundedCurrent = Mathf.CeilToInt(safeCurrent);
+        int roundedMaximum = Mathf.CeilToInt(safeMaximum);
+        if (roundedCurrent != displayedMissionHealth
+            || roundedMaximum != displayedMissionMaxHealth)
+        {
+            displayedMissionHealth = roundedCurrent;
+            displayedMissionMaxHealth = roundedMaximum;
+            missionHealth.text = $"{roundedCurrent} / {roundedMaximum}";
+        }
+
+        int visibleSegmentCount = Mathf.CeilToInt(
+            ratio * MissionHealthSegmentCount);
+        bool critical = ratio <= 0.3f;
+        for (int i = 0; i < missionHealthSegments.Length; i++)
+        {
+            VisualElement segment = missionHealthSegments[i];
+            if (segment == null)
+            {
+                continue;
+            }
+
+            segment.EnableInClassList(
+                "mission-health-segment--active",
+                i < visibleSegmentCount);
+            segment.EnableInClassList(
+                "mission-health-segment--critical",
+                critical);
+        }
     }
 
     public void ShowMissionEffectFeedback(
@@ -268,6 +431,13 @@ public sealed class GarageUiController : MonoBehaviour
         resultHealth.text =
             $"{Mathf.CeilToInt(Mathf.Max(0f, result.RemainingHealth))}"
             + $" / {Mathf.CeilToInt(Mathf.Max(1f, result.MaximumHealth))}";
+        MayhemTier highestTier = result.Progress.Mayhem.HighestTier;
+        resultMayhemTier.text = highestTier == MayhemTier.None
+            ? "TEMPO YOK"
+            : MayhemRules.GetLabel(highestTier);
+        resultBestChain.text =
+            $"{result.Progress.Mayhem.BestChain:N0} KILL";
+        ApplyMayhemTierClass(resultMayhem, highestTier);
         resultKillScrap.text = $"+{result.Reward.KillScrap:N0}";
         resultSuccessBonus.text = $"+{result.Reward.CompletionBonus:N0}";
         resultTotalScrap.text = $"+{result.Reward.TotalScrap:N0} HURDA";
@@ -296,12 +466,34 @@ public sealed class GarageUiController : MonoBehaviour
             RequireElement<VisualElement>(root, "mission-objective-card");
         missionTimer = RequireElement<Label>(root, "mission-timer");
         missionKills = RequireElement<Label>(root, "mission-kills");
-        missionObjectiveStatus =
-            RequireElement<Label>(root, "mission-objective-status");
         missionScore = RequireElement<Label>(root, "mission-score");
+        missionMayhemCard =
+            RequireElement<VisualElement>(root, "mission-mayhem-card");
+        missionMayhemTier =
+            RequireElement<Label>(root, "mission-mayhem-tier");
+        missionMayhemMultiplier =
+            RequireElement<Label>(root, "mission-mayhem-multiplier");
+        missionMayhemFill =
+            RequireElement<VisualElement>(root, "mission-mayhem-fill");
+        missionMayhemAnnouncement =
+            RequireElement<VisualElement>(root, "mission-mayhem-announcement");
+        missionMayhemAnnouncementLabel =
+            RequireElement<Label>(root, "mission-mayhem-announcement-label");
+        missionVehicleName =
+            RequireElement<Label>(root, "mission-vehicle-name");
+        missionSpeedometer =
+            RequireElement<VisualElement>(root, "mission-speedometer");
+        missionSpeedNeedle =
+            RequireElement<VisualElement>(root, "mission-speed-needle");
+        missionCurrentSpeed =
+            RequireElement<Label>(root, "mission-current-speed");
         missionHealth = RequireElement<Label>(root, "mission-health");
-        missionHealthFill =
-            RequireElement<VisualElement>(root, "mission-health-fill");
+        for (int i = 0; i < missionHealthSegments.Length; i++)
+        {
+            missionHealthSegments[i] = RequireElement<VisualElement>(
+                root,
+                $"mission-health-segment-{i}");
+        }
         missionResult = RequireElement<VisualElement>(root, "mission-result");
         missionResultPanel =
             RequireElement<VisualElement>(root, "mission-result-panel");
@@ -314,6 +506,12 @@ public sealed class GarageUiController : MonoBehaviour
         resultBonusKills =
             RequireElement<Label>(root, "result-bonus-kills");
         resultHealth = RequireElement<Label>(root, "result-health");
+        resultMayhem =
+            RequireElement<VisualElement>(root, "result-mayhem");
+        resultMayhemTier =
+            RequireElement<Label>(root, "result-mayhem-tier");
+        resultBestChain =
+            RequireElement<Label>(root, "result-best-chain");
         resultKillScrap = RequireElement<Label>(root, "result-kill-scrap");
         resultSuccessBonus =
             RequireElement<Label>(root, "result-success-bonus");
@@ -358,6 +556,40 @@ public sealed class GarageUiController : MonoBehaviour
         previewViewport.RegisterCallback<PointerCaptureOutEvent>(_ => EndPreviewDrag());
 
         CreateStatElements();
+    }
+
+    private void HideMayhemAnnouncement()
+    {
+        mayhemAnnouncementVisible = false;
+        mayhemCardPulsing = false;
+        if (missionMayhemAnnouncement != null)
+        {
+            missionMayhemAnnouncement.style.display = DisplayStyle.None;
+        }
+
+        missionMayhemCard?.RemoveFromClassList(
+            "mission-mayhem-card--pulse");
+    }
+
+    private static void ApplyMayhemTierClass(
+        VisualElement element,
+        MayhemTier tier)
+    {
+        element.EnableInClassList(
+            "mayhem-tier--none",
+            tier == MayhemTier.None);
+        element.EnableInClassList(
+            "mayhem-tier--rampage",
+            tier == MayhemTier.Rampage);
+        element.EnableInClassList(
+            "mayhem-tier--carnage",
+            tier == MayhemTier.Carnage);
+        element.EnableInClassList(
+            "mayhem-tier--slaughter",
+            tier == MayhemTier.Slaughter);
+        element.EnableInClassList(
+            "mayhem-tier--mayhem",
+            tier == MayhemTier.Mayhem);
     }
 
     private void SwitchScreen(GarageScreen screen)

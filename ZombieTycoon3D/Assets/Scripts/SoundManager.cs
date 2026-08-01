@@ -36,6 +36,8 @@ public sealed class SoundManager : MonoBehaviour
     private int totalSourceCount;
     private bool isConfigured;
     private bool isWarming;
+    private float baseVolume = 1f;
+    private ScoreManager scoreManager;
 
     public int ActiveSourceCount => activeSources.Count;
     public int AvailableSourceCount => availableSources.Count;
@@ -45,6 +47,7 @@ public sealed class SoundManager : MonoBehaviour
     {
         EnsureCreationRoot();
         isConfigured = ValidateSoundEffectPrefab();
+        scoreManager = FindFirstObjectByType<ScoreManager>();
     }
 
     private void OnValidate()
@@ -67,6 +70,10 @@ public sealed class SoundManager : MonoBehaviour
 
         EnsureCreationRoot();
         isConfigured = ValidateSoundEffectPrefab();
+        if (scoreManager == null)
+        {
+            scoreManager = FindFirstObjectByType<ScoreManager>();
+        }
         StartWarmupIfNeeded();
     }
 
@@ -110,6 +117,7 @@ public sealed class SoundManager : MonoBehaviour
             return false;
         }
 
+        baseVolume = prefabSource.volume;
         return true;
     }
 
@@ -191,7 +199,13 @@ public sealed class SoundManager : MonoBehaviour
 
         AudioSource source = pooledSource.Source;
         source.Stop();
-        source.pitch = Random.Range(minimumPitch, maximumPitch);
+        float mayhemIntensity = scoreManager != null
+            ? scoreManager.CurrentMayhem.Meter01
+            : 0f;
+        source.pitch = Random.Range(minimumPitch, maximumPitch)
+            * Mathf.Lerp(1f, 1.08f, mayhemIntensity);
+        source.volume = Mathf.Clamp01(
+            baseVolume * Mathf.Lerp(1f, 1.18f, mayhemIntensity));
         source.time = 0f;
         source.Play();
 

@@ -12,6 +12,7 @@ public sealed class VehicleImpactFeedback : MonoBehaviour
     [SerializeField, Min(0f)] private float feedbackCooldownSeconds = 0.055f;
 
     private float nextFeedbackTime;
+    private float mayhemIntensity;
 
     private void Reset()
     {
@@ -65,11 +66,31 @@ public sealed class VehicleImpactFeedback : MonoBehaviour
             float impulseStrength = Mathf.Lerp(
                 minimumImpulseStrength,
                 maximumImpulseStrength,
-                strength);
+                strength)
+                * Mathf.Lerp(1f, 1.18f, mayhemIntensity);
             impulseSource.GenerateImpulseAtPositionWithVelocity(
                 worldPosition,
                 direction * impulseStrength);
         }
+    }
+
+    public void SetMayhemIntensity(float normalizedIntensity)
+    {
+        mayhemIntensity = Mathf.Clamp01(normalizedIntensity);
+    }
+
+    public void PlayMayhemTierReached(MayhemTier tier)
+    {
+        if (impulseSource == null || tier == MayhemTier.None)
+        {
+            return;
+        }
+
+        float tierStrength = 0.25f + (int)tier * 0.055f;
+        Vector3 direction = transform.forward + Vector3.up * 0.18f;
+        impulseSource.GenerateImpulseAtPositionWithVelocity(
+            transform.position,
+            direction.normalized * tierStrength);
     }
 
     private void ConfigureImpulseSource()

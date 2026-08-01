@@ -20,99 +20,111 @@ MonoBehaviour:
   visualPrefab: {fileID: 1542557953998440, guid: 8dc6b558c717a894ab5211bfb0f04233, type: 3}
   compatibleVehicles:
   - vehicleId: muscle-car
-    localPosition: {x: -1.36, y: 0.48, z: 1.25}
+    anchor: 1
+    localPosition: {x: -0.32256, y: 0, z: 0}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 0.65, y: 0.65, z: 0.65}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.36, y: 0.48, z: 1.25}
+    impactZoneCenter: {x: -1.36, y: 0.55103, z: 1.9219}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.55, z: 1}
   - vehicleId: muscle-car
-    localPosition: {x: -1.36, y: 0.48, z: -1}
+    anchor: 3
+    localPosition: {x: -0.32256, y: 0, z: 0}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 0.65, y: 0.65, z: 0.65}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.36, y: 0.48, z: -1}
+    impactZoneCenter: {x: -1.36, y: 0.55103, z: -1.38487}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.55, z: 1}
   - vehicleId: muscle-car
-    localPosition: {x: 1.36, y: 0.48, z: 1.25}
+    anchor: 2
+    localPosition: {x: 0.32256, y: 0, z: 0}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 0.65, y: 0.65, z: 0.65}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.36, y: 0.48, z: 1.25}
+    impactZoneCenter: {x: 1.36, y: 0.55103, z: 1.9219}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.55, z: 1}
   - vehicleId: muscle-car
-    localPosition: {x: 1.36, y: 0.48, z: -1}
+    anchor: 4
+    localPosition: {x: 0.32256, y: 0, z: 0}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 0.65, y: 0.65, z: 0.65}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.36, y: 0.48, z: -1}
+    impactZoneCenter: {x: 1.36, y: 0.55103, z: -1.38487}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.55, z: 1}
   - vehicleId: ute
-    localPosition: {x: -1.34, y: 0.63, z: 0.9}
+    anchor: 1
+    localPosition: {x: -0.40116, y: 0, z: 0}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.8, y: 0.8, z: 0.8}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.34, y: 0.63, z: 0.9}
+    impactZoneCenter: {x: -1.34, y: 0.57224, z: 1.76897}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.6, z: 1}
   - vehicleId: ute
-    localPosition: {x: -1.34, y: 0.63, z: -1}
+    anchor: 3
+    localPosition: {x: -0.40116, y: 0, z: 0}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.8, y: 0.8, z: 0.8}
     createsImpactZone: 1
-    impactZoneCenter: {x: -1.34, y: 0.63, z: -1}
+    impactZoneCenter: {x: -1.34, y: 0.57224, z: -1.32124}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.6, z: 1}
   - vehicleId: ute
-    localPosition: {x: 1.34, y: 0.63, z: 0.9}
+    anchor: 2
+    localPosition: {x: 0.40116, y: 0, z: 0}
     localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 0.8, y: 0.8, z: 0.8}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.34, y: 0.63, z: 0.9}
+    impactZoneCenter: {x: 1.34, y: 0.57224, z: 1.76897}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.6, z: 1}
   - vehicleId: ute
-    localPosition: {x: 1.34, y: 0.63, z: -1}
+    anchor: 4
+    localPosition: {x: 0.40116, y: 0, z: 0}
     localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 0.8, y: 0.8, z: 0.8}
     createsImpactZone: 1
-    impactZoneCenter: {x: 1.34, y: 0.63, z: -1}
+    impactZoneCenter: {x: 1.34, y: 0.57224, z: -1.32124}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.6, z: 1}
   - vehicleId: golf-cart
-    localPosition: {x: -0.72, y: 0.4, z: 0.7}
+    anchor: 1
+    localPosition: {x: -0.19861, y: 0, z: 0}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 0.42, y: 0.42, z: 0.42}
     createsImpactZone: 1
-    impactZoneCenter: {x: -0.72, y: 0.4, z: 0.7}
+    impactZoneCenter: {x: -0.72, y: 0.31295, z: 1.15055}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
   - vehicleId: golf-cart
-    localPosition: {x: -0.72, y: 0.4, z: -0.66}
+    anchor: 3
+    localPosition: {x: -0.19861, y: 0, z: 0}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 0.42, y: 0.42, z: 0.42}
     createsImpactZone: 1
-    impactZoneCenter: {x: -0.72, y: 0.4, z: -0.66}
+    impactZoneCenter: {x: -0.72, y: 0.31295, z: -0.94049}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
   - vehicleId: golf-cart
-    localPosition: {x: 0.72, y: 0.4, z: 0.7}
+    anchor: 2
+    localPosition: {x: 0.19861, y: 0, z: 0}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 0.42, y: 0.42, z: 0.42}
     createsImpactZone: 1
-    impactZoneCenter: {x: 0.72, y: 0.4, z: 0.7}
+    impactZoneCenter: {x: 0.72, y: 0.31295, z: 1.15055}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
   - vehicleId: golf-cart
-    localPosition: {x: 0.72, y: 0.4, z: -0.66}
+    anchor: 4
+    localPosition: {x: 0.19861, y: 0, z: 0}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 0.42, y: 0.42, z: 0.42}
     createsImpactZone: 1
-    impactZoneCenter: {x: 0.72, y: 0.4, z: -0.66}
+    impactZoneCenter: {x: 0.72, y: 0.31295, z: -0.94049}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
   price: 180

@@ -13,13 +13,15 @@ public readonly struct MissionProgress
         int killTarget,
         int score,
         int normalKillScore,
-        int bonusKillScore)
+        int bonusKillScore,
+        MayhemProgress mayhem)
     {
         Kills = kills;
         KillTarget = killTarget;
         Score = score;
         NormalKillScore = normalKillScore;
         BonusKillScore = bonusKillScore;
+        Mayhem = mayhem;
     }
 
     public int Kills { get; }
@@ -27,6 +29,7 @@ public readonly struct MissionProgress
     public int Score { get; }
     public int NormalKillScore { get; }
     public int BonusKillScore { get; }
+    public MayhemProgress Mayhem { get; }
     public bool TargetReached => Kills >= KillTarget;
     public int BonusKills => Math.Max(0, Kills - KillTarget);
 }

@@ -599,105 +599,467 @@
     top: 0;
     bottom: 0;
     display: none;
-    align-items: center;
     pointer-events: none;
 }
 
-.mission-timer-card {
-    margin-top: 18px;
+.mission-top-anchor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 18px;
     align-items: center;
-    padding: 9px 24px 10px 24px;
-    background-color: rgba(8, 11, 14, 0.78);
+}
+
+.mission-top-row {
+    width: 520px;
+    height: 56px;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 5px;
+    background-color: rgba(8, 11, 14, 0.88);
     border-left-width: 1px;
     border-right-width: 1px;
-    border-top-width: 1px;
+    border-top-width: 2px;
     border-bottom-width: 1px;
-    border-left-color: var(--border);
-    border-right-color: var(--border);
-    border-top-color: var(--border);
-    border-bottom-color: var(--border);
-    border-top-left-radius: 11px;
-    border-top-right-radius: 11px;
-    border-bottom-left-radius: 11px;
-    border-bottom-right-radius: 11px;
+    border-left-color: rgba(255, 255, 255, 0.12);
+    border-right-color: rgba(255, 255, 255, 0.12);
+    border-top-color: rgba(103, 186, 255, 0.78);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.mission-hud-segment {
+    height: 52px;
+    padding: 6px 13px;
+    justify-content: center;
+}
+
+.mission-objective-card {
+    width: 198px;
+}
+
+.mission-timer-card {
+    width: 116px;
+    align-items: center;
+}
+
+.mission-score-card {
+    width: 180px;
+}
+
+.mission-strip-divider {
+    width: 1px;
+    height: 33px;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.mission-primary-value {
+    margin-top: 1px;
+    color: var(--text);
+    font-size: 19px;
+    -unity-font-style: bold;
+    letter-spacing: 0.55px;
 }
 
 .mission-timer {
     margin-top: 1px;
     color: var(--text);
-    font-size: 28px;
+    font-size: 22px;
     -unity-font-style: bold;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
 }
 
-.mission-top-row {
-    margin-top: 18px;
+.mission-objective-card--complete {
+    background-color: rgba(42, 112, 76, 0.24);
+}
+
+.mission-telemetry-stack {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    width: 372px;
+}
+
+.mission-vehicle-panel {
+    position: relative;
+    width: 372px;
+    height: 170px;
     flex-direction: row;
-    align-items: stretch;
+    align-items: flex-end;
+    background-color: transparent;
 }
 
-.mission-hud-card {
-    min-width: 190px;
-    min-height: 78px;
-    margin-left: 5px;
-    margin-right: 5px;
-    padding: 10px 18px;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(8, 11, 14, 0.82);
+.mission-speedometer {
+    position: relative;
+    width: 166px;
+    height: 166px;
+    flex-shrink: 0;
+    background-color: rgba(7, 10, 13, 0.70);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-left-color: var(--border);
-    border-right-color: var(--border);
-    border-top-color: var(--border);
-    border-bottom-color: var(--border);
-    border-top-left-radius: 11px;
-    border-top-right-radius: 11px;
-    border-bottom-left-radius: 11px;
-    border-bottom-right-radius: 11px;
+    border-left-color: rgba(132, 197, 240, 0.13);
+    border-right-color: rgba(132, 197, 240, 0.13);
+    border-top-color: rgba(132, 197, 240, 0.13);
+    border-bottom-color: rgba(132, 197, 240, 0.13);
+    border-top-left-radius: 83px;
+    border-top-right-radius: 83px;
+    border-bottom-left-radius: 83px;
+    border-bottom-right-radius: 83px;
 }
 
-.mission-timer-card {
-    margin-top: 0;
-    min-width: 150px;
-    padding: 10px 22px;
+.mission-speed-tick,
+.mission-speed-needle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 164px;
+    height: 164px;
+    transform-origin: 50% 50%;
 }
 
-.mission-primary-value {
-    margin-top: 2px;
+.mission-speed-tick-mark {
+    position: absolute;
+    left: 81px;
+    top: 9px;
+    width: 2px;
+    height: 10px;
+    background-color: rgba(184, 211, 229, 0.40);
+    border-top-left-radius: 1px;
+    border-top-right-radius: 1px;
+    border-bottom-left-radius: 1px;
+    border-bottom-right-radius: 1px;
+}
+
+.speed-tick--0 { rotate: -120deg; }
+.speed-tick--1 { rotate: -100deg; }
+.speed-tick--2 { rotate: -80deg; }
+.speed-tick--3 { rotate: -60deg; }
+.speed-tick--4 { rotate: -40deg; }
+.speed-tick--5 { rotate: -20deg; }
+.speed-tick--6 { rotate: 0deg; }
+.speed-tick--7 { rotate: 20deg; }
+.speed-tick--8 { rotate: 40deg; }
+.speed-tick--9 { rotate: 60deg; }
+.speed-tick--10 { rotate: 80deg; }
+.speed-tick--11 { rotate: 100deg; }
+.speed-tick--12 { rotate: 120deg; }
+
+.mission-speed-needle {
+    rotate: -120deg;
+}
+
+.mission-speed-needle-bar {
+    position: absolute;
+    left: 80px;
+    top: 25px;
+    width: 3px;
+    height: 59px;
+    background-color: rgb(106, 194, 255);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+.mission-speed-hub {
+    position: absolute;
+    left: 77px;
+    top: 77px;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(213, 234, 247);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.mission-current-speed {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 61px;
     color: var(--text);
-    font-size: 24px;
+    font-size: 45px;
     -unity-font-style: bold;
-    letter-spacing: 0.8px;
+    letter-spacing: -1.5px;
+    -unity-text-align: middle-center;
 }
 
-.mission-support-value {
-    margin-top: 1px;
-    color: var(--text-dim);
+.mission-speed-unit {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 112px;
+    color: rgba(203, 224, 238, 0.68);
     font-size: 9px;
     -unity-font-style: bold;
-    letter-spacing: 0.55px;
+    letter-spacing: 1.6px;
+    -unity-text-align: middle-center;
 }
 
-.mission-objective-card--complete {
-    background-color: rgba(22, 70, 49, 0.90);
-    border-left-color: var(--positive);
-    border-right-color: var(--positive);
-    border-top-color: var(--positive);
-    border-bottom-color: var(--positive);
+.mission-speedometer--fast .mission-speed-needle-bar {
+    background-color: rgb(255, 173, 61);
 }
 
-.mission-objective-card--complete .mission-support-value {
-    color: var(--positive);
+.mission-run-status {
+    width: 194px;
+    min-height: 135px;
+    margin-left: 12px;
+    margin-bottom: 8px;
+    padding-left: 13px;
+    justify-content: flex-end;
+    border-left-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.15);
+}
+
+.mission-vehicle-name {
+    margin-bottom: 10px;
+    color: rgb(222, 232, 238);
+    font-size: 12px;
+    -unity-font-style: bold;
+    letter-spacing: 1.1px;
+}
+
+.mission-health-copy {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mission-health-tag {
+    color: rgb(106, 194, 255);
+    font-size: 9px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.mission-health-value {
+    color: rgb(220, 229, 235);
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 0.45px;
+}
+
+.mission-health-segments {
+    height: 7px;
+    margin-top: 6px;
+    flex-direction: row;
+}
+
+.mission-health-segment {
+    height: 7px;
+    flex-grow: 1;
+    margin-right: 3px;
+    background-color: rgba(255, 255, 255, 0.10);
+    transition-property: width, background-color;
+    transition-duration: 0.12s;
+}
+
+.mission-health-segment--active {
+    background-color: rgb(78, 214, 155);
+}
+
+.mission-health-segment--critical.mission-health-segment--active {
+    background-color: rgb(255, 86, 91);
+}
+
+.mission-mayhem-card {
+    width: 100%;
+    min-height: 43px;
+    margin-top: 18px;
+    padding: 7px 0 0 0;
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 1px;
+    border-bottom-width: 0;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: rgba(255, 255, 255, 0.09);
+    border-bottom-color: transparent;
+    transition-property: background-color;
+    transition-duration: 0.16s;
+}
+
+.mission-mayhem-card--pulse {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.mission-mayhem-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mission-result-mayhem-label {
+    color: var(--text-dim);
+    font-size: 8px;
+    -unity-font-style: bold;
+    letter-spacing: 1.15px;
+}
+
+.mission-mayhem-tier {
+    color: var(--text-soft);
+    font-size: 13px;
+    -unity-font-style: bold;
+    letter-spacing: 1.05px;
+}
+
+.mission-mayhem-multiplier {
+    color: var(--text-soft);
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 0.45px;
+}
+
+.mission-mayhem-track {
+    position: relative;
+    height: 4px;
+    margin-top: 6px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.mission-mayhem-fill {
+    height: 4px;
+    width: 0%;
+    background-color: rgb(118, 129, 139);
+    transition-property: width, background-color;
+    transition-duration: 0.09s;
+}
+
+.mission-result-mayhem.mayhem-tier--rampage {
+    border-left-color: rgb(255, 211, 92);
+    border-right-color: rgb(255, 211, 92);
+    border-top-color: rgb(255, 211, 92);
+    border-bottom-color: rgb(255, 211, 92);
+}
+
+.mission-result-mayhem.mayhem-tier--carnage {
+    border-left-color: rgb(255, 151, 60);
+    border-right-color: rgb(255, 151, 60);
+    border-top-color: rgb(255, 151, 60);
+    border-bottom-color: rgb(255, 151, 60);
+}
+
+.mission-result-mayhem.mayhem-tier--slaughter {
+    border-left-color: rgb(255, 80, 86);
+    border-right-color: rgb(255, 80, 86);
+    border-top-color: rgb(255, 80, 86);
+    border-bottom-color: rgb(255, 80, 86);
+}
+
+.mission-result-mayhem.mayhem-tier--mayhem {
+    border-left-color: rgb(255, 67, 197);
+    border-right-color: rgb(82, 219, 255);
+    border-top-color: rgb(255, 67, 197);
+    border-bottom-color: rgb(82, 219, 255);
+    background-color: rgba(58, 16, 53, 0.70);
+}
+
+.mission-mayhem-card.mayhem-tier--rampage {
+    background-color: transparent;
+}
+
+.mission-mayhem-card.mayhem-tier--carnage {
+    background-color: transparent;
+}
+
+.mission-mayhem-card.mayhem-tier--slaughter {
+    background-color: transparent;
+}
+
+.mission-mayhem-card.mayhem-tier--mayhem {
+    background-color: transparent;
+}
+
+.mayhem-tier--rampage .mission-mayhem-tier,
+.mayhem-tier--rampage .mission-mayhem-multiplier,
+.mayhem-tier--rampage .mission-result-mayhem-value { color: rgb(255, 211, 92); }
+.mayhem-tier--rampage .mission-mayhem-fill { background-color: rgb(255, 211, 92); }
+
+.mayhem-tier--carnage .mission-mayhem-tier,
+.mayhem-tier--carnage .mission-mayhem-multiplier,
+.mayhem-tier--carnage .mission-result-mayhem-value { color: rgb(255, 151, 60); }
+.mayhem-tier--carnage .mission-mayhem-fill { background-color: rgb(255, 151, 60); }
+
+.mayhem-tier--slaughter .mission-mayhem-tier,
+.mayhem-tier--slaughter .mission-mayhem-multiplier,
+.mayhem-tier--slaughter .mission-result-mayhem-value { color: rgb(255, 80, 86); }
+.mayhem-tier--slaughter .mission-mayhem-fill { background-color: rgb(255, 80, 86); }
+
+.mayhem-tier--mayhem .mission-mayhem-tier,
+.mayhem-tier--mayhem .mission-mayhem-multiplier,
+.mayhem-tier--mayhem .mission-result-mayhem-value { color: rgb(255, 107, 217); }
+.mayhem-tier--mayhem .mission-mayhem-fill { background-color: rgb(255, 67, 197); }
+
+.mission-mayhem-announcement {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 42%;
+    display: none;
+    align-items: center;
+}
+
+.mission-mayhem-announcement-label {
+    min-width: 310px;
+    padding: 9px 22px;
+    color: var(--text);
+    background-color: rgba(8, 11, 14, 0.94);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-left-color: var(--accent);
+    border-right-color: var(--accent);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+}
+
+.mission-mayhem-announcement.mayhem-tier--rampage .mission-mayhem-announcement-label { color: rgb(255, 211, 92); }
+.mission-mayhem-announcement.mayhem-tier--carnage .mission-mayhem-announcement-label { color: rgb(255, 151, 60); }
+.mission-mayhem-announcement.mayhem-tier--slaughter .mission-mayhem-announcement-label { color: rgb(255, 80, 86); }
+.mission-mayhem-announcement.mayhem-tier--mayhem .mission-mayhem-announcement-label { color: rgb(255, 107, 217); }
+
+.mission-mayhem-announcement.mayhem-tier--rampage .mission-mayhem-announcement-label {
+    border-left-color: rgb(255, 211, 92);
+    border-right-color: rgb(255, 211, 92);
+}
+
+.mission-mayhem-announcement.mayhem-tier--carnage .mission-mayhem-announcement-label {
+    border-left-color: rgb(255, 151, 60);
+    border-right-color: rgb(255, 151, 60);
+}
+
+.mission-mayhem-announcement.mayhem-tier--slaughter .mission-mayhem-announcement-label {
+    border-left-color: rgb(255, 80, 86);
+    border-right-color: rgb(255, 80, 86);
+}
+
+.mission-mayhem-announcement.mayhem-tier--mayhem .mission-mayhem-announcement-label {
+    border-left-color: rgb(255, 67, 197);
+    border-right-color: rgb(82, 219, 255);
 }
 
 .mission-effect-feedback {
     display: none;
-    min-width: 300px;
-    margin-top: 8px;
-    padding: 7px 16px;
+    width: 340px;
+    margin-bottom: 8px;
+    padding: 8px 13px;
     color: var(--text);
     background-color: rgba(8, 11, 14, 0.88);
     border-left-width: 2px;
@@ -709,7 +1071,7 @@
     font-size: 10px;
     -unity-font-style: bold;
     letter-spacing: 0.65px;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 .mission-effect-feedback--impact {
@@ -723,60 +1085,6 @@
 .mission-effect-feedback--repair {
     color: var(--positive);
     border-left-color: var(--positive);
-}
-
-.mission-health-card {
-    width: 430px;
-    margin-top: 8px;
-    padding: 9px 13px 11px 13px;
-    background-color: rgba(8, 11, 14, 0.82);
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: var(--border);
-    border-right-color: var(--border);
-    border-top-color: var(--border);
-    border-bottom-color: var(--border);
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-.mission-health-copy {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.mission-health-value {
-    color: var(--text);
-    font-size: 11px;
-    -unity-font-style: bold;
-}
-
-.mission-health-track {
-    height: 7px;
-    margin-top: 7px;
-    background-color: rgba(255, 255, 255, 0.09);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    overflow: hidden;
-}
-
-.mission-health-fill {
-    height: 7px;
-    width: 100%;
-    background-color: var(--positive);
-    transition-property: width, background-color;
-    transition-duration: 0.12s;
-}
-
-.mission-health-fill--critical {
-    background-color: var(--negative);
 }
 
 .mission-result {
@@ -896,6 +1204,46 @@
     color: var(--text);
     font-size: 17px;
     -unity-font-style: bold;
+}
+
+.mission-result-mayhem {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px 12px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.035);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: var(--border);
+    border-right-color: var(--border);
+    border-top-color: var(--border);
+    border-bottom-color: var(--border);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.mission-result-mayhem-block {
+    flex-grow: 1;
+    align-items: center;
+}
+
+.mission-result-mayhem-value {
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 15px;
+    -unity-font-style: bold;
+    letter-spacing: 0.7px;
+}
+
+.mission-result-mayhem-divider {
+    width: 1px;
+    height: 30px;
+    background-color: var(--border);
 }
 
 .mission-result-reward {

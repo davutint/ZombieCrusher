@@ -8,8 +8,18 @@ public sealed class GaragePreviewController : MonoBehaviour
     private sealed class PreviewVehicleInstance
     {
         public GameObject container;
+        public readonly Dictionary<GarageAttachmentAnchor, Transform> anchors =
+            new();
         public readonly Dictionary<string, List<GameObject>> attachments =
             new(StringComparer.Ordinal);
+
+        public Transform GetAnchor(GarageAttachmentAnchor anchor)
+        {
+            return anchors.TryGetValue(anchor, out Transform result)
+                && result != null
+                    ? result
+                    : container.transform;
+        }
     }
 
     [Header("Stage")]
@@ -199,6 +209,8 @@ public sealed class GaragePreviewController : MonoBehaviour
         {
             container = container
         };
+        created.anchors[GarageAttachmentAnchor.Body] = container.transform;
+        CreateWheelAnchors(created, visual.transform);
         vehicleCache[vehicle.VehicleId] = created;
         return created;
     }
@@ -279,10 +291,82 @@ public sealed class GaragePreviewController : MonoBehaviour
             }
 
             Transform attachmentTransform = attachmentObject.transform;
+            attachmentTransform.SetParent(instance.GetAnchor(pose.Anchor), false);
             attachmentTransform.localPosition = pose.LocalPosition;
             attachmentTransform.localRotation = pose.LocalRotation;
             attachmentTransform.localScale = pose.LocalScale;
         }
+    }
+
+    private static void CreateWheelAnchors(
+        PreviewVehicleInstance instance,
+        Transform visualRoot)
+    {
+        CreateWheelAnchor(
+            instance,
+            visualRoot,
+            "wheel_fl",
+            GarageAttachmentAnchor.FrontLeftWheel,
+            "AttachmentAnchor_FL");
+        CreateWheelAnchor(
+            instance,
+            visualRoot,
+            "wheel_fr",
+            GarageAttachmentAnchor.FrontRightWheel,
+            "AttachmentAnchor_FR");
+        CreateWheelAnchor(
+            instance,
+            visualRoot,
+            "wheel_rl",
+            GarageAttachmentAnchor.RearLeftWheel,
+            "AttachmentAnchor_RL");
+        CreateWheelAnchor(
+            instance,
+            visualRoot,
+            "wheel_rr",
+            GarageAttachmentAnchor.RearRightWheel,
+            "AttachmentAnchor_RR");
+    }
+
+    private static void CreateWheelAnchor(
+        PreviewVehicleInstance instance,
+        Transform visualRoot,
+        string wheelToken,
+        GarageAttachmentAnchor anchorType,
+        string anchorName)
+    {
+        Renderer wheelRenderer = FindWheelRenderer(visualRoot, wheelToken);
+        if (wheelRenderer == null)
+        {
+            return;
+        }
+
+        GameObject anchorObject = new GameObject(anchorName);
+        Transform anchor = anchorObject.transform;
+        anchor.SetParent(instance.container.transform, false);
+        anchor.position = wheelRenderer.bounds.center;
+        anchor.localRotation = Quaternion.identity;
+        anchor.localScale = Vector3.one;
+        instance.anchors[anchorType] = anchor;
+    }
+
+    private static Renderer FindWheelRenderer(
+        Transform root,
+        string wheelToken)
+    {
+        Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer candidate = renderers[i];
+            string normalizedName =
+                candidate.name.Replace("-", "_").ToLowerInvariant();
+            if (normalizedName.Contains(wheelToken))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private void NormalizeToStage(Transform container)

@@ -70,31 +70,82 @@
     </ui:VisualElement>
 
     <ui:VisualElement name="mission-hud" class="mission-hud">
-        <ui:VisualElement class="mission-top-row">
-            <ui:VisualElement name="mission-objective-card" class="mission-hud-card mission-objective-card">
-                <ui:Label text="İMHA HEDEFİ" class="mission-kicker" />
-                <ui:Label name="mission-kills" text="0 / 100" class="mission-primary-value" />
-                <ui:Label name="mission-objective-status" text="100 KILL KALDI" class="mission-support-value" />
-            </ui:VisualElement>
-            <ui:VisualElement class="mission-hud-card mission-timer-card">
-                <ui:Label text="GÖREV SÜRESİ" class="mission-kicker" />
-                <ui:Label name="mission-timer" text="2:00" class="mission-timer" />
-            </ui:VisualElement>
-            <ui:VisualElement class="mission-hud-card mission-score-card">
-                <ui:Label text="PUAN" class="mission-kicker" />
-                <ui:Label name="mission-score" text="0" class="mission-primary-value" />
-                <ui:Label text="HEDEF SONRASI ×2" class="mission-support-value" />
+        <ui:VisualElement class="mission-top-anchor">
+            <ui:VisualElement class="mission-top-row">
+                <ui:VisualElement name="mission-objective-card" class="mission-hud-segment mission-objective-card">
+                    <ui:Label text="İMHA" class="mission-kicker" />
+                    <ui:Label name="mission-kills" text="0 / 100" class="mission-primary-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-strip-divider" />
+                <ui:VisualElement class="mission-hud-segment mission-timer-card">
+                    <ui:Label text="KALAN SÜRE" class="mission-kicker" />
+                    <ui:Label name="mission-timer" text="2:00" class="mission-timer" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-strip-divider" />
+                <ui:VisualElement class="mission-hud-segment mission-score-card">
+                    <ui:Label text="PUAN" class="mission-kicker" />
+                    <ui:Label name="mission-score" text="0" class="mission-primary-value" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Label name="mission-effect-feedback" text="" class="mission-effect-feedback" />
-        <ui:VisualElement class="mission-health-card">
-            <ui:VisualElement class="mission-health-copy">
-                <ui:Label text="ARAÇ DAYANIKLILIĞI" class="mission-kicker" />
-                <ui:Label name="mission-health" text="100 / 100" class="mission-health-value" />
+
+        <ui:VisualElement class="mission-telemetry-stack">
+            <ui:Label name="mission-effect-feedback" text="" class="mission-effect-feedback" />
+            <ui:VisualElement class="mission-vehicle-panel">
+                <ui:VisualElement name="mission-speedometer" class="mission-speedometer">
+                    <ui:VisualElement class="mission-speed-tick speed-tick--0"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--1"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--2"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--3"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--4"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--5"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--6"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--7"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--8"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--9"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--10"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--11"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-tick speed-tick--12"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
+                    <ui:VisualElement name="mission-speed-needle" class="mission-speed-needle">
+                        <ui:VisualElement class="mission-speed-needle-bar" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mission-speed-hub" />
+                    <ui:Label name="mission-current-speed" text="0" class="mission-current-speed" />
+                    <ui:Label text="KM/H" class="mission-speed-unit" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="mission-run-status">
+                    <ui:Label name="mission-vehicle-name" text="AMBULANS" class="mission-vehicle-name" />
+                    <ui:VisualElement class="mission-health-copy">
+                        <ui:Label text="HP" class="mission-health-tag" />
+                        <ui:Label name="mission-health" text="100 / 100" class="mission-health-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mission-health-segments">
+                        <ui:VisualElement name="mission-health-segment-0" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-1" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-2" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-3" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-4" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-5" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-6" class="mission-health-segment mission-health-segment--active" />
+                        <ui:VisualElement name="mission-health-segment-7" class="mission-health-segment mission-health-segment--active" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="mission-mayhem-card" class="mission-mayhem-card mayhem-tier--none">
+                        <ui:VisualElement class="mission-mayhem-header">
+                            <ui:Label name="mission-mayhem-tier" text="TEMPOYU YÜKSELT" class="mission-mayhem-tier" />
+                            <ui:Label name="mission-mayhem-multiplier" text="x1.00" class="mission-mayhem-multiplier" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="mission-mayhem-track">
+                            <ui:VisualElement name="mission-mayhem-fill" class="mission-mayhem-fill" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement class="mission-health-track">
-                <ui:VisualElement name="mission-health-fill" class="mission-health-fill" />
-            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="mission-mayhem-announcement" class="mission-mayhem-announcement mayhem-tier--none">
+            <ui:Label name="mission-mayhem-announcement-label" text="RAMPAGE" class="mission-mayhem-announcement-label" />
         </ui:VisualElement>
     </ui:VisualElement>
 
@@ -120,6 +171,17 @@
                 <ui:VisualElement class="mission-result-metric">
                     <ui:Label text="ARAÇ" class="mission-result-metric-label" />
                     <ui:Label name="result-health" text="0 / 100" class="mission-result-metric-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="result-mayhem" class="mission-result-mayhem mayhem-tier--none">
+                <ui:VisualElement class="mission-result-mayhem-block">
+                    <ui:Label text="EN YUKSEK KILL-RATE" class="mission-result-mayhem-label" />
+                    <ui:Label name="result-mayhem-tier" text="TEMPO YOK" class="mission-result-mayhem-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-result-mayhem-divider" />
+                <ui:VisualElement class="mission-result-mayhem-block">
+                    <ui:Label text="EN UZUN ZINCIR" class="mission-result-mayhem-label" />
+                    <ui:Label name="result-best-chain" text="0 KILL" class="mission-result-mayhem-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="mission-result-reward">

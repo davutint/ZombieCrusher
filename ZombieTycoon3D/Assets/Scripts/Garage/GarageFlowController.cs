@@ -8,6 +8,7 @@ public sealed class GarageFlowController : MonoBehaviour
     private const int MissionKillTarget = 100;
     private const int NormalKillScore = 100;
     private const int BonusKillScore = 200;
+    private const float TelemetryRefreshInterval = 0.06f;
 
     [Header("Garage")]
     [SerializeField] private GarageBuildState buildState;
@@ -26,6 +27,7 @@ public sealed class GarageFlowController : MonoBehaviour
     [SerializeField] private OldSpawnManager spawnManager;
     [SerializeField] private ScoreManager scoreManager;
 
+    private DeathEffectPool deathEffectPool;
     private Vector3 missionStartPosition;
     private Quaternion missionStartRotation;
     private bool missionActive;
@@ -45,7 +47,9 @@ public sealed class GarageFlowController : MonoBehaviour
     private int nextRepairKill;
     private float feedbackHideTime;
     private float nextFeedbackUpdateTime;
+    private float nextTelemetryUpdateTime;
     private bool feedbackVisible;
+    private MayhemTier previousMayhemTier;
 
     private void Awake()
     {
@@ -73,6 +77,8 @@ public sealed class GarageFlowController : MonoBehaviour
         {
             scoreManager = FindFirstObjectByType<ScoreManager>();
         }
+
+        deathEffectPool = FindFirstObjectByType<DeathEffectPool>();
     }
 
     private void OnEnable()
@@ -86,6 +92,7 @@ public sealed class GarageFlowController : MonoBehaviour
         if (scoreManager != null)
         {
             scoreManager.ProgressChanged += HandleMissionProgressChanged;
+            scoreManager.MayhemChanged += HandleMayhemChanged;
         }
 
         if (player != null)
@@ -130,9 +137,17 @@ public sealed class GarageFlowController : MonoBehaviour
             (MissionDurationSeconds - missionTimeRemaining)
             / MissionDurationSeconds);
         garageUi.UpdateMissionTimer(missionTimeRemaining);
-        garageUi.UpdateMissionHealth(
-            player.GetCurrentHealth(),
-            player.GetMaxHealth());
+        float currentTime = Time.unscaledTime;
+        if (currentTime >= nextTelemetryUpdateTime)
+        {
+            nextTelemetryUpdateTime =
+                currentTime + TelemetryRefreshInterval;
+            garageUi.UpdateMissionTelemetry(
+                Mathf.Abs(vehicleController.carVelocity.z),
+                player.GetCurrentHealth(),
+                player.GetMaxHealth());
+        }
+
         if (missionTimeRemaining <= 0f)
         {
             EndMission(MissionEndReason.TimeExpired);
@@ -150,6 +165,7 @@ public sealed class GarageFlowController : MonoBehaviour
         if (scoreManager != null)
         {
             scoreManager.ProgressChanged -= HandleMissionProgressChanged;
+            scoreManager.MayhemChanged -= HandleMayhemChanged;
         }
 
         if (player != null)
@@ -229,6 +245,9 @@ public sealed class GarageFlowController : MonoBehaviour
         player.ApplyVehicleStats(stats);
         player.ConfigureBuildEffects(activeBuildEffects);
         player.ResetForRun();
+        garageUi.ConfigureMissionVehicle(
+            buildState.SelectedVehicle.DisplayName,
+            stats.maxSpeed);
         missionKills = 0;
         repairsUsed = 0;
         nextRepairKill = activeBuildEffects.HasRepair
@@ -236,8 +255,13 @@ public sealed class GarageFlowController : MonoBehaviour
             : int.MaxValue;
         feedbackHideTime = 0f;
         nextFeedbackUpdateTime = 0f;
+        nextTelemetryUpdateTime =
+            Time.unscaledTime + TelemetryRefreshInterval;
         garageUi.HideMissionEffectFeedback();
         feedbackVisible = false;
+        previousMayhemTier = MayhemTier.None;
+        player.SetMayhemIntensity(0f);
+        deathEffectPool?.SetMayhemIntensity(0f);
         scoreManager.BeginMission(
             MissionKillTarget,
             NormalKillScore,
@@ -257,7 +281,8 @@ public sealed class GarageFlowController : MonoBehaviour
         missionTimeRemaining = MissionDurationSeconds;
         spawnManager.BeginMission();
         garageUi.UpdateMissionTimer(missionTimeRemaining);
-        garageUi.UpdateMissionHealth(
+        garageUi.UpdateMissionTelemetry(
+            0f,
             player.GetCurrentHealth(),
             player.GetMaxHealth());
         garageUi.HideGarageForMission();
@@ -337,6 +362,9 @@ public sealed class GarageFlowController : MonoBehaviour
         feedbackHideTime = 0f;
         nextFeedbackUpdateTime = 0f;
         feedbackVisible = false;
+        previousMayhemTier = MayhemTier.None;
+        player.SetMayhemIntensity(0f);
+        deathEffectPool?.SetMayhemIntensity(0f);
         garageUi.HideMissionEffectFeedback();
 
         if (buildState != null && buildState.SelectedVehicle != null)
@@ -392,6 +420,24 @@ public sealed class GarageFlowController : MonoBehaviour
         {
             missionKills = progress.Kills;
         }
+    }
+
+    private void HandleMayhemChanged(MayhemProgress progress)
+    {
+        garageUi.UpdateMayhem(progress);
+        player.SetMayhemIntensity(progress.Meter01);
+        deathEffectPool?.SetMayhemIntensity(progress.Meter01);
+
+        bool tierReached = missionActive
+            && (int)progress.Tier > (int)previousMayhemTier
+            && progress.Tier != MayhemTier.None;
+        if (tierReached)
+        {
+            garageUi.ShowMayhemTierReached(progress);
+            player.PlayMayhemTierReached(progress.Tier);
+        }
+
+        previousMayhemTier = progress.Tier;
     }
 
     private void HandleAttachmentFeedbackRequested(

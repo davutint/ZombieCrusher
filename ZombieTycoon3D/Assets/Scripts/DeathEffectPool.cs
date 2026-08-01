@@ -36,14 +36,20 @@ public sealed class DeathEffectPool : MonoBehaviour
         public readonly GameObject Instance;
         public readonly ParticleSystem[] ParticleSystems;
         public readonly EffectBucket Bucket;
+        public readonly Vector3 BaseLocalScale;
         public float ReleaseTime;
         public int ActiveIndex = -1;
 
-        public PooledEffect(GameObject instance, ParticleSystem[] particleSystems, EffectBucket bucket)
+        public PooledEffect(
+            GameObject instance,
+            ParticleSystem[] particleSystems,
+            EffectBucket bucket,
+            Vector3 baseLocalScale)
         {
             Instance = instance;
             ParticleSystems = particleSystems;
             Bucket = bucket;
+            BaseLocalScale = baseLocalScale;
         }
     }
 
@@ -51,6 +57,7 @@ public sealed class DeathEffectPool : MonoBehaviour
     private readonly List<PooledEffect> activeEffects = new List<PooledEffect>(128);
 
     private Transform inactiveCreationRoot;
+    private float mayhemIntensity;
 
     public int RegisteredPrefabCount => buckets.Count;
     public int ActiveEffectCount => activeEffects.Count;
@@ -180,6 +187,8 @@ public sealed class DeathEffectPool : MonoBehaviour
 
         Transform effectTransform = effect.Instance.transform;
         effectTransform.SetPositionAndRotation(position, rotation);
+        effectTransform.localScale = effect.BaseLocalScale
+            * Mathf.Lerp(1f, 1.22f, mayhemIntensity);
         effect.Instance.SetActive(true);
 
         RestartParticles(effect);
@@ -187,6 +196,11 @@ public sealed class DeathEffectPool : MonoBehaviour
         effect.ActiveIndex = activeEffects.Count;
         activeEffects.Add(effect);
         return true;
+    }
+
+    public void SetMayhemIntensity(float normalizedIntensity)
+    {
+        mayhemIntensity = Mathf.Clamp01(normalizedIntensity);
     }
 
     private void StartWarmupIfNeeded(EffectBucket bucket)
@@ -255,7 +269,11 @@ public sealed class DeathEffectPool : MonoBehaviour
         instance.transform.SetParent(transform, false);
 
         ParticleSystem[] particleSystems = instance.GetComponentsInChildren<ParticleSystem>(true);
-        PooledEffect effect = new PooledEffect(instance, particleSystems, bucket);
+        PooledEffect effect = new PooledEffect(
+            instance,
+            particleSystems,
+            bucket,
+            instance.transform.localScale);
         bucket.TotalCount++;
         return effect;
     }
@@ -303,6 +321,7 @@ public sealed class DeathEffectPool : MonoBehaviour
         }
 
         effect.Instance.SetActive(false);
+        effect.Instance.transform.localScale = effect.BaseLocalScale;
         if (enqueue)
         {
             effect.Bucket.Available.Enqueue(effect);
