@@ -27,6 +27,22 @@ MonoBehaviour:
     impactZoneCenter: {x: 0, y: 0.8, z: 3.1}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 2.55, y: 0.8, z: 1.05}
+  - vehicleId: muscle-car
+    localPosition: {x: 0, y: 0.58, z: 2.86}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.05, y: 1.05, z: 1.05}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0, y: 0.65, z: 3.02}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 2.5, y: 0.8, z: 1}
+  - vehicleId: golf-cart
+    localPosition: {x: 0, y: 0.38, z: 1.48}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.55, y: 0.55, z: 0.55}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0, y: 0.4, z: 1.6}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 1.35, y: 0.55, z: 0.75}
   price: 120
   modifier:
     maxSpeed: 0
@@ -42,7 +58,9 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "TAKVİYELİ TAMPON · DARBE DESTEĞİ"
+    feedbackLabel: "TAKV\u0130YEL\u0130 TAMPON \xB7 DARBE DESTE\u011E\u0130"
     feedbackTone: 0
-  gameplayEffectSummary: "Ön temaslarda çarpma gücünü %15 artırır ve ezme hız eşiğini düşürür."
-  tradeoffSummary: "+10 HP ve +0.25x çarpma gücü; hızlanmadan 1.0 puan götürür."
+  gameplayEffectSummary: "\xD6n temaslarda \xE7arpma g\xFCc\xFCn\xFC %15 art\u0131r\u0131r
+    ve ezme h\u0131z e\u015Fi\u011Fini d\xFC\u015F\xFCr\xFCr."
+  tradeoffSummary: "+10 HP ve +0.25x \xE7arpma g\xFCc\xFC; h\u0131zlanmadan 1.0 puan
+    g\xF6t\xFCr\xFCr."

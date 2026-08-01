@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_MedicalSupplyRack
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: medical-supply-rack
+  displayName: "Medikal Tavan Raf\u0131"
+  description: "G\xF6rev boyunca s\u0131n\u0131rl\u0131 acil onar\u0131m sa\u011Flayan
+    medikal ekipman paketi."
+  slot: 5
+  visualPrefab: {fileID: 1553468074736348, guid: 1b14b8e14eb429e49a3aaacbc2f0e48e, type: 3}
+  compatibleVehicles:
+  - vehicleId: ambulance
+    localPosition: {x: 0, y: 2.95, z: -0.55}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.9, y: 0.9, z: 0.9}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  price: 230
+  modifier:
+    maxSpeed: -1
+    acceleration: -0.5
+    handling: -0.5
+    durability: 8
+    impactPower: 0
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 20
+    repairAmount: 5
+    maximumRepairs: 4
+    feedbackLabel: "MED\u0130KAL RAF"
+    feedbackTone: 2
+  gameplayEffectSummary: "Her 20 kill'de 5 HP onar\u0131r; g\xF6rev ba\u015F\u0131na
+    en fazla 4 kez \xE7al\u0131\u015F\u0131r ve +8 HP sa\u011Flar."
+  tradeoffSummary: "Tavan y\xFCk\xFC -1 km/h h\u0131z, -0.5 h\u0131zlanma ve -0.5
+    kontrol."

@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_SideCuttingRails
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: side-cutting-rails
+  displayName: Yan Kesici Raylar
+  description: "Teker hatt\u0131nda yan kesme deste\u011Fi; yak\u0131n temas\u0131
+    g\xFC\xE7lendirirken tutu\u015Fu biraz azalt\u0131r."
+  slot: 3
+  visualPrefab: {fileID: 1542557953998440, guid: 8dc6b558c717a894ab5211bfb0f04233, type: 3}
+  compatibleVehicles:
+  - vehicleId: muscle-car
+    localPosition: {x: -1.36, y: 0.48, z: 1.25}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 0.65, y: 0.65, z: 0.65}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.36, y: 0.48, z: 1.25}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.55, z: 1}
+  - vehicleId: muscle-car
+    localPosition: {x: -1.36, y: 0.48, z: -1}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 0.65, y: 0.65, z: 0.65}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.36, y: 0.48, z: -1}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.55, z: 1}
+  - vehicleId: muscle-car
+    localPosition: {x: 1.36, y: 0.48, z: 1.25}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 0.65, y: 0.65, z: 0.65}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.36, y: 0.48, z: 1.25}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.55, z: 1}
+  - vehicleId: muscle-car
+    localPosition: {x: 1.36, y: 0.48, z: -1}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 0.65, y: 0.65, z: 0.65}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.36, y: 0.48, z: -1}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.55, z: 1}
+  - vehicleId: ute
+    localPosition: {x: -1.34, y: 0.63, z: 0.9}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.34, y: 0.63, z: 0.9}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.6, z: 1}
+  - vehicleId: ute
+    localPosition: {x: -1.34, y: 0.63, z: -1}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.34, y: 0.63, z: -1}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.6, z: 1}
+  - vehicleId: ute
+    localPosition: {x: 1.34, y: 0.63, z: 0.9}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.34, y: 0.63, z: 0.9}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.6, z: 1}
+  - vehicleId: ute
+    localPosition: {x: 1.34, y: 0.63, z: -1}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.34, y: 0.63, z: -1}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.6, z: 1}
+  - vehicleId: golf-cart
+    localPosition: {x: -0.72, y: 0.4, z: 0.7}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 0.42, y: 0.42, z: 0.42}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -0.72, y: 0.4, z: 0.7}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
+  - vehicleId: golf-cart
+    localPosition: {x: -0.72, y: 0.4, z: -0.66}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 0.42, y: 0.42, z: 0.42}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -0.72, y: 0.4, z: -0.66}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
+  - vehicleId: golf-cart
+    localPosition: {x: 0.72, y: 0.4, z: 0.7}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 0.42, y: 0.42, z: 0.42}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0.72, y: 0.4, z: 0.7}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
+  - vehicleId: golf-cart
+    localPosition: {x: 0.72, y: 0.4, z: -0.66}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 0.42, y: 0.42, z: 0.42}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0.72, y: 0.4, z: -0.66}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.3, y: 0.45, z: 0.65}
+  price: 180
+  modifier:
+    maxSpeed: -2
+    acceleration: -1
+    handling: 0.5
+    durability: -4
+    impactPower: 0.15
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 0.96
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.18
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "YAN KES\u0130C\u0130LER \xB7 YAN TEMAS"
+    feedbackTone: 0
+  gameplayEffectSummary: "Yan temas g\xFCc\xFCn\xFC %18 art\u0131r\u0131r ve kontrole
+    +0.5 ekler."
+  tradeoffSummary: "Tutu\u015Fu %4, h\u0131z\u0131 2 km/h, h\u0131zlanmay\u0131 1.0
+    ve dayan\u0131kl\u0131l\u0131\u011F\u0131 4 HP azalt\u0131r."

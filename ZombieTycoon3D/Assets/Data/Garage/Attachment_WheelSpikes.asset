@@ -115,6 +115,102 @@ MonoBehaviour:
     impactZoneCenter: {x: 1.38863, y: 0.5269, z: -1.35324}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.55, y: 0.9, z: 1}
+  - vehicleId: muscle-car
+    localPosition: {x: -1.31, y: 0.55, z: 1.92}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 1.15, y: 1.15, z: 1.15}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.245, y: 0.55, z: 1.92}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.8, z: 1.15}
+  - vehicleId: muscle-car
+    localPosition: {x: -1.31, y: 0.55, z: -1.38}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 1.15, y: 1.15, z: 1.15}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.245, y: 0.55, z: -1.38}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.8, z: 1.15}
+  - vehicleId: muscle-car
+    localPosition: {x: 1.31, y: 0.55, z: 1.92}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.15, y: 1.15, z: 1.15}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.245, y: 0.55, z: 1.92}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.8, z: 1.15}
+  - vehicleId: muscle-car
+    localPosition: {x: 1.31, y: 0.55, z: -1.38}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.15, y: 1.15, z: 1.15}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.245, y: 0.55, z: -1.38}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.8, z: 1.15}
+  - vehicleId: ute
+    localPosition: {x: -1.22, y: 0.57, z: 1.77}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 1.22, y: 1.22, z: 1.22}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.155, y: 0.57, z: 1.77}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.85, z: 1.2}
+  - vehicleId: ute
+    localPosition: {x: -1.22, y: 0.57, z: -1.32}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 1.22, y: 1.22, z: 1.22}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.155, y: 0.57, z: -1.32}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.85, z: 1.2}
+  - vehicleId: ute
+    localPosition: {x: 1.22, y: 0.57, z: 1.77}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.22, y: 1.22, z: 1.22}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.155, y: 0.57, z: 1.77}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.85, z: 1.2}
+  - vehicleId: ute
+    localPosition: {x: 1.22, y: 0.57, z: -1.32}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.22, y: 1.22, z: 1.22}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.155, y: 0.57, z: -1.32}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.85, z: 1.2}
+  - vehicleId: golf-cart
+    localPosition: {x: -0.67, y: 0.31, z: 1.15}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -0.615, y: 0.31, z: 1.15}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.32, y: 0.5, z: 0.7}
+  - vehicleId: golf-cart
+    localPosition: {x: -0.67, y: 0.31, z: -0.94}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -0.615, y: 0.31, z: -0.94}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.32, y: 0.5, z: 0.7}
+  - vehicleId: golf-cart
+    localPosition: {x: 0.67, y: 0.31, z: 1.15}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0.615, y: 0.31, z: 1.15}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.32, y: 0.5, z: 0.7}
+  - vehicleId: golf-cart
+    localPosition: {x: 0.67, y: 0.31, z: -0.94}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.8, y: 0.8, z: 0.8}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0.615, y: 0.31, z: -0.94}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.32, y: 0.5, z: 0.7}
   price: 150
   modifier:
     maxSpeed: -2
@@ -130,7 +226,10 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "JANT BIÇAKLARI · YAN TEMAS"
+    feedbackLabel: "JANT BI\xC7AKLARI \xB7 YAN TEMAS"
     feedbackTone: 0
-  gameplayEffectSummary: "Dört yan temas bölgesinde çarpma gücünü %20 artırır; direksiyon tepkisine +1.0 ekler."
-  tradeoffSummary: "Yan biçme gücü karşılığında tutuş %6, hız 2 km/h, hızlanma 1.0 ve dayanıklılık 5 HP düşer."
+  gameplayEffectSummary: "D\xF6rt yan temas b\xF6lgesinde \xE7arpma g\xFCc\xFCn\xFC
+    %20 art\u0131r\u0131r; direksiyon tepkisine +1.0 ekler."
+  tradeoffSummary: "Yan bi\xE7me g\xFCc\xFC kar\u015F\u0131l\u0131\u011F\u0131nda
+    tutu\u015F %6, h\u0131z 2 km/h, h\u0131zlanma 1.0 ve dayan\u0131kl\u0131l\u0131k
+    5 HP d\xFC\u015Fer."

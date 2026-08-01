@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb63a2f879bb6ab4b9766b9542daaea6, type: 3}
+  m_Name: Vehicle_MuscleCar
+  m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
+  vehicleId: muscle-car
+  displayName: Muscle Car
+  description: "Y\xFCksek azami h\u0131z ve g\xFC\xE7l\xFC d\xFCz hat performans\u0131;
+    z\u0131rhs\u0131z kald\u0131\u011F\u0131nda k\u0131r\u0131lgand\u0131r."
+  visualPrefab: {fileID: 1720750727606104, guid: 142475bf32587464f86a974127ca5f1c, type: 3}
+  previewEuler: {x: 0, y: 28, z: 0}
+  previewScale: 1
+  gameplayLocalPosition: {x: 0, y: -1.5247436, z: -0.08}
+  gameplayLocalEuler: {x: 0, y: 0, z: 0}
+  gameplayScale: 1
+  gameplayColliderCenter: {x: 0, y: -0.1847436, z: 0}
+  gameplayColliderSize: {x: 2.76, y: 2.67, z: 5.85}
+  price: 650
+  baseStats:
+    maxSpeed: 138
+    acceleration: 24
+    handling: 10
+    durability: 80
+    impactPower: 1.05
+  bodyMass: 0.9
+  driveMass: 0.92
+  gravity: 6.8
+  downforce: 6.5
+  lateralGrip: 1.12
+  centerOfMass: {x: 0, y: -0.14, z: 0}
+  driveCenterOfMass: {x: 0, y: -0.05, z: 0}

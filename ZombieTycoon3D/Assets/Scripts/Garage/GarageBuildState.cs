@@ -45,6 +45,19 @@ public sealed class GarageBuildState : MonoBehaviour
             replacePreviewSlot: false,
             includeLoadout: true);
 
+    public VehicleStats DisplayedCurrentStats
+    {
+        get
+        {
+            GarageVehicleDefinition vehicle = DisplayedVehicle;
+            return CalculateStats(
+                vehicle,
+                null,
+                replacePreviewSlot: false,
+                includeLoadout: vehicle == selectedVehicle);
+        }
+    }
+
     public VehicleStats PreviewStats
     {
         get
@@ -53,7 +66,7 @@ public sealed class GarageBuildState : MonoBehaviour
             bool sameVehicle = vehicle == selectedVehicle;
             return CalculateStats(
                 vehicle,
-                sameVehicle ? previewAttachment : null,
+                previewAttachment,
                 replacePreviewSlot: sameVehicle && previewAttachment != null,
                 includeLoadout: sameVehicle);
         }
@@ -74,7 +87,7 @@ public sealed class GarageBuildState : MonoBehaviour
             bool sameVehicle = vehicle == selectedVehicle;
             return CalculateEffects(
                 vehicle,
-                sameVehicle ? previewAttachment : null,
+                previewAttachment,
                 replacePreviewSlot: sameVehicle && previewAttachment != null,
                 includeLoadout: sameVehicle);
         }

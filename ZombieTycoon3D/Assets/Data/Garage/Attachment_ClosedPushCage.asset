@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_ClosedPushCage
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: closed-push-cage
+  displayName: "Kapal\u0131 \u0130tme Kafesi"
+  description: "Muscle Car'\u0131n \xF6n\xFCn\xFC kapatan sa\u011Flam itme kafesi;
+    d\xFCz hat darbelerini g\xFC\xE7lendirir."
+  slot: 0
+  visualPrefab: {fileID: 1401668275333364, guid: 556549befaca7314bb70bd44ef086f25, type: 3}
+  compatibleVehicles:
+  - vehicleId: muscle-car
+    localPosition: {x: 0, y: 0.64, z: 2.94}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 1.05, y: 1.05, z: 1.05}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 0, y: 0.7, z: 3.1}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 2.55, y: 0.95, z: 1}
+  price: 210
+  modifier:
+    maxSpeed: -3
+    acceleration: -1
+    handling: -0.5
+    durability: 10
+    impactPower: 0.3
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.25
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "\u0130TME KAFES\u0130 \xB7 G\xDC\xC7L\xDC DARBE"
+    feedbackTone: 0
+  gameplayEffectSummary: "\xD6n temas g\xFCc\xFCn\xFC %25 art\u0131r\u0131r; +10
+    HP ve +0.30x \xE7arpma g\xFCc\xFC sa\u011Flar."
+  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."

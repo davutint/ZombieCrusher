@@ -10,65 +10,64 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
-  m_Name: Attachment_LightPlating
+  m_Name: Attachment_WindowCage
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
-  attachmentId: light-plating
-  displayName: Hafif Kaplama
-  description: "G\xF6vde dayan\u0131kl\u0131l\u0131\u011F\u0131n\u0131 y\xFCkseltir;
-    ek a\u011F\u0131rl\u0131k h\u0131zlanmay\u0131 ve kontrol\xFC bir miktar d\xFC\u015F\xFCr\xFCr."
+  attachmentId: window-cage
+  displayName: Pencere Kafesi
+  description: "Yan cam a\xE7\u0131kl\u0131klar\u0131n\u0131 koruyan kafes; g\xF6r\xFC\u015F\xFC
+    korurken hasar\u0131 azalt\u0131r."
   slot: 1
-  visualPrefab: {fileID: 1837151923621358, guid: 44e6895ba5da26a4b9c17f16428d7750, type: 3}
+  visualPrefab: {fileID: 1395933157865066, guid: 325058588e94ff4469ad3fdb8f17700c, type: 3}
   compatibleVehicles:
-  - vehicleId: ambulance
-    localPosition: {x: -1.36, y: 1.45, z: -0.25}
+  - vehicleId: prison-bus
+    localPosition: {x: -1.68, y: 1.85, z: 1.6}
     localEuler: {x: 0, y: 90, z: 0}
-    localScale: {x: 1, y: 1, z: 1}
+    localScale: {x: 1.1, y: 1.1, z: 1.1}
     createsImpactZone: 0
     impactZoneCenter: {x: 0, y: 0, z: 0}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
-  - vehicleId: ambulance
-    localPosition: {x: 1.36, y: 1.45, z: -0.25}
+  - vehicleId: prison-bus
+    localPosition: {x: 1.68, y: 1.85, z: 1.6}
     localEuler: {x: 0, y: -90, z: 0}
-    localScale: {x: -1, y: 1, z: 1}
+    localScale: {x: 1.1, y: 1.1, z: 1.1}
     createsImpactZone: 0
     impactZoneCenter: {x: 0, y: 0, z: 0}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
-  - vehicleId: muscle-car
-    localPosition: {x: -1.28, y: 0.92, z: -0.1}
+  - vehicleId: prison-bus
+    localPosition: {x: -1.68, y: 1.85, z: -0.8}
     localEuler: {x: 0, y: 90, z: 0}
-    localScale: {x: 1.05, y: 1.05, z: 1.05}
+    localScale: {x: 1.1, y: 1.1, z: 1.1}
     createsImpactZone: 0
     impactZoneCenter: {x: 0, y: 0, z: 0}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
-  - vehicleId: muscle-car
-    localPosition: {x: 1.28, y: 0.92, z: -0.1}
+  - vehicleId: prison-bus
+    localPosition: {x: 1.68, y: 1.85, z: -0.8}
     localEuler: {x: 0, y: -90, z: 0}
-    localScale: {x: 1.05, y: 1.05, z: 1.05}
+    localScale: {x: 1.1, y: 1.1, z: 1.1}
     createsImpactZone: 0
     impactZoneCenter: {x: 0, y: 0, z: 0}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
-  price: 180
+  price: 220
   modifier:
-    maxSpeed: -5
-    acceleration: -1.5
-    handling: -1
-    durability: 25
-    impactPower: 0.05
+    maxSpeed: -3
+    acceleration: -1
+    handling: -0.5
+    durability: 18
+    impactPower: 0
   gameplayEffect:
-    damageTakenMultiplier: 0.85
+    damageTakenMultiplier: 0.88
     lateralGripMultiplier: 1
     downforceBonus: 0
     contactImpactPowerMultiplier: 1
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "HAF\u0130F KAPLAMA \xB7 %15 HASAR AZALTMA"
+    feedbackLabel: "PENCERE KAFES\u0130 \xB7 %12 HASAR AZALTMA"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temas\u0131ndan al\u0131nan ara\xE7 hasar\u0131n\u0131
-    %15 azalt\u0131r ve dayan\u0131kl\u0131l\u0131\u011Fa 25 HP ekler."
-  tradeoffSummary: "Koruma kar\u015F\u0131l\u0131\u011F\u0131nda -5 km/h h\u0131z,
-    -1.5 h\u0131zlanma ve -1.0 kontrol."
+  gameplayEffectSummary: "Zombi temas hasar\u0131n\u0131 %12 azalt\u0131r ve maksimum
+    dayan\u0131kl\u0131l\u0131\u011Fa 18 HP ekler."
+  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."

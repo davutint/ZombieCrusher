@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_SideExhaust
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: side-exhaust
+  displayName: Yan Egzoz
+  description: "Motor nefesini a\xE7an yan egzoz; h\u0131z ve ivme kar\u015F\u0131l\u0131\u011F\u0131nda
+    dayan\u0131kl\u0131l\u0131k g\xF6t\xFCr\xFCr."
+  slot: 2
+  visualPrefab: {fileID: 1360410021609672, guid: 3265f4e6931402444bad53b920c43dcf, type: 3}
+  compatibleVehicles:
+  - vehicleId: muscle-car
+    localPosition: {x: -1.28, y: 0.48, z: -0.35}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.82, y: 0.82, z: 0.82}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  - vehicleId: muscle-car
+    localPosition: {x: 1.28, y: 0.48, z: -0.35}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 0.82, y: 0.82, z: 0.82}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  - vehicleId: ute
+    localPosition: {x: -1.2, y: 0.62, z: -0.25}
+    localEuler: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.85, y: 0.85, z: 0.85}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  - vehicleId: ute
+    localPosition: {x: 1.2, y: 0.62, z: -0.25}
+    localEuler: {x: 0, y: 180, z: 0}
+    localScale: {x: 0.85, y: 0.85, z: 0.85}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
+  price: 220
+  modifier:
+    maxSpeed: 7
+    acceleration: 3
+    handling: 0
+    durability: -2
+    impactPower: 0.05
+  gameplayEffect:
+    damageTakenMultiplier: 1
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel:
+    feedbackTone: 0
+  gameplayEffectSummary: "Azami h\u0131za +7 km/h, h\u0131zlanmaya +3.0 ve \xE7arpma
+    g\xFCc\xFCne +0.05x ekler."
+  tradeoffSummary: "Performans kurulumu dayan\u0131kl\u0131l\u0131ktan 2 HP g\xF6t\xFCr\xFCr."

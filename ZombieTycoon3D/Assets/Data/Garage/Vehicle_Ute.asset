@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb63a2f879bb6ab4b9766b9542daaea6, type: 3}
+  m_Name: Vehicle_Ute
+  m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
+  vehicleId: ute
+  displayName: Ute
+  description: "Dengeli dayan\u0131kl\u0131l\u0131k, g\xFC\xE7l\xFC \xE7arpma ve
+    ekipman ta\u015F\u0131ma kapasitesi sunar."
+  visualPrefab: {fileID: 1364802344601326, guid: 0ecf00181b469b2438043da6adbb8de7, type: 3}
+  previewEuler: {x: 0, y: 28, z: 0}
+  previewScale: 1
+  gameplayLocalPosition: {x: -0.01, y: -1.5247436, z: 0.1}
+  gameplayLocalEuler: {x: 0, y: 0, z: 0}
+  gameplayScale: 1
+  gameplayColliderCenter: {x: 0, y: 0.2552564, z: 0}
+  gameplayColliderSize: {x: 2.63, y: 3.6, z: 6.4}
+  price: 600
+  baseStats:
+    maxSpeed: 92
+    acceleration: 18
+    handling: 9
+    durability: 135
+    impactPower: 1.2
+  bodyMass: 1.18
+  driveMass: 1.12
+  gravity: 7.5
+  downforce: 6.5
+  lateralGrip: 1.02
+  centerOfMass: {x: 0, y: -0.22, z: 0}
+  driveCenterOfMass: {x: 0, y: -0.08, z: 0}

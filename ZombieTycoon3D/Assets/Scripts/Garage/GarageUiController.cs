@@ -362,8 +362,21 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void SwitchScreen(GarageScreen screen)
     {
+        bool preserveGalleryVehicle =
+            activeScreen == GarageScreen.Gallery
+            && screen == GarageScreen.Parts
+            && buildState.DisplayedVehicle != null;
+
         activeScreen = screen;
-        buildState.ClearPreview();
+        if (preserveGalleryVehicle)
+        {
+            buildState.PreviewPart(null);
+        }
+        else
+        {
+            buildState.ClearPreview();
+        }
+
         Refresh();
     }
 
@@ -680,6 +693,7 @@ public sealed class GarageUiController : MonoBehaviour
     {
         detailMechanics.style.display = DisplayStyle.Flex;
         rightTitle.text = "PARÇA DETAYI";
+        GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         GarageAttachmentDefinition attachment = buildState.PreviewAttachment;
         detailTitle.text = attachment != null ? attachment.DisplayName : "Parça seç";
         detailDescription.text =
@@ -691,21 +705,46 @@ public sealed class GarageUiController : MonoBehaviour
             ? attachment.TradeoffSummary
             : "Her avantajın sürüş veya dayanıklılık bedeli burada görünür.";
 
+        bool vehicleOwned = buildState.IsVehicleOwned(vehicle);
+        bool vehicleSelected = vehicle != null
+            && vehicle == buildState.SelectedVehicle;
         bool owned = buildState.IsAttachmentOwned(attachment);
-        contextAction.text = owned
-            ? "MONTAJDA TAK"
-            : attachment != null
-                ? $"SATIN AL · {attachment.Price:N0} HURDA"
-                : "PARÇA SEÇ";
-        contextAction.SetEnabled(
-            attachment != null
-            && (owned || economy.CanAfford(attachment.Price)));
+
+        if (attachment == null)
+        {
+            contextAction.text = "PARÇA SEÇ";
+            contextAction.SetEnabled(false);
+            contextHint.text = "İncelemek istediğin uyumlu parçayı seç.";
+        }
+        else if (!vehicleOwned)
+        {
+            contextAction.text = "ÖNCE ARACI SATIN AL";
+            contextAction.SetEnabled(false);
+            contextHint.text =
+                $"Bu parçayı satın almak veya takmak için önce {vehicle.DisplayName} aracına sahip ol.";
+        }
+        else if (!vehicleSelected)
+        {
+            contextAction.text = "ÖNCE ARACI SEÇ";
+            contextAction.SetEnabled(false);
+            contextHint.text =
+                "Satın alma ve montaj için önce galeriden bu aracı aktif araç olarak seç.";
+        }
+        else
+        {
+            contextAction.text = owned
+                ? "MONTAJDA TAK"
+                : $"SATIN AL · {attachment.Price:N0} HURDA";
+            contextAction.SetEnabled(
+                owned || economy.CanAfford(attachment.Price));
+            contextHint.text = owned
+                ? "Takıldığında önizlenen statlar aktif build olur."
+                : economy.CanAfford(attachment.Price)
+                    ? "Satın alma parçayı envantere ekler; montaj ayrı yapılır."
+                    : "Bu parça için yeterli Hurda yok.";
+        }
+
         contextAction.clicked += HandleContextAction;
-        contextHint.text = owned
-            ? "Takıldığında önizlenen statlar aktif build olur."
-            : attachment != null && economy.CanAfford(attachment.Price)
-                ? "Satın alma parçayı envantere ekler; montaj ayrı yapılır."
-                : "Bu parça için yeterli Hurda yok.";
     }
 
     private void HandleContextAction()
@@ -731,6 +770,15 @@ public sealed class GarageUiController : MonoBehaviour
                 break;
 
             case GarageScreen.Parts:
+                GarageVehicleDefinition displayedVehicle =
+                    buildState.DisplayedVehicle;
+                if (displayedVehicle == null
+                    || displayedVehicle != buildState.SelectedVehicle
+                    || !buildState.IsVehicleOwned(displayedVehicle))
+                {
+                    return;
+                }
+
                 GarageAttachmentDefinition attachment =
                     buildState.PreviewAttachment;
                 if (buildState.IsAttachmentOwned(attachment)
@@ -799,7 +847,9 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void UpdateStats()
     {
-        VehicleStats current = buildState.CurrentStats;
+        VehicleStats current = activeScreen == GarageScreen.Parts
+            ? buildState.DisplayedCurrentStats
+            : buildState.CurrentStats;
         VehicleStats preview = buildState.PreviewStats;
 
         for (int i = 0; i < statElements.Count; i++)

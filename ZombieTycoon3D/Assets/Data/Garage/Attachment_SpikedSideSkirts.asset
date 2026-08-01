@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851af34ba7ded7944ae7b05722d2f08d, type: 3}
+  m_Name: Attachment_SpikedSideSkirts
+  m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
+  attachmentId: spiked-side-skirts
+  displayName: Dikenli Yan Etekler
+  description: "Ute yan hatt\u0131n\u0131 dikenli korumayla g\xFC\xE7lendirir ve
+    yak\u0131n temas\u0131 destekler."
+  slot: 1
+  visualPrefab: {fileID: 1952498728170228, guid: 861068ac1a3d19049be5927b86868fea, type: 3}
+  compatibleVehicles:
+  - vehicleId: ute
+    localPosition: {x: -1.25, y: 0.75, z: -0.05}
+    localEuler: {x: 0, y: 90, z: 0}
+    localScale: {x: 0.86, y: 0.86, z: 0.86}
+    createsImpactZone: 1
+    impactZoneCenter: {x: -1.25, y: 0.75, z: -0.05}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.75, z: 2.4}
+  - vehicleId: ute
+    localPosition: {x: 1.25, y: 0.75, z: -0.05}
+    localEuler: {x: 0, y: -90, z: 0}
+    localScale: {x: 0.86, y: 0.86, z: 0.86}
+    createsImpactZone: 1
+    impactZoneCenter: {x: 1.25, y: 0.75, z: -0.05}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0.45, y: 0.75, z: 2.4}
+  price: 210
+  modifier:
+    maxSpeed: -3
+    acceleration: -1
+    handling: -0.5
+    durability: 14
+    impactPower: 0.15
+  gameplayEffect:
+    damageTakenMultiplier: 0.95
+    lateralGripMultiplier: 1
+    downforceBonus: 0
+    contactImpactPowerMultiplier: 1.12
+    repairEveryKills: 0
+    repairAmount: 0
+    maximumRepairs: 0
+    feedbackLabel: "D\u0130KENL\u0130 ETEKLER \xB7 YAN TEMAS"
+    feedbackTone: 1
+  gameplayEffectSummary: "Yan temas g\xFCc\xFCn\xFC %12 art\u0131r\u0131r, hasar\u0131
+    %5 azalt\u0131r ve +14 HP sa\u011Flar."
+  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."
