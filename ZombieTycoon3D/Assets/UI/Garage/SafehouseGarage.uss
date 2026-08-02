@@ -656,6 +656,944 @@
     padding-right: 18px;
 }
 
+/* Vehicle-first Safehouse Garage */
+.garage-root {
+    --garage-bg: rgba(7, 9, 10, 0.90);
+    --panel-bg: rgba(12, 14, 15, 0.82);
+    --panel-soft: rgba(24, 25, 25, 0.78);
+    --panel-hover: rgba(43, 40, 38, 0.90);
+    --border: rgba(238, 231, 220, 0.13);
+    --border-strong: rgba(238, 231, 220, 0.26);
+    --text: rgb(238, 233, 224);
+    --text-soft: rgb(181, 176, 168);
+    --text-dim: rgb(126, 124, 119);
+    --accent: rgb(205, 76, 62);
+    --accent-soft: rgba(205, 76, 62, 0.18);
+    --positive: rgb(91, 201, 145);
+    --negative: rgb(224, 91, 91);
+    background-color: transparent;
+}
+
+.garage-root .topbar {
+    height: 72px;
+    padding-left: 26px;
+    padding-right: 22px;
+    background-color: rgba(7, 9, 10, 0.93);
+    border-bottom-color: rgba(238, 231, 220, 0.09);
+}
+
+.garage-root .brand-mark {
+    margin-right: 10px;
+    color: rgb(211, 91, 74);
+    font-size: 13px;
+}
+
+.garage-root .brand-title {
+    font-size: 17px;
+    letter-spacing: 1.4px;
+}
+
+.garage-root .tabbar {
+    height: 72px;
+    flex-grow: 1;
+    justify-content: center;
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: transparent;
+    border-bottom-width: 0;
+}
+
+.garage-root .top-tab {
+    height: 72px;
+    margin-left: 17px;
+    margin-right: 17px;
+    padding-left: 0;
+    padding-right: 0;
+    color: rgb(144, 141, 135);
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(0, 0, 0, 0);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    font-size: 12px;
+    letter-spacing: 1.0px;
+}
+
+.garage-root .top-tab:hover {
+    color: var(--text);
+    background-color: transparent;
+}
+
+.garage-root .top-tab--selected {
+    color: var(--text);
+    background-color: transparent;
+    border-bottom-color: var(--accent);
+}
+
+.garage-root .topbar-actions {
+    min-width: 145px;
+    justify-content: flex-end;
+}
+
+.garage-root .balance-block {
+    align-items: flex-end;
+}
+
+.garage-root .balance-value {
+    margin-top: 0;
+    color: var(--text);
+    font-size: 16px;
+    letter-spacing: 0.6px;
+}
+
+.garage-root .topbar-settings-button {
+    width: 36px;
+    height: 36px;
+    margin-left: 15px;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    color: var(--text-soft);
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    font-size: 17px;
+}
+
+.garage-root .topbar-settings-button:hover {
+    color: var(--text);
+    background-color: rgba(238, 231, 220, 0.08);
+}
+
+.garage-root .content-row {
+    position: relative;
+    flex-grow: 1;
+    min-height: 0;
+    background-color: rgba(5, 6, 7, 0.12);
+}
+
+.garage-root .center-stage {
+    position: relative;
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.garage-root .stage-context {
+    left: 26px;
+    top: 19px;
+    color: rgba(197, 191, 182, 0.78);
+    font-size: 12px;
+    letter-spacing: 0.45px;
+}
+
+.garage-root .preview-viewport {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    min-height: 0;
+}
+
+.garage-root .drag-hint {
+    right: 24px;
+    top: 17px;
+    padding: 7px 10px;
+    background-color: rgba(8, 9, 9, 0.58);
+    border-top-left-radius: 13px;
+    border-top-right-radius: 13px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+}
+
+.garage-root .drag-icon {
+    color: rgb(211, 91, 74);
+}
+
+.garage-root .drag-copy {
+    color: rgba(177, 172, 164, 0.68);
+    font-size: 10px;
+    letter-spacing: 0.75px;
+}
+
+.browser-drawer,
+.context-drawer,
+.garage-root .stats-panel {
+    background-color: rgba(11, 12, 12, 0.78);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(238, 231, 220, 0.12);
+    border-right-color: rgba(238, 231, 220, 0.12);
+    border-top-color: rgba(238, 231, 220, 0.12);
+    border-bottom-color: rgba(238, 231, 220, 0.12);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
+.browser-drawer {
+    position: absolute;
+    left: 24px;
+    top: 68px;
+    width: 336px;
+    max-height: 430px;
+    padding: 18px 16px 14px 16px;
+}
+
+.garage-root .rail-title {
+    margin-left: 4px;
+    margin-bottom: 14px;
+    color: rgb(151, 147, 140);
+    font-size: 11px;
+    letter-spacing: 1.15px;
+}
+
+.garage-root .rail-list {
+    flex-grow: 0;
+    max-height: 374px;
+}
+
+.garage-root .rail-item {
+    height: 55px;
+    margin-bottom: 6px;
+    padding-left: 15px;
+    padding-right: 14px;
+    color: rgb(179, 174, 166);
+    background-color: rgba(238, 231, 220, 0.025);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    border-bottom-left-radius: 11px;
+    border-bottom-right-radius: 11px;
+    -unity-text-align: middle-left;
+}
+
+.garage-root .rail-item-copy {
+    flex-grow: 1;
+    min-width: 0;
+    justify-content: center;
+}
+
+.garage-root .rail-item-title {
+    color: rgb(222, 216, 207);
+    font-size: 14px;
+    -unity-font-style: bold;
+    white-space: nowrap;
+}
+
+.garage-root .rail-item-meta {
+    margin-top: 3px;
+    color: rgb(132, 129, 123);
+    font-size: 10px;
+    letter-spacing: 0.75px;
+}
+
+.garage-root .rail-item:hover {
+    color: var(--text);
+    background-color: rgba(238, 231, 220, 0.08);
+}
+
+.garage-root .rail-item--selected {
+    color: rgb(247, 238, 228);
+    background-color: rgba(205, 76, 62, 0.24);
+    border-left-width: 2px;
+    border-left-color: rgb(211, 91, 74);
+}
+
+.garage-root .rail-item--selected .rail-item-title {
+    color: rgb(250, 241, 231);
+}
+
+.garage-root .rail-item--selected .rail-item-meta {
+    color: rgb(226, 125, 108);
+}
+
+.garage-root .filter-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin-bottom: 0;
+}
+
+.garage-root .filter-chip {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding-left: 2px;
+    padding-right: 2px;
+    color: rgba(225, 219, 209, 0.86);
+    background-color: rgba(9, 10, 10, 0.74);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(238, 231, 220, 0.55);
+    border-right-color: rgba(238, 231, 220, 0.55);
+    border-top-color: rgba(238, 231, 220, 0.55);
+    border-bottom-color: rgba(238, 231, 220, 0.55);
+    border-top-left-radius: 27px;
+    border-top-right-radius: 27px;
+    border-bottom-left-radius: 27px;
+    border-bottom-right-radius: 27px;
+    font-size: 8px;
+    -unity-font-style: bold;
+    letter-spacing: 0.35px;
+    translate: -50% -50%;
+}
+
+.garage-root .filter-chip:hover {
+    color: var(--text);
+    background-color: rgba(36, 33, 31, 0.92);
+    border-left-color: rgba(238, 231, 220, 0.88);
+    border-right-color: rgba(238, 231, 220, 0.88);
+    border-top-color: rgba(238, 231, 220, 0.88);
+    border-bottom-color: rgba(238, 231, 220, 0.88);
+}
+
+.garage-root .filter-chip--selected {
+    color: rgb(255, 239, 232);
+    background-color: rgba(117, 37, 31, 0.88);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(225, 91, 73);
+    border-right-color: rgb(225, 91, 73);
+    border-top-color: rgb(225, 91, 73);
+    border-bottom-color: rgb(225, 91, 73);
+}
+
+.garage-root .stats-panel {
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    width: 332px;
+    min-height: 0;
+    margin: 0;
+    padding: 18px 19px 15px 19px;
+}
+
+.garage-root .stats-title {
+    margin-bottom: 10px;
+    color: rgb(154, 149, 141);
+    font-size: 11px;
+    letter-spacing: 1.2px;
+}
+
+.garage-root .stat-grid {
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.garage-root .stat-card {
+    min-width: 0;
+    height: 48px;
+    flex-grow: 0;
+    margin-right: 0;
+    margin-bottom: 2px;
+    padding: 0;
+    background-color: transparent;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(238, 231, 220, 0.055);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.garage-root .stat-name {
+    color: rgb(139, 136, 130);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+}
+
+.garage-root .stat-value-row {
+    height: 22px;
+}
+
+.garage-root .stat-value {
+    color: rgb(225, 219, 210);
+    font-size: 13px;
+}
+
+.garage-root .stat-delta {
+    font-size: 12px;
+}
+
+.garage-root .stat-track {
+    height: 3px;
+    margin-top: 3px;
+    background-color: rgba(238, 231, 220, 0.10);
+    border-top-left-radius: 1px;
+    border-top-right-radius: 1px;
+    border-bottom-left-radius: 1px;
+    border-bottom-right-radius: 1px;
+}
+
+.garage-root .stat-current-fill,
+.garage-root .stat-preview-fill {
+    background-color: rgba(219, 212, 202, 0.52);
+}
+
+.garage-root .stat-preview-fill {
+    height: 3px;
+    background-color: rgb(188, 79, 67);
+}
+
+.context-drawer {
+    position: absolute;
+    right: 24px;
+    top: 68px;
+    width: 368px;
+    max-height: 430px;
+    padding: 18px 18px 15px 18px;
+}
+
+.garage-root .right-list {
+    flex-grow: 0;
+    max-height: 356px;
+}
+
+.garage-root .slot-row {
+    min-height: 58px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-bottom-color: rgba(238, 231, 220, 0.08);
+}
+
+.garage-root .slot-label {
+    font-size: 10px;
+    letter-spacing: 0.7px;
+}
+
+.garage-root .slot-value {
+    margin-top: 3px;
+    font-size: 14px;
+}
+
+.garage-root .slot-effect {
+    display: none;
+}
+
+.garage-root .ghost-button {
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+}
+
+.garage-root .ghost-button:hover {
+    color: rgb(226, 105, 87);
+}
+
+.garage-screen--assembly .context-drawer .detail-block {
+    display: none;
+}
+
+.garage-screen--gallery .context-drawer,
+.garage-screen--parts .context-drawer {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 24px;
+    width: 960px;
+    max-height: 194px;
+    padding: 18px 22px 17px 22px;
+    translate: -50% 0;
+    background-color: rgba(11, 12, 12, 0.94);
+    border-top-width: 2px;
+    border-top-color: rgba(211, 91, 74, 0.72);
+}
+
+.garage-screen--gallery .right-list,
+.garage-screen--parts .right-list {
+    display: none;
+}
+
+.garage-screen--gallery .context-drawer-title,
+.garage-screen--parts .context-drawer-title {
+    display: flex;
+    margin-left: 0;
+    margin-bottom: 11px;
+    color: rgb(178, 172, 163);
+}
+
+.garage-root .detail-block {
+    margin-top: 0;
+    padding-top: 0;
+    flex-direction: row;
+    align-items: center;
+    border-top-width: 0;
+}
+
+.garage-root .detail-copy {
+    flex-grow: 1;
+    min-width: 0;
+    padding-right: 28px;
+}
+
+.garage-root .detail-title {
+    color: rgb(238, 232, 222);
+    font-size: 24px;
+    letter-spacing: 0.35px;
+}
+
+.garage-root .detail-description {
+    min-height: 0;
+    margin-top: 6px;
+    margin-bottom: 7px;
+    color: rgb(167, 162, 154);
+    font-size: 12px;
+    white-space: normal;
+}
+
+.garage-root .detail-mechanics {
+    margin-bottom: 0;
+    padding: 0;
+    flex-direction: row;
+    background-color: transparent;
+    border-left-width: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.garage-root .detail-mechanic-kicker {
+    display: none;
+}
+
+.garage-root .detail-effect,
+.garage-root .detail-tradeoff {
+    max-width: 48%;
+    margin-top: 4px;
+    margin-right: 18px;
+    color: rgb(172, 168, 160);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.garage-root .detail-effect {
+    color: rgb(122, 202, 157);
+}
+
+.garage-root .detail-tradeoff {
+    color: rgb(213, 119, 112);
+}
+
+.garage-root .detail-action-block {
+    width: 268px;
+    flex-shrink: 0;
+    padding-left: 22px;
+    border-left-width: 1px;
+    border-left-color: rgba(238, 231, 220, 0.10);
+}
+
+.garage-root .primary-action,
+.garage-root .mission-button {
+    height: 52px;
+    color: rgb(255, 240, 232);
+    background-color: rgb(164, 55, 45);
+    border-top-left-radius: 13px;
+    border-top-right-radius: 13px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+    font-size: 12px;
+    letter-spacing: 0.75px;
+}
+
+.garage-root .primary-action:hover,
+.garage-root .mission-button:hover {
+    background-color: rgb(194, 69, 56);
+}
+
+.garage-root .primary-action:disabled,
+.garage-root .mission-button:disabled {
+    color: rgb(118, 115, 110);
+    background-color: rgba(238, 231, 220, 0.06);
+}
+
+.garage-root .context-hint {
+    margin-top: 7px;
+    color: rgb(122, 119, 114);
+    font-size: 10px;
+    -unity-text-align: upper-center;
+}
+
+.garage-root .footerbar {
+    position: relative;
+    height: 82px;
+    padding-left: 25px;
+    padding-right: 25px;
+    background-color: rgba(7, 9, 10, 0.92);
+    border-top-color: rgba(238, 231, 220, 0.09);
+}
+
+.garage-root .selected-build {
+    color: rgb(175, 170, 161);
+    font-size: 12px;
+    letter-spacing: 0.45px;
+}
+
+.garage-root .mission-brief-row {
+    margin-top: 7px;
+}
+
+.garage-root .mission-brief-value,
+.garage-root .mission-brief-control {
+    margin-right: 13px;
+    font-size: 10px;
+}
+
+.garage-root .mission-brief-value {
+    color: rgb(207, 93, 76);
+}
+
+.garage-root .mission-button {
+    position: absolute;
+    left: 50%;
+    top: 15px;
+    width: 268px;
+    min-width: 268px;
+    translate: -50% 0;
+}
+
+.garage-root .footer-mission-brief {
+    max-width: 610px;
+}
+
+.garage-root .rail-list .unity-scroll-view__vertical-scroller,
+.garage-root .rail-list .unity-scroll-view__horizontal-scroller,
+.garage-root .right-list .unity-scroll-view__vertical-scroller,
+.garage-root .right-list .unity-scroll-view__horizontal-scroller {
+    display: none;
+}
+
+.garage-root .empty-state {
+    padding: 14px 12px;
+    color: rgb(151, 147, 140);
+    font-size: 11px;
+    white-space: normal;
+}
+
+/* Two-screen showroom: the vehicle owns the stage, controls stay spatial. */
+.garage-root .showroom-arrow {
+    position: absolute;
+    top: 45%;
+    width: 68px;
+    height: 68px;
+    padding: 0;
+    color: rgba(238, 233, 224, 0.82);
+    background-color: rgba(8, 9, 9, 0.52);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(238, 231, 220, 0.20);
+    border-right-color: rgba(238, 231, 220, 0.20);
+    border-top-color: rgba(238, 231, 220, 0.20);
+    border-bottom-color: rgba(238, 231, 220, 0.20);
+    border-top-left-radius: 34px;
+    border-top-right-radius: 34px;
+    border-bottom-left-radius: 34px;
+    border-bottom-right-radius: 34px;
+    font-size: 42px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    translate: 0 -50%;
+}
+
+.garage-root .showroom-arrow:hover {
+    color: rgb(255, 246, 236);
+    background-color: rgba(62, 53, 49, 0.82);
+    border-left-color: rgba(224, 105, 87, 0.72);
+    border-right-color: rgba(224, 105, 87, 0.72);
+    border-top-color: rgba(224, 105, 87, 0.72);
+    border-bottom-color: rgba(224, 105, 87, 0.72);
+}
+
+.garage-root .showroom-arrow:disabled {
+    opacity: 0.28;
+}
+
+.garage-root .showroom-arrow--left {
+    left: 29%;
+}
+
+.garage-root .showroom-arrow--right {
+    right: 29%;
+}
+
+.garage-root .showroom-caption {
+    position: absolute;
+    left: 50%;
+    bottom: 221px;
+    min-width: 230px;
+    align-items: center;
+    translate: -50% 0;
+}
+
+.garage-root .showroom-caption-title {
+    color: rgb(232, 226, 216);
+    font-size: 12px;
+    letter-spacing: 1.25px;
+}
+
+.garage-root .showroom-caption-meta {
+    margin-top: 5px;
+    color: rgb(207, 93, 76);
+    font-size: 10px;
+    letter-spacing: 0.95px;
+}
+
+.garage-root .stats-panel {
+    left: 26px;
+    top: 50%;
+    bottom: auto;
+    width: 326px;
+    padding: 17px 18px 15px 18px;
+    translate: 0 -50%;
+    background-color: rgba(9, 10, 10, 0.61);
+    border-left-color: rgba(238, 231, 220, 0.08);
+    border-right-color: rgba(238, 231, 220, 0.08);
+    border-top-color: rgba(238, 231, 220, 0.08);
+    border-bottom-color: rgba(238, 231, 220, 0.08);
+}
+
+.garage-root .stats-title {
+    margin-bottom: 7px;
+    color: rgb(156, 151, 143);
+    font-size: 10px;
+    letter-spacing: 1.25px;
+}
+
+.garage-root .stat-card {
+    height: 45px;
+    margin-bottom: 0;
+    flex-direction: row;
+    align-items: center;
+    border-bottom-color: rgba(238, 231, 220, 0.075);
+}
+
+.garage-root .stat-name {
+    width: 88px;
+    flex-shrink: 0;
+    color: rgb(145, 141, 134);
+    font-size: 10px;
+    letter-spacing: 0.75px;
+}
+
+.garage-root .stat-value-row {
+    height: 45px;
+    flex-grow: 1;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.garage-root .stat-value {
+    flex-grow: 1;
+    color: rgb(231, 225, 216);
+    font-size: 13px;
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+
+.garage-root .stat-delta {
+    min-width: 62px;
+    margin-left: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    -unity-text-align: middle-right;
+}
+
+/* Readable performance rows with a passive value slider beneath the text. */
+.garage-root .stats-panel {
+    width: 344px;
+    padding: 17px 18px 14px 18px;
+}
+
+.garage-root .stat-card {
+    height: 54px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.garage-root .stat-header {
+    height: 31px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.garage-root .stat-value-row {
+    height: 31px;
+}
+
+.garage-root .stat-track {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    margin-top: 1px;
+    margin-bottom: 7px;
+    background-color: rgba(238, 231, 220, 0.09);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    overflow: hidden;
+}
+
+.garage-root .stat-current-fill,
+.garage-root .stat-preview-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(216, 207, 195, 0.42);
+}
+
+.garage-root .stat-preview-fill {
+    top: auto;
+    bottom: 0;
+    height: 2px;
+    background-color: rgb(205, 82, 68);
+}
+
+.garage-root .stat-preview-fill--positive {
+    background-color: rgb(98, 190, 137);
+}
+
+.garage-root .stat-preview-fill--negative {
+    background-color: rgb(218, 83, 88);
+}
+
+/* Keep carousel identity above the vehicle instead of over the model. */
+.garage-root .showroom-caption {
+    left: 50%;
+    top: 17px;
+    bottom: auto;
+    min-width: 270px;
+    height: 40px;
+    padding-left: 16px;
+    padding-right: 16px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    translate: -50% 0;
+    background-color: rgba(8, 9, 9, 0.82);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 2px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(238, 231, 220, 0.12);
+    border-right-color: rgba(238, 231, 220, 0.12);
+    border-top-color: rgba(211, 91, 74, 0.78);
+    border-bottom-color: rgba(238, 231, 220, 0.12);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+
+.garage-root .showroom-caption-title {
+    color: rgb(238, 232, 222);
+    font-size: 12px;
+    -unity-font-style: bold;
+    letter-spacing: 1.15px;
+}
+
+.garage-root .showroom-caption-meta {
+    margin-top: 0;
+    margin-left: 13px;
+    padding-left: 13px;
+    color: rgb(216, 104, 87);
+    font-size: 10px;
+    letter-spacing: 0.9px;
+    border-left-width: 1px;
+    border-left-color: rgba(238, 231, 220, 0.14);
+}
+
+.garage-screen--gallery .context-drawer,
+.garage-screen--parts .context-drawer {
+    bottom: 18px;
+    width: 58%;
+    min-width: 720px;
+    max-width: 940px;
+    min-height: 116px;
+    max-height: 126px;
+    padding: 15px 18px 14px 20px;
+}
+
+.garage-root .detail-copy {
+    padding-right: 24px;
+}
+
+.garage-root .detail-title {
+    font-size: 23px;
+}
+
+.garage-root .detail-description {
+    max-height: 34px;
+    margin-top: 5px;
+    margin-bottom: 0;
+    color: rgb(166, 161, 153);
+    font-size: 12px;
+    overflow: hidden;
+}
+
+.garage-screen--parts .detail-mechanics {
+    display: none;
+}
+
+.garage-root .detail-action-block {
+    width: 252px;
+    padding-left: 18px;
+}
+
+.garage-root .primary-action {
+    height: 48px;
+}
+
+.garage-root .context-hint {
+    margin-top: 7px;
+    color: rgb(142, 137, 129);
+    font-size: 9px;
+    -unity-font-style: bold;
+    letter-spacing: 0.8px;
+    -unity-text-align: middle-center;
+}
+
+.garage-root .footerbar {
+    height: 76px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.garage-root .mission-button {
+    top: 12px;
+}
+
 .mission-hud {
     position: absolute;
     left: 0;

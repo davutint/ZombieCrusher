@@ -7,6 +7,7 @@ public sealed class GaragePreviewController : MonoBehaviour
 {
     private sealed class PreviewVehicleInstance
     {
+        public string vehicleId;
         public GameObject container;
         public readonly Dictionary<GarageAttachmentAnchor, Transform> anchors =
             new();
@@ -31,7 +32,7 @@ public sealed class GaragePreviewController : MonoBehaviour
     [SerializeField, Min(0f)] private float autoRotationSpeed = 6f;
     [SerializeField, Min(0.01f)] private float dragRotationSensitivity = 0.22f;
     [SerializeField, Range(20f, 60f)] private float fieldOfView = 34f;
-    [SerializeField, Min(1f)] private float framingPadding = 1.3f;
+    [SerializeField, Range(1f, 1.2f)] private float framingPadding = 1.06f;
 
     private readonly Dictionary<string, PreviewVehicleInstance> vehicleCache =
         new(StringComparer.Ordinal);
@@ -182,6 +183,60 @@ public sealed class GaragePreviewController : MonoBehaviour
         inputDragging = false;
     }
 
+    public bool TryGetAttachmentViewportPosition(
+        GarageAttachmentDefinition attachment,
+        out Vector2 viewportPosition)
+    {
+        viewportPosition = default;
+        if (!visible
+            || attachment == null
+            || previewCamera == null
+            || activeInstance?.container == null)
+        {
+            return false;
+        }
+
+        string vehicleId = activeInstance.vehicleId;
+        int poseCount = attachment.GetPoseCount(vehicleId);
+        if (poseCount <= 0)
+        {
+            return false;
+        }
+
+        bool found = false;
+        float closestDepth = float.MaxValue;
+        Vector3 closestViewportPoint = default;
+        for (int i = 0; i < poseCount; i++)
+        {
+            if (!attachment.TryGetPose(vehicleId, i, out GarageAttachmentPose pose))
+            {
+                continue;
+            }
+
+            Transform anchor = activeInstance.GetAnchor(pose.Anchor);
+            Vector3 worldPosition = anchor.TransformPoint(pose.LocalPosition);
+            Vector3 candidate = previewCamera.WorldToViewportPoint(worldPosition);
+            if (candidate.z <= 0f || candidate.z >= closestDepth)
+            {
+                continue;
+            }
+
+            found = true;
+            closestDepth = candidate.z;
+            closestViewportPoint = candidate;
+        }
+
+        if (!found)
+        {
+            return false;
+        }
+
+        viewportPosition = new Vector2(
+            closestViewportPoint.x,
+            closestViewportPoint.y);
+        return true;
+    }
+
     private PreviewVehicleInstance GetOrCreateVehicle(
         GarageVehicleDefinition vehicle)
     {
@@ -207,6 +262,7 @@ public sealed class GaragePreviewController : MonoBehaviour
 
         PreviewVehicleInstance created = new PreviewVehicleInstance
         {
+            vehicleId = vehicle.VehicleId,
             container = container
         };
         created.anchors[GarageAttachmentAnchor.Body] = container.transform;
@@ -402,21 +458,53 @@ public sealed class GaragePreviewController : MonoBehaviour
             Mathf.Lerp(bounds.min.y, bounds.max.y, 0.52f),
             bounds.center.z);
 
-        float radius = Mathf.Max(
-            bounds.extents.x,
-            Mathf.Max(bounds.extents.y, bounds.extents.z));
         float halfFovRadians = fieldOfView * 0.5f * Mathf.Deg2Rad;
-        float distance = Mathf.Max(
-            2f,
-            radius / Mathf.Tan(halfFovRadians) * framingPadding);
-
         Vector3 viewDirection = new Vector3(1.15f, 0.52f, -1.45f).normalized;
+        Quaternion viewRotation = Quaternion.LookRotation(
+            -viewDirection,
+            Vector3.up);
+        Vector3 viewForward = viewRotation * Vector3.forward;
+        Vector3 viewRight = viewRotation * Vector3.right;
+        Vector3 viewUp = viewRotation * Vector3.up;
+        float verticalTan = Mathf.Tan(halfFovRadians);
+        float horizontalTan = verticalTan * Mathf.Max(0.1f, previewCamera.aspect);
+        float edgePadding = Mathf.Clamp(framingPadding, 1.02f, 1.08f);
+        float distance = 2f;
+
+        Vector3 boundsMin = bounds.min;
+        Vector3 boundsMax = bounds.max;
+        for (int cornerIndex = 0; cornerIndex < 8; cornerIndex++)
+        {
+            Vector3 corner = new Vector3(
+                (cornerIndex & 1) == 0 ? boundsMin.x : boundsMax.x,
+                (cornerIndex & 2) == 0 ? boundsMin.y : boundsMax.y,
+                (cornerIndex & 4) == 0 ? boundsMin.z : boundsMax.z);
+            Vector3 relative = corner - focus;
+            float depthOffset = Vector3.Dot(relative, viewForward);
+            float verticalDistance =
+                Mathf.Abs(Vector3.Dot(relative, viewUp))
+                * edgePadding
+                / verticalTan
+                - depthOffset;
+            float horizontalDistance =
+                Mathf.Abs(Vector3.Dot(relative, viewRight))
+                * edgePadding
+                / horizontalTan
+                - depthOffset;
+            distance = Mathf.Max(
+                distance,
+                Mathf.Max(verticalDistance, horizontalDistance));
+        }
+
         previewCamera.transform.position = focus + viewDirection * distance;
         previewCamera.transform.rotation = Quaternion.LookRotation(
             focus - previewCamera.transform.position,
             Vector3.up);
-        previewCamera.nearClipPlane = Mathf.Max(0.03f, distance - radius * 2.2f);
-        previewCamera.farClipPlane = distance + radius * 3f + 10f;
+        float boundsRadius = bounds.extents.magnitude;
+        previewCamera.nearClipPlane = Mathf.Max(
+            0.03f,
+            distance - boundsRadius * 2.2f);
+        previewCamera.farClipPlane = distance + boundsRadius * 3f + 10f;
     }
 
     private void HideCachedVehicles()

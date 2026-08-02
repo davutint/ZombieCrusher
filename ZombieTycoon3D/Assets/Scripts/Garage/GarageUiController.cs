@@ -16,7 +16,6 @@ public sealed class GarageUiController : MonoBehaviour
 
     private enum GarageScreen
     {
-        Assembly,
         Gallery,
         Parts
     }
@@ -36,7 +35,10 @@ public sealed class GarageUiController : MonoBehaviour
     [SerializeField] private GaragePreviewController previewController;
 
     private readonly List<StatElements> statElements = new();
-    private GarageScreen activeScreen = GarageScreen.Assembly;
+    private readonly Dictionary<GarageAttachmentSlot, Button> partHotspots = new();
+    private readonly Dictionary<GarageAttachmentSlot, GarageAttachmentDefinition>
+        partHotspotAttachments = new();
+    private GarageScreen activeScreen = GarageScreen.Gallery;
     private GarageAttachmentSlot partsFilter = GarageAttachmentSlot.Front;
 
     private VisualElement garageRoot;
@@ -94,16 +96,15 @@ public sealed class GarageUiController : MonoBehaviour
     private Label resultTotalScrap;
     private Label resultBalance;
     private Button resultButton;
-    private Button assemblyTab;
     private Button galleryTab;
     private Button partsTab;
-    private Label leftTitle;
     private VisualElement leftFilters;
-    private ScrollView leftList;
     private Label contextLabel;
     private VisualElement statGrid;
-    private Label rightTitle;
-    private ScrollView rightList;
+    private Button carouselPrev;
+    private Button carouselNext;
+    private Label carouselTitle;
+    private Label carouselMeta;
     private Label detailTitle;
     private Label detailDescription;
     private VisualElement detailMechanics;
@@ -111,7 +112,6 @@ public sealed class GarageUiController : MonoBehaviour
     private Label detailTradeoff;
     private Button contextAction;
     private Label contextHint;
-    private Label selectedBuildLabel;
     private Label balanceValue;
     private Button missionButton;
     private VisualElement previewViewport;
@@ -251,6 +251,8 @@ public sealed class GarageUiController : MonoBehaviour
             PlayerPrefs.Save();
             settingsSavePending = false;
         }
+
+        UpdatePartHotspotPositions();
     }
 
     public void ShowGarage()
@@ -266,7 +268,7 @@ public sealed class GarageUiController : MonoBehaviour
         missionSpeedAnimationEnabled = false;
         ResetMissionDamagePulse();
         previewController.SetVisible(true);
-        activeScreen = GarageScreen.Assembly;
+        activeScreen = GarageScreen.Gallery;
         buildState.ClearPreview();
         Refresh();
     }
@@ -725,16 +727,15 @@ public sealed class GarageUiController : MonoBehaviour
             RequireElement<Label>(root, "result-total-scrap");
         resultBalance = RequireElement<Label>(root, "result-balance");
         resultButton = RequireElement<Button>(root, "result-button");
-        assemblyTab = RequireElement<Button>(root, "assembly-tab");
         galleryTab = RequireElement<Button>(root, "gallery-tab");
         partsTab = RequireElement<Button>(root, "parts-tab");
-        leftTitle = RequireElement<Label>(root, "left-title");
         leftFilters = RequireElement<VisualElement>(root, "left-filters");
-        leftList = RequireElement<ScrollView>(root, "left-list");
         contextLabel = RequireElement<Label>(root, "context-label");
         statGrid = RequireElement<VisualElement>(root, "stat-grid");
-        rightTitle = RequireElement<Label>(root, "right-title");
-        rightList = RequireElement<ScrollView>(root, "right-list");
+        carouselPrev = RequireElement<Button>(root, "carousel-prev");
+        carouselNext = RequireElement<Button>(root, "carousel-next");
+        carouselTitle = RequireElement<Label>(root, "carousel-title");
+        carouselMeta = RequireElement<Label>(root, "carousel-meta");
         detailTitle = RequireElement<Label>(root, "detail-title");
         detailDescription = RequireElement<Label>(root, "detail-description");
         detailMechanics =
@@ -743,16 +744,16 @@ public sealed class GarageUiController : MonoBehaviour
         detailTradeoff = RequireElement<Label>(root, "detail-tradeoff");
         contextAction = RequireElement<Button>(root, "context-action");
         contextHint = RequireElement<Label>(root, "context-hint");
-        selectedBuildLabel = RequireElement<Label>(root, "selected-build");
         balanceValue = RequireElement<Label>(root, "balance-value");
         missionButton = RequireElement<Button>(root, "mission-button");
         previewViewport = RequireElement<VisualElement>(root, "preview-viewport");
         missionEffectFeedback =
             RequireElement<Label>(root, "mission-effect-feedback");
 
-        assemblyTab.clicked += () => SwitchScreen(GarageScreen.Assembly);
         galleryTab.clicked += () => SwitchScreen(GarageScreen.Gallery);
         partsTab.clicked += () => SwitchScreen(GarageScreen.Parts);
+        carouselPrev.clicked += () => CycleShowroom(-1);
+        carouselNext.clicked += () => CycleShowroom(1);
         missionButton.clicked += () => MissionRequested?.Invoke();
         resultButton.clicked += () => ResultAcknowledged?.Invoke();
         missionPauseButton.clicked +=
@@ -869,22 +870,16 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void SwitchScreen(GarageScreen screen)
     {
-        bool preserveGalleryVehicle =
-            activeScreen == GarageScreen.Gallery
-            && screen == GarageScreen.Parts
-            && buildState.DisplayedVehicle != null;
-
         activeScreen = screen;
-        if (preserveGalleryVehicle)
+        if (screen == GarageScreen.Parts)
         {
-            buildState.PreviewPart(null);
+            NormalizePartsFilter(buildState.DisplayedVehicle);
+            SelectPartForSlot(partsFilter);
         }
         else
         {
-            buildState.ClearPreview();
+            buildState.PreviewPart(null);
         }
-
-        Refresh();
     }
 
     private void Refresh()
@@ -896,18 +891,24 @@ public sealed class GarageUiController : MonoBehaviour
 
         balanceValue.text = $"{economy.Scrap:N0} HURDA";
         UpdateTabs();
-        PopulateLeftRail();
-        PopulateRightRail();
+        PopulateScreen();
+        PopulateContextDrawer();
         UpdateStats();
         UpdatePreview();
-        UpdateSelectedBuild();
+        UpdateCarousel();
+        UpdateMissionButton();
     }
 
     private void UpdateTabs()
     {
-        SetTabSelected(assemblyTab, activeScreen == GarageScreen.Assembly);
         SetTabSelected(galleryTab, activeScreen == GarageScreen.Gallery);
         SetTabSelected(partsTab, activeScreen == GarageScreen.Parts);
+        garageRoot.EnableInClassList(
+            "garage-screen--gallery",
+            activeScreen == GarageScreen.Gallery);
+        garageRoot.EnableInClassList(
+            "garage-screen--parts",
+            activeScreen == GarageScreen.Parts);
     }
 
     private static void SetTabSelected(Button button, bool selected)
@@ -915,67 +916,21 @@ public sealed class GarageUiController : MonoBehaviour
         button.EnableInClassList("top-tab--selected", selected);
     }
 
-    private void PopulateLeftRail()
+    private void PopulateScreen()
     {
         leftFilters.Clear();
-        leftList.Clear();
+        partHotspots.Clear();
+        partHotspotAttachments.Clear();
 
-        switch (activeScreen)
+        if (activeScreen == GarageScreen.Gallery)
         {
-            case GarageScreen.Assembly:
-                leftTitle.text = "SAHİP OLUNAN ARAÇLAR";
-                contextLabel.text = "Montaj tezgâhı · parçalar burada takılır";
-                PopulateOwnedVehicles();
-                break;
-
-            case GarageScreen.Gallery:
-                leftTitle.text = "ARAÇ GALERİSİ";
-                contextLabel.text = "Galeride aracı incele · satın alma equip etmez";
-                PopulateVehicleCatalog();
-                break;
-
-            case GarageScreen.Parts:
-                leftTitle.text = "PARÇA DÜKKÂNI";
-                contextLabel.text = "Parçayı araçta ve statlarda canlı önizle";
-                PopulatePartFilters();
-                PopulatePartCatalog();
-                break;
+            contextLabel.text = "Aracı yakından incele · oklarla vitrini değiştir";
+            return;
         }
-    }
 
-    private void PopulateOwnedVehicles()
-    {
-        IReadOnlyList<GarageVehicleDefinition> vehicles = buildState.Catalog.Vehicles;
-        for (int i = 0; i < vehicles.Count; i++)
-        {
-            GarageVehicleDefinition vehicle = vehicles[i];
-            if (!buildState.IsVehicleOwned(vehicle))
-            {
-                continue;
-            }
-
-            Button button = CreateListButton(
-                vehicle.DisplayName,
-                vehicle == buildState.SelectedVehicle);
-            button.clicked += () => buildState.SelectOwnedVehicle(vehicle);
-            leftList.Add(button);
-        }
-    }
-
-    private void PopulateVehicleCatalog()
-    {
-        IReadOnlyList<GarageVehicleDefinition> vehicles = buildState.Catalog.Vehicles;
-        for (int i = 0; i < vehicles.Count; i++)
-        {
-            GarageVehicleDefinition vehicle = vehicles[i];
-            bool selected = vehicle == buildState.DisplayedVehicle;
-            string suffix = buildState.IsVehicleOwned(vehicle)
-                ? " · SAHİP"
-                : $" · {vehicle.Price:N0} HURDA";
-            Button button = CreateListButton(vehicle.DisplayName + suffix, selected);
-            button.clicked += () => buildState.PreviewVehicle(vehicle);
-            leftList.Add(button);
-        }
+        contextLabel.text = "Montaj noktasını seç · oklarla uyumlu parçaları incele";
+        NormalizePartsFilter(buildState.DisplayedVehicle);
+        PopulatePartFilters();
     }
 
     private void PopulatePartFilters()
@@ -998,152 +953,216 @@ public sealed class GarageUiController : MonoBehaviour
         for (int i = 0; i < compatibleSlots.Count; i++)
         {
             GarageAttachmentSlot slot = compatibleSlots[i];
-            string label = GetSlotLabel(slot);
+            GarageAttachmentDefinition hotspotAttachment =
+                FindCompatibleAttachment(vehicle, slot);
             Button button = new Button(() =>
             {
                 partsFilter = slot;
-                buildState.PreviewPart(null);
-                Refresh();
+                SelectPartForSlot(slot);
             })
             {
-                text = label
+                text = GetHotspotLabel(slot),
+                tooltip = GetSlotLabel(slot)
             };
             button.AddToClassList("filter-chip");
             button.EnableInClassList("filter-chip--selected", partsFilter == slot);
             leftFilters.Add(button);
+            partHotspots[slot] = button;
+            if (hotspotAttachment != null)
+            {
+                partHotspotAttachments[slot] = hotspotAttachment;
+            }
         }
+
+        UpdatePartHotspotPositions();
     }
 
-    private void PopulatePartCatalog()
+    private GarageAttachmentDefinition FindCompatibleAttachment(
+        GarageVehicleDefinition vehicle,
+        GarageAttachmentSlot slot)
     {
-        GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
+        if (vehicle == null || buildState.Catalog == null)
+        {
+            return null;
+        }
+
         IReadOnlyList<GarageAttachmentDefinition> attachments =
             buildState.Catalog.Attachments;
-        bool addedPart = false;
-
         for (int i = 0; i < attachments.Count; i++)
         {
             GarageAttachmentDefinition attachment = attachments[i];
-            if (attachment == null
-                || attachment.Slot != partsFilter
-                || vehicle == null
-                || !attachment.TryGetPose(vehicle.VehicleId, out _))
+            if (attachment != null
+                && attachment.Slot == slot
+                && attachment.TryGetPose(vehicle.VehicleId, out _))
             {
-                continue;
+                return attachment;
             }
-
-            bool selected = attachment == buildState.PreviewAttachment;
-            string suffix = buildState.IsAttachmentOwned(attachment)
-                ? " · SAHİP"
-                : $" · {attachment.Price:N0} HURDA";
-            Button button = CreateListButton(
-                attachment.DisplayName + suffix,
-                selected);
-            button.clicked += () => buildState.PreviewPart(attachment);
-            leftList.Add(button);
-            addedPart = true;
         }
 
-        if (!addedPart)
-        {
-            Label emptyState = new Label(
-                vehicle != null
-                    ? "Bu araç için bu kategoride uyumlu parça yok."
-                    : "Önce bir araç seç.");
-            emptyState.AddToClassList("empty-state");
-            leftList.Add(emptyState);
-        }
+        return null;
     }
 
-    private void PopulateRightRail()
+    private List<GarageAttachmentDefinition> GetCompatibleAttachments(
+        GarageVehicleDefinition vehicle,
+        GarageAttachmentSlot slot)
     {
-        rightList.Clear();
-        contextAction.clicked -= HandleContextAction;
-
-        switch (activeScreen)
+        List<GarageAttachmentDefinition> compatible = new();
+        if (vehicle == null || buildState.Catalog == null)
         {
-            case GarageScreen.Assembly:
-                PopulateEquippedSlots();
-                break;
-
-            case GarageScreen.Gallery:
-                PopulateVehicleDetails();
-                break;
-
-            case GarageScreen.Parts:
-                PopulatePartDetails();
-                break;
+            return compatible;
         }
+
+        IReadOnlyList<GarageAttachmentDefinition> attachments =
+            buildState.Catalog.Attachments;
+        for (int i = 0; i < attachments.Count; i++)
+        {
+            GarageAttachmentDefinition attachment = attachments[i];
+            if (attachment != null
+                && attachment.Slot == slot
+                && attachment.TryGetPose(vehicle.VehicleId, out _))
+            {
+                compatible.Add(attachment);
+            }
+        }
+
+        return compatible;
     }
 
-    private void PopulateEquippedSlots()
+    private void NormalizePartsFilter(GarageVehicleDefinition vehicle)
     {
-        detailMechanics.style.display = DisplayStyle.None;
-        rightTitle.text = "TAKILI PARÇALAR";
-        detailTitle.text = buildState.SelectedVehicle != null
-            ? buildState.SelectedVehicle.DisplayName
-            : "Araç seçilmedi";
-        detailDescription.text = "Sahip olunan uyumlu parçalar Montaj ekranında değiştirilir.";
-        contextAction.text = "2:00 GÖREVE ÇIK";
-        contextAction.SetEnabled(buildState.SelectedVehicle != null);
-        contextAction.clicked += HandleContextAction;
-        contextHint.text = "Görev seçili build ile başlar.";
-
-        foreach (GarageAttachmentSlot slot in Enum.GetValues(typeof(GarageAttachmentSlot)))
+        if (VehicleSupportsSlot(vehicle, partsFilter))
         {
-            if (!VehicleSupportsSlot(buildState.SelectedVehicle, slot))
-            {
-                continue;
-            }
+            return;
+        }
 
-            GarageAttachmentDefinition equipped = buildState.GetEquipped(slot);
-            VisualElement row = new VisualElement();
-            row.AddToClassList("slot-row");
-
-            VisualElement copy = new VisualElement();
-            copy.AddToClassList("slot-copy");
-            Label slotLabel = new Label(GetSlotLabel(slot));
-            slotLabel.AddToClassList("slot-label");
-            Label value = new Label(equipped != null ? equipped.DisplayName : "Stok");
-            value.AddToClassList("slot-value");
-            copy.Add(slotLabel);
-            copy.Add(value);
-            if (equipped != null
-                && !string.IsNullOrWhiteSpace(
-                    equipped.GameplayEffectSummary))
-            {
-                Label effect = new Label(equipped.GameplayEffectSummary);
-                effect.AddToClassList("slot-effect");
-                copy.Add(effect);
-            }
-
-            Button change = new Button(() =>
+        foreach (GarageAttachmentSlot slot in Enum.GetValues(
+                     typeof(GarageAttachmentSlot)))
+        {
+            if (VehicleSupportsSlot(vehicle, slot))
             {
                 partsFilter = slot;
-                SwitchScreen(GarageScreen.Parts);
-            })
-            {
-                text = "DEĞİŞTİR"
-            };
-            change.AddToClassList("ghost-button");
+                return;
+            }
+        }
+    }
 
-            VisualElement actions = new VisualElement();
-            actions.AddToClassList("slot-actions");
-            actions.Add(change);
-            if (equipped != null)
+    private void SelectPartForSlot(GarageAttachmentSlot slot)
+    {
+        GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
+        GarageAttachmentDefinition candidate = null;
+        if (vehicle != null && vehicle == buildState.SelectedVehicle)
+        {
+            GarageAttachmentDefinition equipped = buildState.GetEquipped(slot);
+            if (equipped != null
+                && equipped.TryGetPose(vehicle.VehicleId, out _))
             {
-                Button remove = new Button(() => buildState.Unequip(slot))
-                {
-                    text = "ÇIKAR"
-                };
-                remove.AddToClassList("ghost-button");
-                remove.AddToClassList("ghost-button--danger");
-                actions.Add(remove);
+                candidate = equipped;
+            }
+        }
+
+        candidate ??= FindCompatibleAttachment(vehicle, slot);
+        buildState.PreviewPart(candidate);
+    }
+
+    private void UpdatePartHotspotPositions()
+    {
+        if (activeScreen != GarageScreen.Parts
+            || previewController == null
+            || !previewController.IsVisible
+            || partHotspots.Count == 0)
+        {
+            return;
+        }
+
+        foreach (KeyValuePair<GarageAttachmentSlot, Button> pair in partHotspots)
+        {
+            if (!partHotspotAttachments.TryGetValue(
+                    pair.Key,
+                    out GarageAttachmentDefinition attachment)
+                || !previewController.TryGetAttachmentViewportPosition(
+                    attachment,
+                    out Vector2 viewportPosition))
+            {
+                continue;
             }
 
-            row.Add(copy);
-            row.Add(actions);
-            rightList.Add(row);
+            pair.Value.style.left = Length.Percent(
+                Mathf.Clamp(viewportPosition.x * 100f, 16f, 84f));
+            pair.Value.style.top = Length.Percent(
+                Mathf.Clamp((1f - viewportPosition.y) * 100f, 15f, 76f));
+        }
+    }
+
+    private void CycleShowroom(int direction)
+    {
+        if (activeScreen == GarageScreen.Gallery)
+        {
+            IReadOnlyList<GarageVehicleDefinition> vehicles =
+                buildState.Catalog.Vehicles;
+            if (vehicles.Count == 0)
+            {
+                return;
+            }
+
+            int currentIndex = IndexOfVehicle(
+                vehicles,
+                buildState.DisplayedVehicle);
+            int nextIndex = WrapIndex(currentIndex + direction, vehicles.Count);
+            buildState.PreviewVehicle(vehicles[nextIndex]);
+            return;
+        }
+
+        List<GarageAttachmentDefinition> attachments =
+            GetCompatibleAttachments(buildState.DisplayedVehicle, partsFilter);
+        if (attachments.Count == 0)
+        {
+            buildState.PreviewPart(null);
+            return;
+        }
+
+        int currentPartIndex = attachments.IndexOf(buildState.PreviewAttachment);
+        if (currentPartIndex < 0)
+        {
+            currentPartIndex = direction > 0 ? -1 : 0;
+        }
+
+        int nextPartIndex = WrapIndex(
+            currentPartIndex + direction,
+            attachments.Count);
+        buildState.PreviewPart(attachments[nextPartIndex]);
+    }
+
+    private static int IndexOfVehicle(
+        IReadOnlyList<GarageVehicleDefinition> vehicles,
+        GarageVehicleDefinition vehicle)
+    {
+        for (int i = 0; i < vehicles.Count; i++)
+        {
+            if (vehicles[i] == vehicle)
+            {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+
+    private static int WrapIndex(int index, int count)
+    {
+        return count > 0 ? (index % count + count) % count : 0;
+    }
+
+    private void PopulateContextDrawer()
+    {
+        contextAction.clicked -= HandleContextAction;
+
+        if (activeScreen == GarageScreen.Gallery)
+        {
+            PopulateVehicleDetails();
+        }
+        else
+        {
+            PopulatePartDetails();
         }
     }
 
@@ -1175,22 +1194,28 @@ public sealed class GarageUiController : MonoBehaviour
     private void PopulateVehicleDetails()
     {
         detailMechanics.style.display = DisplayStyle.None;
-        rightTitle.text = "ARAÇ DETAYI";
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         detailTitle.text = vehicle != null ? vehicle.DisplayName : "Araç seç";
         detailDescription.text = vehicle != null ? vehicle.Description : string.Empty;
 
         bool owned = buildState.IsVehicleOwned(vehicle);
-        contextAction.text = owned
-            ? "ARACI SEÇ"
+        bool selected = vehicle != null && vehicle == buildState.SelectedVehicle;
+        contextAction.text = selected
+            ? "AKTİF ARAÇ"
+            : owned
+                ? "ARACI SEÇ"
             : vehicle != null
                 ? $"SATIN AL · {vehicle.Price:N0} HURDA"
                 : "ARAÇ SEÇ";
         contextAction.SetEnabled(
-            vehicle != null && (owned || economy.CanAfford(vehicle.Price)));
+            vehicle != null
+            && !selected
+            && (owned || economy.CanAfford(vehicle.Price)));
         contextAction.clicked += HandleContextAction;
-        contextHint.text = owned
-            ? "Seçim Montaj ekranındaki aktif aracı değiştirir."
+        contextHint.text = selected
+            ? "Göreve bu araç ve takılı build ile çıkacaksın."
+            : owned
+                ? "Bu aracı aktif görev aracı olarak seç."
             : vehicle != null && economy.CanAfford(vehicle.Price)
                 ? "Satın alma aracı envantere ekler; otomatik seçmez."
                 : "Bu araç için yeterli Hurda yok.";
@@ -1198,57 +1223,58 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void PopulatePartDetails()
     {
-        detailMechanics.style.display = DisplayStyle.Flex;
-        rightTitle.text = "PARÇA DETAYI";
+        detailMechanics.style.display = DisplayStyle.None;
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         GarageAttachmentDefinition attachment = buildState.PreviewAttachment;
-        detailTitle.text = attachment != null ? attachment.DisplayName : "Parça seç";
+        detailTitle.text = attachment != null ? attachment.DisplayName : "Uyumlu parça yok";
         detailDescription.text =
-            attachment != null ? attachment.Description : "Uyumlu parçayı soldan seç.";
-        detailEffect.text = attachment != null
-            ? attachment.GameplayEffectSummary
-            : "Parçanın gerçek pasif etkisi burada görünür.";
-        detailTradeoff.text = attachment != null
-            ? attachment.TradeoffSummary
-            : "Her avantajın sürüş veya dayanıklılık bedeli burada görünür.";
+            attachment != null
+                ? attachment.Description
+                : "Bu montaj noktası için uyumlu parça bulunamadı.";
+        detailEffect.text = string.Empty;
+        detailTradeoff.text = string.Empty;
 
         bool vehicleOwned = buildState.IsVehicleOwned(vehicle);
         bool vehicleSelected = vehicle != null
             && vehicle == buildState.SelectedVehicle;
         bool owned = buildState.IsAttachmentOwned(attachment);
+        bool equipped = attachment != null
+            && buildState.GetEquipped(attachment.Slot) == attachment;
 
         if (attachment == null)
         {
             contextAction.text = "PARÇA SEÇ";
             contextAction.SetEnabled(false);
-            contextHint.text = "İncelemek istediğin uyumlu parçayı seç.";
+            contextHint.text = "MONTAJ NOKTASI SEÇ";
         }
         else if (!vehicleOwned)
         {
             contextAction.text = "ÖNCE ARACI SATIN AL";
             contextAction.SetEnabled(false);
-            contextHint.text =
-                $"Bu parçayı satın almak veya takmak için önce {vehicle.DisplayName} aracına sahip ol.";
+            contextHint.text = $"{vehicle.DisplayName.ToUpperInvariant()} GEREKLİ";
         }
         else if (!vehicleSelected)
         {
             contextAction.text = "ÖNCE ARACI SEÇ";
             contextAction.SetEnabled(false);
-            contextHint.text =
-                "Satın alma ve montaj için önce galeriden bu aracı aktif araç olarak seç.";
+            contextHint.text = "AKTİF ARAÇ GEREKLİ";
         }
         else
         {
-            contextAction.text = owned
-                ? "MONTAJDA TAK"
+            contextAction.text = equipped
+                ? "SÖK"
+                : owned
+                    ? "TAK"
                 : $"SATIN AL · {attachment.Price:N0} HURDA";
             contextAction.SetEnabled(
-                owned || economy.CanAfford(attachment.Price));
-            contextHint.text = owned
-                ? "Takıldığında önizlenen statlar aktif build olur."
+                equipped || owned || economy.CanAfford(attachment.Price));
+            contextHint.text = equipped
+                ? "TAKILI"
+                : owned
+                    ? "ENVANTERDE"
                 : economy.CanAfford(attachment.Price)
-                    ? "Satın alma parçayı envantere ekler; montaj ayrı yapılır."
-                    : "Bu parça için yeterli Hurda yok.";
+                    ? "SATIN ALINABİLİR"
+                    : "HURDA YETERSİZ";
         }
 
         contextAction.clicked += HandleContextAction;
@@ -1258,16 +1284,11 @@ public sealed class GarageUiController : MonoBehaviour
     {
         switch (activeScreen)
         {
-            case GarageScreen.Assembly:
-                MissionRequested?.Invoke();
-                break;
-
             case GarageScreen.Gallery:
                 GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
                 if (buildState.IsVehicleOwned(vehicle)
                     && buildState.SelectOwnedVehicle(vehicle))
                 {
-                    activeScreen = GarageScreen.Assembly;
                     Refresh();
                 }
                 else if (economy.TryPurchaseVehicle(vehicle))
@@ -1288,11 +1309,22 @@ public sealed class GarageUiController : MonoBehaviour
 
                 GarageAttachmentDefinition attachment =
                     buildState.PreviewAttachment;
-                if (buildState.IsAttachmentOwned(attachment)
-                    && buildState.EquipPreviewPart())
+                if (attachment == null)
                 {
-                    activeScreen = GarageScreen.Assembly;
-                    Refresh();
+                    return;
+                }
+
+                if (buildState.GetEquipped(attachment.Slot) == attachment)
+                {
+                    if (buildState.Unequip(attachment.Slot))
+                    {
+                        buildState.PreviewPart(attachment);
+                    }
+                }
+                else if (buildState.IsAttachmentOwned(attachment)
+                         && buildState.EquipPreviewPart())
+                {
+                    buildState.PreviewPart(attachment);
                 }
                 else if (economy.TryPurchaseAttachment(attachment))
                 {
@@ -1315,6 +1347,9 @@ public sealed class GarageUiController : MonoBehaviour
             VisualElement card = new VisualElement();
             card.AddToClassList("stat-card");
 
+            VisualElement header = new VisualElement();
+            header.AddToClassList("stat-header");
+
             Label name = new Label(GarageVehicleStatPresentation.GetTurkishLabel(stat));
             name.AddToClassList("stat-name");
 
@@ -1336,8 +1371,9 @@ public sealed class GarageUiController : MonoBehaviour
             track.Add(currentFill);
             track.Add(previewFill);
 
-            card.Add(name);
-            card.Add(valueRow);
+            header.Add(name);
+            header.Add(valueRow);
+            card.Add(header);
             card.Add(track);
             statGrid.Add(card);
 
@@ -1354,19 +1390,17 @@ public sealed class GarageUiController : MonoBehaviour
 
     private void UpdateStats()
     {
-        VehicleStats current = activeScreen == GarageScreen.Parts
-            ? buildState.DisplayedCurrentStats
-            : buildState.CurrentStats;
+        VehicleStats current = buildState.DisplayedCurrentStats;
         VehicleStats preview = buildState.PreviewStats;
 
         for (int i = 0; i < statElements.Count; i++)
         {
             StatElements elements = statElements[i];
-            float currentValue = current.GetValue(elements.stat);
+            float currentValue = activeScreen == GarageScreen.Parts
+                ? current.GetValue(elements.stat)
+                : preview.GetValue(elements.stat);
             float previewValue = preview.GetValue(elements.stat);
             float delta = previewValue - currentValue;
-            float displayMaximum =
-                GarageVehicleStatPresentation.GetDisplayMaximum(elements.stat);
 
             elements.value.text =
                 $"{GarageVehicleStatPresentation.FormatValue(elements.stat, currentValue)}"
@@ -1375,15 +1409,21 @@ public sealed class GarageUiController : MonoBehaviour
                     : string.Empty);
             elements.delta.text = Mathf.Abs(delta) > 0.0001f
                 ? GarageVehicleStatPresentation.FormatDelta(elements.stat, delta)
-                : "—";
-
-            elements.currentFill.style.width =
-                Length.Percent(Mathf.Clamp01(currentValue / displayMaximum) * 100f);
-            elements.previewFill.style.width =
-                Length.Percent(Mathf.Clamp01(previewValue / displayMaximum) * 100f);
+                : string.Empty;
 
             elements.delta.EnableInClassList("stat-positive", delta > 0.0001f);
             elements.delta.EnableInClassList("stat-negative", delta < -0.0001f);
+
+            float displayMaximum =
+                GarageVehicleStatPresentation.GetDisplayMaximum(elements.stat);
+            float currentPercent = displayMaximum > 0f
+                ? Mathf.Clamp01(currentValue / displayMaximum) * 100f
+                : 0f;
+            float previewPercent = displayMaximum > 0f
+                ? Mathf.Clamp01(previewValue / displayMaximum) * 100f
+                : 0f;
+            elements.currentFill.style.width = Length.Percent(currentPercent);
+            elements.previewFill.style.width = Length.Percent(previewPercent);
             elements.previewFill.EnableInClassList(
                 "stat-preview-fill--positive",
                 delta > 0.0001f);
@@ -1404,43 +1444,60 @@ public sealed class GarageUiController : MonoBehaviour
             showEquipped);
     }
 
-    private void UpdateSelectedBuild()
+    private void UpdateCarousel()
     {
-        GarageVehicleDefinition vehicle = buildState.SelectedVehicle;
-        if (vehicle == null)
+        if (activeScreen == GarageScreen.Gallery)
         {
-            selectedBuildLabel.text = "Seçili build yok";
-            missionButton.SetEnabled(false);
+            IReadOnlyList<GarageVehicleDefinition> vehicles =
+                buildState.Catalog.Vehicles;
+            GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
+            int index = IndexOfVehicle(vehicles, vehicle);
+
+            carouselTitle.text = vehicles.Count > 0
+                ? $"ARAÇ  {index + 1} / {vehicles.Count}"
+                : "ARAÇ YOK";
+            carouselMeta.text = vehicle == buildState.SelectedVehicle
+                ? "AKTİF ARAÇ"
+                : buildState.IsVehicleOwned(vehicle)
+                    ? "SAHİP"
+                    : vehicle != null
+                        ? $"{vehicle.Price:N0} HURDA"
+                        : string.Empty;
+            carouselPrev.SetEnabled(vehicles.Count > 1);
+            carouselNext.SetEnabled(vehicles.Count > 1);
             return;
         }
 
-        List<string> partNames = new();
-        foreach (GarageAttachmentDefinition attachment in buildState.GetEquippedAttachments())
-        {
-            partNames.Add(attachment.DisplayName);
-        }
-
-        string parts = partNames.Count > 0
-            ? string.Join(" · ", partNames)
-            : "Stok";
-        selectedBuildLabel.text = $"SEÇİLİ BUILD  ·  {vehicle.DisplayName}  ·  {parts}";
-        missionButton.SetEnabled(true);
+        List<GarageAttachmentDefinition> attachments =
+            GetCompatibleAttachments(buildState.DisplayedVehicle, partsFilter);
+        GarageAttachmentDefinition attachment = buildState.PreviewAttachment;
+        int partIndex = attachments.IndexOf(attachment);
+        carouselTitle.text = attachments.Count > 0
+            ? $"{GetSlotLabel(partsFilter).ToUpperInvariant()}  {partIndex + 1} / {attachments.Count}"
+            : $"{GetSlotLabel(partsFilter).ToUpperInvariant()}  ·  UYUMLU PARÇA YOK";
+        carouselMeta.text = attachment != null
+            && buildState.GetEquipped(attachment.Slot) == attachment
+                ? "TAKILI"
+                : buildState.IsAttachmentOwned(attachment)
+                    ? "SAHİP"
+                    : attachment != null
+                        ? $"{attachment.Price:N0} HURDA"
+                        : string.Empty;
+        carouselPrev.SetEnabled(attachments.Count > 1);
+        carouselNext.SetEnabled(attachments.Count > 1);
     }
 
-    private static Button CreateListButton(string text, bool selected)
+    private void UpdateMissionButton()
     {
-        Button button = new Button
-        {
-            text = text
-        };
-        button.AddToClassList("rail-item");
-        button.EnableInClassList("rail-item--selected", selected);
-        return button;
+        missionButton.SetEnabled(buildState.SelectedVehicle != null);
     }
 
     private void OnPreviewPointerDown(PointerDownEvent evt)
     {
-        if (evt.button != 0)
+        VisualElement target = evt.target as VisualElement;
+        if (evt.button != 0
+            || target is Button
+            || target?.GetFirstAncestorOfType<Button>() != null)
         {
             return;
         }
@@ -1497,6 +1554,20 @@ public sealed class GarageUiController : MonoBehaviour
             GarageAttachmentSlot.Wheels => "TEKERLEK",
             GarageAttachmentSlot.RearAero => "ARKA / AERO",
             GarageAttachmentSlot.RoofUtility => "TAVAN / EKİPMAN",
+            _ => slot.ToString().ToUpperInvariant()
+        };
+    }
+
+    private static string GetHotspotLabel(GarageAttachmentSlot slot)
+    {
+        return slot switch
+        {
+            GarageAttachmentSlot.Front => "ÖN",
+            GarageAttachmentSlot.Armor => "ZIRH",
+            GarageAttachmentSlot.Engine => "MOTOR",
+            GarageAttachmentSlot.Wheels => "TEKER",
+            GarageAttachmentSlot.RearAero => "ARKA",
+            GarageAttachmentSlot.RoofUtility => "TAVAN",
             _ => slot.ToString().ToUpperInvariant()
         };
     }

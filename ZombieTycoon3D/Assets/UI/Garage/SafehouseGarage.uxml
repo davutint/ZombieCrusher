@@ -1,82 +1,70 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="project://database/Assets/UI/Garage/SafehouseGarage.uss?fileID=7433441132597879392&amp;guid=2a141c23a20fc334fa71298b365b8fe1&amp;type=3#SafehouseGarage" />
-    <ui:VisualElement name="garage-root" class="garage-root">
+    <ui:VisualElement name="garage-root" class="garage-root garage-screen--gallery">
         <ui:VisualElement class="topbar">
             <ui:VisualElement class="brand-row">
                 <ui:Label text="◆" class="brand-mark" />
                 <ui:Label text="SAFEHOUSE GARAGE" class="brand-title" />
             </ui:VisualElement>
+
+            <ui:VisualElement class="tabbar">
+                <ui:Button name="gallery-tab" text="ARAÇLAR" class="top-tab top-tab--selected" />
+                <ui:Button name="parts-tab" text="PARÇALAR" class="top-tab" />
+            </ui:VisualElement>
+
             <ui:VisualElement class="topbar-actions">
-                <ui:Button name="garage-settings-button" text="AYARLAR" class="topbar-settings-button" />
                 <ui:VisualElement class="balance-block">
-                    <ui:Label text="BAKİYE" class="eyebrow" />
                     <ui:Label name="balance-value" text="0 HURDA" class="balance-value" />
                 </ui:VisualElement>
+                <ui:Button name="garage-settings-button" text="⚙" class="topbar-settings-button" />
             </ui:VisualElement>
-        </ui:VisualElement>
-
-        <ui:VisualElement class="tabbar">
-            <ui:Button name="assembly-tab" text="MONTAJ" class="top-tab top-tab--selected" />
-            <ui:Button name="gallery-tab" text="ARAÇ GALERİSİ" class="top-tab" />
-            <ui:Button name="parts-tab" text="PARÇA DÜKKÂNI" class="top-tab" />
         </ui:VisualElement>
 
         <ui:VisualElement class="content-row">
-            <ui:VisualElement class="rail left-rail">
-                <ui:Label name="left-title" text="SAHİP OLUNAN ARAÇLAR" class="rail-title" />
-                <ui:VisualElement name="left-filters" class="filter-row" />
-                <ui:ScrollView name="left-list" class="rail-list" />
-            </ui:VisualElement>
-
             <ui:VisualElement class="center-stage">
-                <ui:Label name="context-label" text="Montaj tezgâhı · parçalar burada takılır" class="stage-context" />
+                <ui:Label name="context-label" text="Aracı yakından incele" class="stage-context" />
+
                 <ui:VisualElement name="preview-viewport" class="preview-viewport">
-                    <ui:VisualElement class="drag-hint">
+                    <ui:VisualElement class="drag-hint" picking-mode="Ignore">
                         <ui:Label text="↔" class="drag-icon" />
-                        <ui:Label text="ARACI ÇEVİRMEK İÇİN SÜRÜKLE" class="drag-copy" />
+                        <ui:Label text="SÜRÜKLE · ARACI ÇEVİR" class="drag-copy" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="left-filters" class="filter-row" picking-mode="Ignore" />
+                    <ui:Button name="carousel-prev" text="‹" class="showroom-arrow showroom-arrow--left" />
+                    <ui:Button name="carousel-next" text="›" class="showroom-arrow showroom-arrow--right" />
+                    <ui:VisualElement class="showroom-caption" picking-mode="Ignore">
+                        <ui:Label name="carousel-title" text="ARAÇ 1 / 6" class="showroom-caption-title" />
+                        <ui:Label name="carousel-meta" text="SAHİP" class="showroom-caption-meta" />
                     </ui:VisualElement>
                 </ui:VisualElement>
+
                 <ui:VisualElement class="stats-panel">
-                    <ui:VisualElement class="stats-heading-row">
-                        <ui:VisualElement>
-                            <ui:Label text="BUILD PERFORMANSI" class="stats-title" />
-                            <ui:Label text="Mevcut değer → önizlenen değişim" class="stats-subtitle" />
-                        </ui:VisualElement>
-                        <ui:Label text="CANLI KARŞILAŞTIRMA" class="live-badge" />
-                    </ui:VisualElement>
+                    <ui:Label text="PERFORMANS" class="stats-title" />
                     <ui:VisualElement name="stat-grid" class="stat-grid" />
                 </ui:VisualElement>
-            </ui:VisualElement>
 
-            <ui:VisualElement class="rail right-rail">
-                <ui:Label name="right-title" text="TAKILI PARÇALAR" class="rail-title" />
-                <ui:ScrollView name="right-list" class="right-list" />
-                <ui:VisualElement class="detail-block">
-                    <ui:Label name="detail-title" text="Ambulans" class="detail-title" />
-                    <ui:Label name="detail-description" text="" class="detail-description" />
-                    <ui:VisualElement name="detail-mechanics" class="detail-mechanics">
-                        <ui:Label text="PASIF ETKI" class="detail-mechanic-kicker" />
-                        <ui:Label name="detail-effect" text="" class="detail-effect" />
-                        <ui:Label text="BEDEL" class="detail-mechanic-kicker detail-mechanic-kicker--tradeoff" />
-                        <ui:Label name="detail-tradeoff" text="" class="detail-tradeoff" />
+                <ui:VisualElement class="context-drawer">
+                    <ui:VisualElement class="detail-block">
+                        <ui:VisualElement class="detail-copy">
+                            <ui:Label name="detail-title" text="Ambulans" class="detail-title" />
+                            <ui:Label name="detail-description" text="" class="detail-description" />
+                            <ui:VisualElement name="detail-mechanics" class="detail-mechanics">
+                                <ui:Label text="" class="detail-mechanic-kicker" />
+                                <ui:Label name="detail-effect" text="" class="detail-effect" />
+                                <ui:Label text="" class="detail-mechanic-kicker detail-mechanic-kicker--tradeoff" />
+                                <ui:Label name="detail-tradeoff" text="" class="detail-tradeoff" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="detail-action-block">
+                            <ui:Button name="context-action" text="2:00 GÖREVE ÇIK" class="primary-action" />
+                            <ui:Label name="context-hint" text="" class="context-hint" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:Button name="context-action" text="2:00 GÖREVE ÇIK" class="primary-action" />
-                    <ui:Label name="context-hint" text="" class="context-hint" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:VisualElement class="footerbar">
-            <ui:VisualElement class="footer-mission-brief">
-                <ui:Label name="selected-build" text="SEÇİLİ BUILD" class="selected-build" />
-                <ui:VisualElement class="mission-brief-row">
-                    <ui:Label text="02:00" class="mission-brief-value" />
-                    <ui:Label text="100 İMHA" class="mission-brief-value" />
-                    <ui:Label text="WASD / OK TUŞLARI" class="mission-brief-control" />
-                    <ui:Label text="SPACE FREN" class="mission-brief-control" />
-                    <ui:Label text="ESC DURAKLAT" class="mission-brief-control" />
-                </ui:VisualElement>
-            </ui:VisualElement>
             <ui:Button name="mission-button" text="▶  2:00 GÖREVE ÇIK" class="mission-button" />
         </ui:VisualElement>
     </ui:VisualElement>
