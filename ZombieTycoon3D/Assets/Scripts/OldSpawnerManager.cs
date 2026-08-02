@@ -36,6 +36,14 @@ public class OldSpawnManager : MonoBehaviour
     [SerializeField, Min(0.05f)] private float surgeSpawnInterval = 0.62f;
     [SerializeField, Min(0.05f)] private float finaleSpawnInterval = 0.45f;
 
+    [Header("Horde Direction")]
+    [SerializeField] private Camera gameplayCamera;
+    [SerializeField, Range(0f, 0.25f)] private float spawnViewportPadding = 0.08f;
+    [SerializeField, Min(1)] private int hordePlacementAttempts = 24;
+    [SerializeField, Min(0.1f)] private float formationNavMeshSampleRadius = 1.75f;
+    [SerializeField, Min(0.1f)] private float zombieVisibilityRadius = 0.8f;
+    [SerializeField, Min(0.5f)] private float zombieVisibilityHeight = 2.4f;
+
     [Header("Pool Settings")]
     [SerializeField, Min(1)] private int initialPoolSize = 50;
     [SerializeField, Min(1)] private int poolWarmupPerFrame = 5;
@@ -56,6 +64,7 @@ public class OldSpawnManager : MonoBehaviour
     private readonly Queue<Enemy> availableZombies = new Queue<Enemy>();
     private readonly HashSet<Enemy> activeZombies = new HashSet<Enemy>();
     private readonly List<GameObject> validZombiePrefabs = new List<GameObject>();
+    private readonly HordeSpawnDirector hordeDirector = new HordeSpawnDirector();
 
     private int totalCreatedZombieCount;
     private int nextPrefabIndex;
@@ -65,6 +74,10 @@ public class OldSpawnManager : MonoBehaviour
     private int currentHordeSize;
     private float currentSpawnInterval;
     private float nextSpawnTime;
+    private Vector3[] hordeSpawnPositions = new Vector3[0];
+    private HordeFormation lastHordeFormation;
+    private int successfulHordeCount;
+    private int deferredHordeCount;
 
     public int CurrentZombieCount => currentZombieCount;
     public int AvailableZombieCount => availableZombies.Count;
@@ -74,6 +87,13 @@ public class OldSpawnManager : MonoBehaviour
     public int CurrentActiveTarget => currentActiveTarget;
     public int CurrentHordeSize => currentHordeSize;
     public float CurrentSpawnInterval => currentSpawnInterval;
+    public HordeFormation LastHordeFormation => lastHordeFormation;
+    public int SuccessfulHordeCount => successfulHordeCount;
+    public int DeferredHordeCount => deferredHordeCount;
+    public int LastVisibleCandidateRejections =>
+        hordeDirector.LastVisibleCandidateRejections;
+    public int LastNavMeshCandidateRejections =>
+        hordeDirector.LastNavMeshCandidateRejections;
 
     private IEnumerator Start()
     {
@@ -172,6 +192,17 @@ public class OldSpawnManager : MonoBehaviour
         totalCreatedZombieCount = 0;
         currentZombieCount = 0;
         nextPrefabIndex = 0;
+        successfulHordeCount = 0;
+        deferredHordeCount = 0;
+        int maximumConfiguredHordeSize = Mathf.Max(
+            openingHordeSize,
+            buildUpHordeSize,
+            surgeHordeSize,
+            finaleHordeSize);
+        hordeSpawnPositions = new Vector3[Mathf.Clamp(
+            maximumConfiguredHordeSize,
+            1,
+            maxZombiesInScene)];
         SetMissionProgress(0f);
         nextSpawnTime = Time.unscaledTime;
         return true;
@@ -258,16 +289,35 @@ public class OldSpawnManager : MonoBehaviour
 
     private void SpawnZombieHorde(int count)
     {
-        if (!TryGetRandomSpawnPosition(out Vector3 hordeCenter))
+        int spawnCount = Mathf.Min(count, availableZombies.Count);
+        if (spawnCount <= 0)
         {
             return;
         }
 
-        int spawnCount = Mathf.Min(count, availableZombies.Count);
+        EnsureHordeSpawnBufferCapacity(spawnCount);
+        if (!TryResolveGameplayCamera()
+            || !hordeDirector.TryPlanHorde(
+                gameplayCamera,
+                player.position,
+                spawnCount,
+                spawnDistanceMin,
+                spawnDistanceMax,
+                hordePlacementAttempts,
+                formationNavMeshSampleRadius,
+                spawnViewportPadding,
+                zombieVisibilityRadius,
+                zombieVisibilityHeight,
+                hordeSpawnPositions,
+                out HordeFormation formation))
+        {
+            deferredHordeCount++;
+            return;
+        }
+
         for (int i = 0; i < spawnCount; i++)
         {
-            Vector3 offset = new Vector3(Random.Range(-2f, 2f), 0f, Random.Range(-2f, 2f));
-            Vector3 spawnPosition = hordeCenter + offset;
+            Vector3 spawnPosition = hordeSpawnPositions[i];
 
             Enemy zombie = availableZombies.Dequeue();
             if (zombie == null)
@@ -276,39 +326,45 @@ public class OldSpawnManager : MonoBehaviour
             }
 
             activeZombies.Add(zombie);
-            zombie.SpawnFromPool(spawnPosition, Quaternion.identity, zombieParent, player);
+            Vector3 facingDirection = player.position - spawnPosition;
+            facingDirection.y = 0f;
+            Quaternion spawnRotation = facingDirection.sqrMagnitude
+                > Mathf.Epsilon
+                ? Quaternion.LookRotation(facingDirection, Vector3.up)
+                : Quaternion.identity;
+            zombie.SpawnFromPool(
+                spawnPosition,
+                spawnRotation,
+                zombieParent,
+                player);
         }
 
+        lastHordeFormation = formation;
+        successfulHordeCount++;
         currentZombieCount = activeZombies.Count;
     }
 
-    private bool TryGetRandomSpawnPosition(out Vector3 spawnPosition)
+    private void EnsureHordeSpawnBufferCapacity(int requiredCapacity)
     {
-        for (int attempt = 0; attempt < 10; attempt++)
+        if (hordeSpawnPositions.Length >= requiredCapacity)
         {
-            Vector3 randomDirection = Random.insideUnitSphere.normalized;
-            randomDirection.y = 0f;
+            return;
+        }
 
-            float randomDistance = Random.Range(spawnDistanceMin, spawnDistanceMax);
-            Vector3 randomPoint = player.position + randomDirection * randomDistance;
+        hordeSpawnPositions = new Vector3[Mathf.Min(
+            Mathf.Max(requiredCapacity, hordeSpawnPositions.Length * 2),
+            maxZombiesInScene)];
+    }
 
-            if (!NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, 5f, NavMesh.AllAreas))
-            {
-                continue;
-            }
-
-            float distanceToPlayer = Vector3.Distance(hit.position, player.position);
-            if (distanceToPlayer < spawnDistanceMin || distanceToPlayer > spawnDistanceMax)
-            {
-                continue;
-            }
-
-            spawnPosition = hit.position;
+    private bool TryResolveGameplayCamera()
+    {
+        if (gameplayCamera != null)
+        {
             return true;
         }
 
-        spawnPosition = default;
-        return false;
+        gameplayCamera = Camera.main;
+        return gameplayCamera != null;
     }
 
     internal bool ReturnZombieToPool(Enemy zombie)
@@ -338,6 +394,14 @@ public class OldSpawnManager : MonoBehaviour
     {
         SetMissionProgress(0f);
         SetSpawningEnabled(true);
+    }
+
+    public void SetGameplayCamera(Camera camera)
+    {
+        if (camera != null)
+        {
+            gameplayCamera = camera;
+        }
     }
 
     public void SetMissionProgress(float normalizedProgress)

@@ -112,6 +112,7 @@ public sealed class GarageFlowController : MonoBehaviour
             return;
         }
 
+        spawnManager.SetGameplayCamera(gameplayCamera);
         missionStartPosition = gameplayVehicle.position;
         missionStartRotation = gameplayVehicle.rotation;
         driveStartPosition = driveRigidbody.position;
