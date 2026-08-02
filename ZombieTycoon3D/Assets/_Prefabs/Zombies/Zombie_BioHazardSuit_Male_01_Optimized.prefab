@@ -1755,6 +1755,13 @@ MonoBehaviour:
   maxHealth: 100
   deathEffectPrefab: {fileID: 100002, guid: f240380c12d8e4c2f8c575baf8e042c4, type: 3}
   deathEffectLifetime: 3
+  gameplayProfile:
+    archetype: 3
+    movementSpeedMultiplier: 0.92
+    requiredImpactSpeedMultiplier: 1
+    contactThreatMultiplier: 1.75
+    killScoreMultiplier: 1
+    killFeedbackLabel:
 --- !u!114 &82439241287865920
 MonoBehaviour:
   m_ObjectHideFlags: 0

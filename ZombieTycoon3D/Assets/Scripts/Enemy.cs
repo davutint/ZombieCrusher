@@ -20,6 +20,8 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject deathEffectPrefab;
     [FormerlySerializedAs("destroyDelay")]
     [SerializeField] private float deathEffectLifetime = 3f;
+    [Header("Gameplay Profile")]
+    [SerializeField] private ZombieGameplayProfile gameplayProfile;
 
     private OldSpawnManager poolOwner;
     private DeathEffectPool deathEffectPool;
@@ -111,6 +113,17 @@ public class Enemy : MonoBehaviour
     }
 
     internal GameObject DeathEffectPrefab => deathEffectPrefab;
+    internal ZombieArchetype Archetype => gameplayProfile.Archetype;
+    internal float MovementSpeedMultiplier =>
+        gameplayProfile.MovementSpeedMultiplier;
+    internal float RequiredImpactSpeedMultiplier =>
+        gameplayProfile.RequiredImpactSpeedMultiplier;
+    internal float ContactThreatMultiplier =>
+        gameplayProfile.ContactThreatMultiplier;
+    internal float KillScoreMultiplier =>
+        gameplayProfile.KillScoreMultiplier;
+    internal string KillFeedbackLabel =>
+        gameplayProfile.KillFeedbackLabel;
 
     internal void ConfigurePool(
         OldSpawnManager owner,
@@ -335,6 +348,11 @@ public class Enemy : MonoBehaviour
         isDead = true;
         SpawnDeathEffect();
         EventManager.OnZombieDead?.Invoke(transform.position);
+        EventManager.OnZombieKilled?.Invoke(new ZombieKillEvent(
+            transform.position,
+            Archetype,
+            KillScoreMultiplier,
+            KillFeedbackLabel));
 
         if (poolOwner == null || !poolOwner.ReturnZombieToPool(this))
         {

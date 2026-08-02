@@ -14,6 +14,8 @@ public sealed class ScoreManager : MonoBehaviour
         new float[TrackedKillCapacity];
 
     private bool missionActive;
+    private bool missionPaused;
+    private float pauseStartedAt;
     private int kills;
     private int killTarget = 1;
     private int score;
@@ -32,6 +34,7 @@ public sealed class ScoreManager : MonoBehaviour
 
     public event Action<MissionProgress> ProgressChanged;
     public event Action<MayhemProgress> MayhemChanged;
+    public event Action<ZombieScoreAward> SpecialKillScored;
 
     public bool MissionActive => missionActive;
 
@@ -54,18 +57,19 @@ public sealed class ScoreManager : MonoBehaviour
 
     private void OnEnable()
     {
-        EventManager.OnZombieDead += HandleZombieDead;
+        EventManager.OnZombieKilled += HandleZombieKilled;
     }
 
     private void OnDisable()
     {
-        EventManager.OnZombieDead -= HandleZombieDead;
+        EventManager.OnZombieKilled -= HandleZombieKilled;
         missionActive = false;
+        missionPaused = false;
     }
 
     private void Update()
     {
-        if (!missionActive)
+        if (!missionActive || missionPaused)
         {
             return;
         }
@@ -114,6 +118,7 @@ public sealed class ScoreManager : MonoBehaviour
         score = 0;
         ResetMayhemState();
         missionActive = true;
+        missionPaused = false;
         ProgressChanged?.Invoke(CurrentProgress);
         MayhemChanged?.Invoke(CurrentMayhem);
     }
@@ -121,19 +126,61 @@ public sealed class ScoreManager : MonoBehaviour
     public MissionProgress FinishMission()
     {
         missionActive = false;
+        missionPaused = false;
         return CurrentProgress;
     }
 
     public void CancelMission()
     {
         missionActive = false;
+        missionPaused = false;
         ResetMayhemState();
         MayhemChanged?.Invoke(CurrentMayhem);
     }
 
     public void RegisterZombieKill()
     {
-        if (!missionActive)
+        RegisterZombieKill(new ZombieKillEvent(
+            Vector3.zero,
+            ZombieArchetype.Standard,
+            1f,
+            null));
+    }
+
+    public void SetMissionPaused(bool paused)
+    {
+        if (!missionActive || missionPaused == paused)
+        {
+            return;
+        }
+
+        missionPaused = paused;
+        if (paused)
+        {
+            pauseStartedAt = Time.unscaledTime;
+            return;
+        }
+
+        float pauseDuration = Mathf.Max(
+            0f,
+            Time.unscaledTime - pauseStartedAt);
+        for (int i = 0; i < recentKillCount; i++)
+        {
+            int index = (recentKillHead + i) % TrackedKillCapacity;
+            recentKillTimes[index] += pauseDuration;
+        }
+
+        if (!float.IsNegativeInfinity(lastKillTime))
+        {
+            lastKillTime += pauseDuration;
+        }
+
+        nextMayhemPublishTime += pauseDuration;
+    }
+
+    private void RegisterZombieKill(ZombieKillEvent killEvent)
+    {
+        if (!missionActive || missionPaused)
         {
             return;
         }
@@ -158,18 +205,35 @@ public sealed class ScoreManager : MonoBehaviour
         int baseScore = kills >= killTarget
             ? bonusKillScore
             : normalKillScore;
+        float mayhemMultiplier =
+            MayhemRules.GetScoreMultiplier(currentTier);
+        int standardScore = Mathf.RoundToInt(
+            baseScore * mayhemMultiplier);
         int earnedScore = Mathf.RoundToInt(
-            baseScore * MayhemRules.GetScoreMultiplier(currentTier));
+            baseScore
+            * Mathf.Max(0f, killEvent.ScoreMultiplier)
+            * mayhemMultiplier);
         kills++;
         score += earnedScore;
         mayhemDirty = true;
         ProgressChanged?.Invoke(CurrentProgress);
         PublishMayhem(currentTime, currentTier != previousTier);
+
+        int bonusScore = Mathf.Max(0, earnedScore - standardScore);
+        if (bonusScore > 0
+            && !string.IsNullOrWhiteSpace(killEvent.FeedbackLabel))
+        {
+            SpecialKillScored?.Invoke(new ZombieScoreAward(
+                killEvent.Archetype,
+                earnedScore,
+                bonusScore,
+                killEvent.FeedbackLabel));
+        }
     }
 
-    private void HandleZombieDead(Vector3 _)
+    private void HandleZombieKilled(ZombieKillEvent killEvent)
     {
-        RegisterZombieKill();
+        RegisterZombieKill(killEvent);
     }
 
     private void ResetMayhemState()

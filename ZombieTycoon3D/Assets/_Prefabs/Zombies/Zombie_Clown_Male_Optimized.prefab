@@ -858,6 +858,13 @@ MonoBehaviour:
   maxHealth: 100
   deathEffectPrefab: {fileID: 100002, guid: f240380c12d8e4c2f8c575baf8e042c4, type: 3}
   deathEffectLifetime: 3
+  gameplayProfile:
+    archetype: 4
+    movementSpeedMultiplier: 1.1
+    requiredImpactSpeedMultiplier: 0.95
+    contactThreatMultiplier: 1
+    killScoreMultiplier: 2.5
+    killFeedbackLabel: ÖDÜL HEDEFİ
 --- !u!114 &6639962410805100963
 MonoBehaviour:
   m_ObjectHideFlags: 0

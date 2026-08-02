@@ -6,9 +6,12 @@
                 <ui:Label text="◆" class="brand-mark" />
                 <ui:Label text="SAFEHOUSE GARAGE" class="brand-title" />
             </ui:VisualElement>
-            <ui:VisualElement class="balance-block">
-                <ui:Label text="BAKİYE" class="eyebrow" />
-                <ui:Label name="balance-value" text="0 HURDA" class="balance-value" />
+            <ui:VisualElement class="topbar-actions">
+                <ui:Button name="garage-settings-button" text="AYARLAR" class="topbar-settings-button" />
+                <ui:VisualElement class="balance-block">
+                    <ui:Label text="BAKİYE" class="eyebrow" />
+                    <ui:Label name="balance-value" text="0 HURDA" class="balance-value" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -64,7 +67,16 @@
         </ui:VisualElement>
 
         <ui:VisualElement class="footerbar">
-            <ui:Label name="selected-build" text="SEÇİLİ BUILD" class="selected-build" />
+            <ui:VisualElement class="footer-mission-brief">
+                <ui:Label name="selected-build" text="SEÇİLİ BUILD" class="selected-build" />
+                <ui:VisualElement class="mission-brief-row">
+                    <ui:Label text="02:00" class="mission-brief-value" />
+                    <ui:Label text="100 İMHA" class="mission-brief-value" />
+                    <ui:Label text="WASD / OK TUŞLARI" class="mission-brief-control" />
+                    <ui:Label text="SPACE FREN" class="mission-brief-control" />
+                    <ui:Label text="ESC DURAKLAT" class="mission-brief-control" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:Button name="mission-button" text="▶  2:00 GÖREVE ÇIK" class="mission-button" />
         </ui:VisualElement>
     </ui:VisualElement>
@@ -149,6 +161,8 @@
         </ui:VisualElement>
     </ui:VisualElement>
 
+    <ui:Button name="mission-pause-button" text="Ⅱ" class="mission-pause-button" />
+
     <ui:VisualElement name="mission-result" class="mission-result">
         <ui:VisualElement name="mission-result-panel" class="mission-result-panel">
             <ui:Label text="SAFEHOUSE GÖREV RAPORU" class="mission-result-eyebrow" />
@@ -203,6 +217,81 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:Button name="result-button" text="GARAJA DÖN" class="mission-result-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="mission-intro" class="mission-intro">
+        <ui:VisualElement class="mission-intro-panel">
+            <ui:VisualElement class="mission-intro-header">
+                <ui:Label text="SAFEHOUSE" class="mission-intro-brand" />
+                <ui:Label text="GÖREV 01" class="mission-intro-index" />
+            </ui:VisualElement>
+            <ui:Label name="mission-intro-vehicle" text="AMBULANS" class="mission-intro-vehicle" />
+            <ui:VisualElement class="mission-intro-rule" />
+            <ui:VisualElement class="mission-intro-objectives">
+                <ui:VisualElement class="mission-intro-objective">
+                    <ui:Label text="HEDEF" class="mission-intro-label" />
+                    <ui:Label text="100 İMHA" class="mission-intro-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-intro-divider" />
+                <ui:VisualElement class="mission-intro-objective">
+                    <ui:Label text="SÜRE" class="mission-intro-label" />
+                    <ui:Label text="02:00" class="mission-intro-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label name="mission-intro-countdown" text="3" class="mission-intro-countdown" />
+            <ui:Label text="SÜR · EZ · HAYATTA KAL" class="mission-intro-tagline" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="mission-pause" class="mission-pause">
+        <ui:VisualElement class="mission-pause-panel">
+            <ui:Label text="SAFEHOUSE // GÖREV 01" class="mission-pause-eyebrow" />
+            <ui:Label text="DURAKLATILDI" class="mission-pause-title" />
+            <ui:VisualElement class="mission-pause-summary">
+                <ui:VisualElement class="mission-pause-metric">
+                    <ui:Label text="KALAN" class="mission-pause-metric-label" />
+                    <ui:Label name="pause-timer" text="02:00" class="mission-pause-metric-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-pause-divider" />
+                <ui:VisualElement class="mission-pause-metric">
+                    <ui:Label text="İMHA" class="mission-pause-metric-label" />
+                    <ui:Label name="pause-kills" text="0 / 100" class="mission-pause-metric-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-pause-divider" />
+                <ui:VisualElement class="mission-pause-metric">
+                    <ui:Label text="PUAN" class="mission-pause-metric-label" />
+                    <ui:Label name="pause-score" text="0" class="mission-pause-metric-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="pause-resume-button" text="DEVAM ET" class="pause-primary-button" />
+            <ui:VisualElement class="mission-pause-actions">
+                <ui:Button name="pause-restart-button" text="BAŞTAN BAŞLAT" class="pause-secondary-button pause-restart-button" />
+                <ui:Button name="pause-garage-button" text="GARAJA DÖN" class="pause-secondary-button pause-secondary-button--danger" />
+            </ui:VisualElement>
+            <ui:Button name="pause-settings-button" text="AYARLAR" class="pause-settings-button" />
+            <ui:Label text="ESC  DEVAM" class="mission-pause-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="settings-overlay" class="settings-overlay">
+        <ui:VisualElement class="settings-panel">
+            <ui:Label text="SAFEHOUSE" class="settings-eyebrow" />
+            <ui:Label text="AYARLAR" class="settings-title" />
+            <ui:VisualElement class="settings-rule" />
+            <ui:VisualElement class="settings-volume-header">
+                <ui:Label text="SES" class="settings-label" />
+                <ui:Label name="master-volume-value" text="80%" class="settings-value" />
+            </ui:VisualElement>
+            <ui:Slider name="master-volume" low-value="0" high-value="1" value="0.8" class="settings-slider" />
+            <ui:VisualElement class="settings-screen-row">
+                <ui:VisualElement>
+                    <ui:Label text="EKRAN" class="settings-label" />
+                    <ui:Label text="Tarayıcı tam ekranı" class="settings-description" />
+                </ui:VisualElement>
+                <ui:Button name="fullscreen-button" text="TAM EKRAN" class="settings-action-button" />
+            </ui:VisualElement>
+            <ui:Button name="settings-close-button" text="GERİ" class="settings-close-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

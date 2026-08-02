@@ -11,6 +11,8 @@ public sealed class GarageUiController : MonoBehaviour
     private const float MissionSpeedNeedleSmoothTime = 0.045f;
     private const float MissionSpeedSnapThreshold = 0.015f;
     private const float MissionDamagePulseDuration = 0.18f;
+    private const string MasterVolumeKey = "zt3d.settings.master-volume";
+    private const float SettingsSaveDelay = 0.35f;
 
     private enum GarageScreen
     {
@@ -58,6 +60,24 @@ public sealed class GarageUiController : MonoBehaviour
     private readonly VisualElement[] missionHealthSegments =
         new VisualElement[MissionHealthSegmentCount];
     private VisualElement missionResult;
+    private VisualElement missionIntro;
+    private Label missionIntroVehicle;
+    private Label missionIntroCountdown;
+    private Button missionPauseButton;
+    private VisualElement missionPause;
+    private Label pauseTimer;
+    private Label pauseKills;
+    private Label pauseScore;
+    private Button pauseResumeButton;
+    private Button pauseRestartButton;
+    private Button pauseGarageButton;
+    private Button pauseSettingsButton;
+    private VisualElement settingsOverlay;
+    private Button garageSettingsButton;
+    private Slider masterVolume;
+    private Label masterVolumeValue;
+    private Button fullscreenButton;
+    private Button settingsCloseButton;
     private VisualElement missionResultPanel;
     private Label resultStatus;
     private Label resultTitle;
@@ -115,9 +135,18 @@ public sealed class GarageUiController : MonoBehaviour
     private float displayedMissionNeedleSpeed;
     private float missionSpeedNeedleVelocity;
     private bool missionSpeedAnimationEnabled;
+    private bool settingsSavePending;
+    private bool settingsVisible;
+    private float settingsSaveTime;
 
     public event Action MissionRequested;
     public event Action ResultAcknowledged;
+    public event Action MissionPauseRequested;
+    public event Action MissionResumeRequested;
+    public event Action MissionRestartRequested;
+    public event Action MissionGarageRequested;
+
+    public bool SettingsVisible => settingsVisible;
 
     private void Reset()
     {
@@ -162,6 +191,7 @@ public sealed class GarageUiController : MonoBehaviour
         }
 
         BindVisualTree();
+        LoadSettings();
         buildState.Changed += Refresh;
         economy.Changed += Refresh;
         Refresh();
@@ -177,6 +207,12 @@ public sealed class GarageUiController : MonoBehaviour
         if (economy != null)
         {
             economy.Changed -= Refresh;
+        }
+
+        if (settingsSavePending)
+        {
+            PlayerPrefs.Save();
+            settingsSavePending = false;
         }
     }
 
@@ -209,6 +245,12 @@ public sealed class GarageUiController : MonoBehaviour
         {
             AnimateMissionSpeedometer();
         }
+
+        if (settingsSavePending && currentTime >= settingsSaveTime)
+        {
+            PlayerPrefs.Save();
+            settingsSavePending = false;
+        }
     }
 
     public void ShowGarage()
@@ -216,6 +258,10 @@ public sealed class GarageUiController : MonoBehaviour
         garageRoot.style.display = DisplayStyle.Flex;
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.None;
+        missionIntro.style.display = DisplayStyle.None;
+        missionPause.style.display = DisplayStyle.None;
+        missionPauseButton.style.display = DisplayStyle.None;
+        CloseSettingsPanel();
         HideMayhemAnnouncement();
         missionSpeedAnimationEnabled = false;
         ResetMissionDamagePulse();
@@ -230,9 +276,71 @@ public sealed class GarageUiController : MonoBehaviour
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.Flex;
         missionResult.style.display = DisplayStyle.None;
+        missionPause.style.display = DisplayStyle.None;
+        missionPauseButton.style.display = DisplayStyle.None;
+        CloseSettingsPanel();
         HideMayhemAnnouncement();
         missionSpeedAnimationEnabled = true;
         previewController.SetVisible(false);
+    }
+
+    public void ShowMissionIntro(string vehicleName)
+    {
+        missionIntroVehicle.text = string.IsNullOrWhiteSpace(vehicleName)
+            ? "ARAÇ"
+            : vehicleName.ToUpperInvariant();
+        missionIntroCountdown.text = "3";
+        missionIntro.style.display = DisplayStyle.Flex;
+        missionPauseButton.style.display = DisplayStyle.None;
+    }
+
+    public void UpdateMissionIntroCountdown(string value)
+    {
+        if (missionIntroCountdown != null)
+        {
+            missionIntroCountdown.text = value;
+        }
+    }
+
+    public void CompleteMissionIntro()
+    {
+        missionIntro.style.display = DisplayStyle.None;
+        missionPauseButton.style.display = DisplayStyle.Flex;
+    }
+
+    public void ShowMissionPause(
+        float remainingSeconds,
+        MissionProgress progress)
+    {
+        int seconds = Mathf.Max(0, Mathf.CeilToInt(remainingSeconds));
+        pauseTimer.text = $"{seconds / 60:0}:{seconds % 60:00}";
+        pauseKills.text = $"{progress.Kills} / {progress.KillTarget}";
+        pauseScore.text = progress.Score.ToString("N0");
+        missionPause.style.display = DisplayStyle.Flex;
+        missionPauseButton.style.display = DisplayStyle.None;
+    }
+
+    public void HideMissionPause()
+    {
+        missionPause.style.display = DisplayStyle.None;
+        missionPauseButton.style.display = DisplayStyle.Flex;
+        CloseSettingsPanel();
+    }
+
+    public void CloseSettingsPanel()
+    {
+        if (settingsOverlay == null)
+        {
+            return;
+        }
+
+        settingsOverlay.style.display = DisplayStyle.None;
+        settingsVisible = false;
+        if (settingsSavePending)
+        {
+            PlayerPrefs.Save();
+            settingsSavePending = false;
+        }
     }
 
     public void UpdateMissionTimer(float remainingSeconds)
@@ -470,6 +578,10 @@ public sealed class GarageUiController : MonoBehaviour
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.Flex;
+        missionIntro.style.display = DisplayStyle.None;
+        missionPause.style.display = DisplayStyle.None;
+        missionPauseButton.style.display = DisplayStyle.None;
+        CloseSettingsPanel();
         missionSpeedAnimationEnabled = false;
         previewController.SetVisible(false);
 
@@ -558,6 +670,37 @@ public sealed class GarageUiController : MonoBehaviour
                 $"mission-health-segment-{i}");
         }
         missionResult = RequireElement<VisualElement>(root, "mission-result");
+        missionIntro = RequireElement<VisualElement>(root, "mission-intro");
+        missionIntroVehicle =
+            RequireElement<Label>(root, "mission-intro-vehicle");
+        missionIntroCountdown =
+            RequireElement<Label>(root, "mission-intro-countdown");
+        missionPauseButton =
+            RequireElement<Button>(root, "mission-pause-button");
+        missionPause =
+            RequireElement<VisualElement>(root, "mission-pause");
+        pauseTimer = RequireElement<Label>(root, "pause-timer");
+        pauseKills = RequireElement<Label>(root, "pause-kills");
+        pauseScore = RequireElement<Label>(root, "pause-score");
+        pauseResumeButton =
+            RequireElement<Button>(root, "pause-resume-button");
+        pauseRestartButton =
+            RequireElement<Button>(root, "pause-restart-button");
+        pauseGarageButton =
+            RequireElement<Button>(root, "pause-garage-button");
+        pauseSettingsButton =
+            RequireElement<Button>(root, "pause-settings-button");
+        settingsOverlay =
+            RequireElement<VisualElement>(root, "settings-overlay");
+        garageSettingsButton =
+            RequireElement<Button>(root, "garage-settings-button");
+        masterVolume = RequireElement<Slider>(root, "master-volume");
+        masterVolumeValue =
+            RequireElement<Label>(root, "master-volume-value");
+        fullscreenButton =
+            RequireElement<Button>(root, "fullscreen-button");
+        settingsCloseButton =
+            RequireElement<Button>(root, "settings-close-button");
         missionResultPanel =
             RequireElement<VisualElement>(root, "mission-result-panel");
         resultStatus = RequireElement<Label>(root, "result-status");
@@ -612,6 +755,20 @@ public sealed class GarageUiController : MonoBehaviour
         partsTab.clicked += () => SwitchScreen(GarageScreen.Parts);
         missionButton.clicked += () => MissionRequested?.Invoke();
         resultButton.clicked += () => ResultAcknowledged?.Invoke();
+        missionPauseButton.clicked +=
+            () => MissionPauseRequested?.Invoke();
+        pauseResumeButton.clicked +=
+            () => MissionResumeRequested?.Invoke();
+        pauseRestartButton.clicked +=
+            () => MissionRestartRequested?.Invoke();
+        pauseGarageButton.clicked +=
+            () => MissionGarageRequested?.Invoke();
+        garageSettingsButton.clicked += OpenSettingsPanel;
+        pauseSettingsButton.clicked += OpenSettingsPanel;
+        settingsCloseButton.clicked += CloseSettingsPanel;
+        fullscreenButton.clicked += ToggleFullscreen;
+        masterVolume.RegisterValueChangedCallback(
+            HandleMasterVolumeChanged);
 
         previewViewport.RegisterCallback<PointerDownEvent>(OnPreviewPointerDown);
         previewViewport.RegisterCallback<PointerMoveEvent>(OnPreviewPointerMove);
@@ -619,6 +776,53 @@ public sealed class GarageUiController : MonoBehaviour
         previewViewport.RegisterCallback<PointerCaptureOutEvent>(_ => EndPreviewDrag());
 
         CreateStatElements();
+    }
+
+    private void LoadSettings()
+    {
+        float volume = Mathf.Clamp01(
+            PlayerPrefs.GetFloat(MasterVolumeKey, 0.8f));
+        AudioListener.volume = volume;
+        masterVolume.SetValueWithoutNotify(volume);
+        UpdateVolumeLabel(volume);
+        UpdateFullscreenButton();
+        settingsOverlay.style.display = DisplayStyle.None;
+    }
+
+    private void OpenSettingsPanel()
+    {
+        UpdateFullscreenButton();
+        settingsOverlay.style.display = DisplayStyle.Flex;
+        settingsVisible = true;
+    }
+
+    private void HandleMasterVolumeChanged(ChangeEvent<float> evt)
+    {
+        float volume = Mathf.Clamp01(evt.newValue);
+        AudioListener.volume = volume;
+        PlayerPrefs.SetFloat(MasterVolumeKey, volume);
+        UpdateVolumeLabel(volume);
+        settingsSavePending = true;
+        settingsSaveTime = Time.unscaledTime + SettingsSaveDelay;
+    }
+
+    private void UpdateVolumeLabel(float volume)
+    {
+        masterVolumeValue.text =
+            $"{Mathf.RoundToInt(Mathf.Clamp01(volume) * 100f)}%";
+    }
+
+    private void ToggleFullscreen()
+    {
+        Screen.fullScreen = !Screen.fullScreen;
+        UpdateFullscreenButton();
+    }
+
+    private void UpdateFullscreenButton()
+    {
+        fullscreenButton.text = Screen.fullScreen
+            ? "TAM EKRANDAN ÇIK"
+            : "TAM EKRAN";
     }
 
     private void ResetMissionDamagePulse()

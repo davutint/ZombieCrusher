@@ -106,18 +106,25 @@ public class Player : MonoBehaviour
             return false;
         }
 
+        Enemy enemy = other.gameObject.GetComponentInParent<Enemy>();
+        if (enemy == null)
+        {
+            return false;
+        }
+
         float currentSpeed = rb.linearVelocity.magnitude;
         float effectiveImpactPower =
             impactPower * Mathf.Max(0.1f, contactImpactPowerMultiplier);
         float effectiveMinimumImpactSpeed =
-            minImpactSpeed / Mathf.Max(0.1f, effectiveImpactPower);
+            minImpactSpeed
+            * enemy.RequiredImpactSpeedMultiplier
+            / Mathf.Max(0.1f, effectiveImpactPower);
         if (currentSpeed < effectiveMinimumImpactSpeed)
         {
             return false;
         }
 
-        Enemy enemy = other.gameObject.GetComponentInParent<Enemy>();
-        if (enemy == null || !enemy.TryDestroy())
+        if (!enemy.TryDestroy())
         {
             return false;
         }

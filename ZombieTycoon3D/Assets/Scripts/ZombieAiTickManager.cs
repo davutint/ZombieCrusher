@@ -26,6 +26,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     private Transform navigationTarget;
     private Player contactDamageTarget;
     private float nextContactDamageTime;
+    private float contactingThreatUnits;
 
     public int RegisteredCount => entries.Count;
     public int TickedLastFrame { get; private set; }
@@ -71,6 +72,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     {
         TickedLastFrame = 0;
         ContactingZombieCount = 0;
+        contactingThreatUnits = 0f;
         RemoveDestroyedEntries();
 
         if (navigationTarget == null)
@@ -97,6 +99,8 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             if (Steer(entry, navigationTarget.position, deltaTime))
             {
                 ContactingZombieCount++;
+                contactingThreatUnits +=
+                    entry.ContactThreatMultiplier;
             }
 
             TickedLastFrame++;
@@ -139,8 +143,9 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             runner,
             tree,
             agent,
-            agent.speed,
+            agent.speed * enemy.MovementSpeedMultiplier,
             agent.radius,
+            enemy.ContactThreatMultiplier,
             agent.enabled,
             agent.updatePosition,
             agent.updateRotation,
@@ -209,7 +214,9 @@ public sealed class ZombieAiTickManager : MonoBehaviour
 
         Vector3 direction = toTarget / distance;
         float moveDistance = Mathf.Min(
-            entry.MoveSpeed * Mathf.Max(0.1f, speedMultiplier) * deltaTime,
+            entry.MoveSpeed
+            * Mathf.Max(0.1f, speedMultiplier)
+            * deltaTime,
             distance - stopRadius);
         enemyTransform.position += direction * moveDistance;
 
@@ -230,6 +237,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     private void ProcessContactDamage()
     {
         if (ContactingZombieCount <= 0
+            || contactingThreatUnits <= 0f
             || contactDamageTarget == null
             || spawnManager == null
             || !spawnManager.SpawningEnabled)
@@ -252,11 +260,14 @@ public sealed class ZombieAiTickManager : MonoBehaviour
         }
 
         nextContactDamageTime = currentTime + interval;
-        EffectiveAttackerCount = Mathf.Min(
-            ContactingZombieCount,
+        float effectiveThreatUnits = Mathf.Min(
+            contactingThreatUnits,
             Mathf.Max(1, maximumEffectiveAttackers));
+        EffectiveAttackerCount = Mathf.Max(
+            1,
+            Mathf.CeilToInt(effectiveThreatUnits));
         float attackerMultiplier = 1f
-            + (EffectiveAttackerCount - 1)
+            + Mathf.Max(0f, effectiveThreatUnits - 1f)
             * Mathf.Clamp01(additionalAttackerDamageScale);
         float rawDamage = Mathf.Max(0f, baseContactDamagePerSecond)
             * attackerMultiplier
@@ -270,6 +281,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     private void ResetContactDamageState()
     {
         nextContactDamageTime = 0f;
+        contactingThreatUnits = 0f;
         EffectiveAttackerCount = 0;
         LastAppliedContactDamage = 0f;
     }
@@ -340,6 +352,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             NavMeshAgent agent,
             float moveSpeed,
             float agentRadius,
+            float contactThreatMultiplier,
             bool agentWasEnabled,
             bool originalUpdatePosition,
             bool originalUpdateRotation,
@@ -354,6 +367,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             Agent = agent;
             MoveSpeed = moveSpeed;
             AgentRadius = agentRadius;
+            ContactThreatMultiplier = contactThreatMultiplier;
             AgentWasEnabled = agentWasEnabled;
             OriginalUpdatePosition = originalUpdatePosition;
             OriginalUpdateRotation = originalUpdateRotation;
@@ -370,6 +384,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
         public NavMeshAgent Agent;
         public float MoveSpeed;
         public float AgentRadius;
+        public float ContactThreatMultiplier;
         public bool AgentWasEnabled;
         public bool OriginalUpdatePosition;
         public bool OriginalUpdateRotation;
