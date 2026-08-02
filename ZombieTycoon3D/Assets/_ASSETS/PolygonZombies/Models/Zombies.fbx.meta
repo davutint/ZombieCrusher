@@ -970,7 +970,7 @@ ModelImporter:
     optimizeBones: 1
     generateMeshLods: 1
     meshLodGenerationFlags: 0
-    maximumMeshLod: 32
+    maximumMeshLod: 2
     meshOptimizationFlags: -1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
