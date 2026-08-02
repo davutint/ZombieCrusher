@@ -8,6 +8,8 @@ using UnityEngine.UIElements;
 public sealed class GarageUiController : MonoBehaviour
 {
     private const int MissionHealthSegmentCount = 8;
+    private const float MissionSpeedNeedleSmoothTime = 0.045f;
+    private const float MissionSpeedSnapThreshold = 0.015f;
 
     private enum GarageScreen
     {
@@ -104,6 +106,10 @@ public sealed class GarageUiController : MonoBehaviour
     private int displayedMissionHealth = int.MinValue;
     private int displayedMissionMaxHealth = int.MinValue;
     private float missionGaugeMaximumSpeed = 120f;
+    private float targetMissionSpeed;
+    private float displayedMissionNeedleSpeed;
+    private float missionSpeedNeedleVelocity;
+    private bool missionSpeedAnimationEnabled;
 
     public event Action MissionRequested;
     public event Action ResultAcknowledged;
@@ -185,6 +191,11 @@ public sealed class GarageUiController : MonoBehaviour
             missionMayhemCard.RemoveFromClassList(
                 "mission-mayhem-card--pulse");
         }
+
+        if (missionSpeedAnimationEnabled)
+        {
+            AnimateMissionSpeedometer();
+        }
     }
 
     public void ShowGarage()
@@ -193,6 +204,7 @@ public sealed class GarageUiController : MonoBehaviour
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.None;
         HideMayhemAnnouncement();
+        missionSpeedAnimationEnabled = false;
         previewController.SetVisible(true);
         activeScreen = GarageScreen.Assembly;
         buildState.ClearPreview();
@@ -205,6 +217,7 @@ public sealed class GarageUiController : MonoBehaviour
         missionHud.style.display = DisplayStyle.Flex;
         missionResult.style.display = DisplayStyle.None;
         HideMayhemAnnouncement();
+        missionSpeedAnimationEnabled = true;
         previewController.SetVisible(false);
     }
 
@@ -291,31 +304,51 @@ public sealed class GarageUiController : MonoBehaviour
             : vehicleName.ToUpperInvariant();
         displayedMissionSpeed = int.MinValue;
         missionGaugeMaximumSpeed = Mathf.Max(40f, maximumSpeed);
+        targetMissionSpeed = 0f;
+        displayedMissionNeedleSpeed = 0f;
+        missionSpeedNeedleVelocity = 0f;
         missionCurrentSpeed.text = "0";
         UpdateMissionSpeedometer(0f);
     }
 
-    public void UpdateMissionTelemetry(
-        float currentSpeed,
-        float currentHealth,
-        float maximumHealth)
+    public void SetMissionSpeedTarget(float currentSpeed)
     {
-        if (missionCurrentSpeed == null)
+        targetMissionSpeed = Mathf.Max(0f, Mathf.Abs(currentSpeed));
+    }
+
+    private void AnimateMissionSpeedometer()
+    {
+        float previousSpeed = displayedMissionNeedleSpeed;
+        displayedMissionNeedleSpeed = Mathf.SmoothDamp(
+            displayedMissionNeedleSpeed,
+            targetMissionSpeed,
+            ref missionSpeedNeedleVelocity,
+            MissionSpeedNeedleSmoothTime,
+            Mathf.Infinity,
+            Time.unscaledDeltaTime);
+
+        if (Mathf.Abs(displayedMissionNeedleSpeed - targetMissionSpeed)
+            <= MissionSpeedSnapThreshold)
         {
-            return;
+            displayedMissionNeedleSpeed = targetMissionSpeed;
+            missionSpeedNeedleVelocity = 0f;
         }
 
         int roundedSpeed = Mathf.Max(
             0,
-            Mathf.RoundToInt(Mathf.Abs(currentSpeed)));
+            Mathf.RoundToInt(displayedMissionNeedleSpeed));
         if (roundedSpeed != displayedMissionSpeed)
         {
             displayedMissionSpeed = roundedSpeed;
             missionCurrentSpeed.text = roundedSpeed.ToString();
         }
 
-        UpdateMissionSpeedometer(Mathf.Abs(currentSpeed));
-        UpdateMissionHealth(currentHealth, maximumHealth);
+        if (!Mathf.Approximately(
+                previousSpeed,
+                displayedMissionNeedleSpeed))
+        {
+            UpdateMissionSpeedometer(displayedMissionNeedleSpeed);
+        }
     }
 
     private void UpdateMissionSpeedometer(float currentSpeed)
@@ -410,6 +443,7 @@ public sealed class GarageUiController : MonoBehaviour
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.Flex;
+        missionSpeedAnimationEnabled = false;
         previewController.SetVisible(false);
 
         resultStatus.text = result.Succeeded ? "BAŞARILI" : "BAŞARISIZ";

@@ -8,7 +8,7 @@ public sealed class GarageFlowController : MonoBehaviour
     private const int MissionKillTarget = 100;
     private const int NormalKillScore = 100;
     private const int BonusKillScore = 200;
-    private const float TelemetryRefreshInterval = 0.06f;
+    private const float HealthRefreshInterval = 0.06f;
 
     [Header("Garage")]
     [SerializeField] private GarageBuildState buildState;
@@ -47,7 +47,7 @@ public sealed class GarageFlowController : MonoBehaviour
     private int nextRepairKill;
     private float feedbackHideTime;
     private float nextFeedbackUpdateTime;
-    private float nextTelemetryUpdateTime;
+    private float nextHealthUpdateTime;
     private bool feedbackVisible;
     private MayhemTier previousMayhemTier;
 
@@ -137,13 +137,14 @@ public sealed class GarageFlowController : MonoBehaviour
             (MissionDurationSeconds - missionTimeRemaining)
             / MissionDurationSeconds);
         garageUi.UpdateMissionTimer(missionTimeRemaining);
+        float currentSpeed = Mathf.Abs(vehicleController.carVelocity.z);
+        garageUi.SetMissionSpeedTarget(currentSpeed);
         float currentTime = Time.unscaledTime;
-        if (currentTime >= nextTelemetryUpdateTime)
+        if (currentTime >= nextHealthUpdateTime)
         {
-            nextTelemetryUpdateTime =
-                currentTime + TelemetryRefreshInterval;
-            garageUi.UpdateMissionTelemetry(
-                Mathf.Abs(vehicleController.carVelocity.z),
+            nextHealthUpdateTime =
+                currentTime + HealthRefreshInterval;
+            garageUi.UpdateMissionHealth(
                 player.GetCurrentHealth(),
                 player.GetMaxHealth());
         }
@@ -255,8 +256,8 @@ public sealed class GarageFlowController : MonoBehaviour
             : int.MaxValue;
         feedbackHideTime = 0f;
         nextFeedbackUpdateTime = 0f;
-        nextTelemetryUpdateTime =
-            Time.unscaledTime + TelemetryRefreshInterval;
+        nextHealthUpdateTime =
+            Time.unscaledTime + HealthRefreshInterval;
         garageUi.HideMissionEffectFeedback();
         feedbackVisible = false;
         previousMayhemTier = MayhemTier.None;
@@ -281,8 +282,8 @@ public sealed class GarageFlowController : MonoBehaviour
         missionTimeRemaining = MissionDurationSeconds;
         spawnManager.BeginMission();
         garageUi.UpdateMissionTimer(missionTimeRemaining);
-        garageUi.UpdateMissionTelemetry(
-            0f,
+        garageUi.SetMissionSpeedTarget(0f);
+        garageUi.UpdateMissionHealth(
             player.GetCurrentHealth(),
             player.GetMaxHealth());
         garageUi.HideGarageForMission();

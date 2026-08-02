@@ -20,7 +20,7 @@ MonoBehaviour:
   visualPrefab: {fileID: 1360410021609672, guid: 3265f4e6931402444bad53b920c43dcf, type: 3}
   compatibleVehicles:
   - vehicleId: muscle-car
-    localPosition: {x: -1.42, y: 0.78, z: -0.28}
+    localPosition: {x: -1.3, y: 0.88, z: 0.25}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.82, y: 0.82, z: 0.82}
     createsImpactZone: 0
@@ -28,15 +28,15 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: muscle-car
-    localPosition: {x: 1.42, y: 0.78, z: -0.28}
-    localEuler: {x: 0, y: 180, z: 0}
+    localPosition: {x: 1.3, y: 0.88, z: 0.25}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.82, y: 0.82, z: 0.82}
     createsImpactZone: 0
     impactZoneCenter: {x: 0, y: 0, z: 0}
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: ute
-    localPosition: {x: -1.39, y: 0.9, z: -0.2}
+    localPosition: {x: -1.26, y: 0.94, z: 0.21}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.85, y: 0.85, z: 0.85}
     createsImpactZone: 0
@@ -44,8 +44,8 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: ute
-    localPosition: {x: 1.39, y: 0.9, z: -0.2}
-    localEuler: {x: 0, y: 180, z: 0}
+    localPosition: {x: 1.26, y: 0.94, z: 0.21}
+    localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.85, y: 0.85, z: 0.85}
     createsImpactZone: 0
     impactZoneCenter: {x: 0, y: 0, z: 0}
