@@ -150,18 +150,35 @@ public class Player : MonoBehaviour
                 contactFeedbackLabel,
                 contactFeedbackTone);
         }
-        else if (preventedDamage > 0.0001f
-                 && Time.unscaledTime >= nextDefenseFeedbackTime
-                 && !string.IsNullOrWhiteSpace(
-                     buildEffects.DamageFeedbackLabel))
+        else
         {
-            nextDefenseFeedbackTime = Time.unscaledTime + 0.6f;
-            AttachmentFeedbackRequested?.Invoke(
-                buildEffects.DamageFeedbackLabel,
-                buildEffects.DamageFeedbackTone);
+            RequestDamageReductionFeedback(preventedDamage);
         }
 
         return true;
+    }
+
+    public float ApplyZombieContactDamage(
+        float rawDamage,
+        int effectiveAttackerCount)
+    {
+        if (isExploded || rawDamage <= 0f)
+        {
+            return 0f;
+        }
+
+        float appliedDamage =
+            rawDamage * Mathf.Max(0f, buildEffects.DamageTakenMultiplier);
+        if (appliedDamage <= 0f)
+        {
+            return 0f;
+        }
+
+        float preventedDamage = Mathf.Max(0f, rawDamage - appliedDamage);
+        TakeDamage(appliedDamage);
+        impactFeedback?.PlayZombieContactDamage(effectiveAttackerCount);
+        RequestDamageReductionFeedback(preventedDamage);
+        return appliedDamage;
     }
 
     public void SetMayhemIntensity(float normalizedIntensity)
@@ -172,6 +189,22 @@ public class Player : MonoBehaviour
     public void PlayMayhemTierReached(MayhemTier tier)
     {
         impactFeedback?.PlayMayhemTierReached(tier);
+    }
+
+    private void RequestDamageReductionFeedback(float preventedDamage)
+    {
+        if (preventedDamage <= 0.0001f
+            || Time.unscaledTime < nextDefenseFeedbackTime
+            || string.IsNullOrWhiteSpace(
+                buildEffects.DamageFeedbackLabel))
+        {
+            return;
+        }
+
+        nextDefenseFeedbackTime = Time.unscaledTime + 0.6f;
+        AttachmentFeedbackRequested?.Invoke(
+            buildEffects.DamageFeedbackLabel,
+            buildEffects.DamageFeedbackTone);
     }
 
     // Hasar uygulama metodu

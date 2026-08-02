@@ -140,7 +140,6 @@ public class Enemy : MonoBehaviour
         RestoreComponents();
         ResetLifeState();
         gameObject.SetActive(true);
-        ResetAnimator();
         ResetAgent(position);
 
         if (hasStarted)
@@ -180,7 +179,13 @@ public class Enemy : MonoBehaviour
 
         if (animator != null)
         {
-            animator.enabled = initialAnimatorState && !animationGameplaySuppressed;
+            bool isAnimationLodManaged =
+                animatorLodManager != null &&
+                animatorLodManager.isActiveAndEnabled;
+            animator.enabled =
+                !isAnimationLodManaged &&
+                initialAnimatorState &&
+                !animationGameplaySuppressed;
         }
     }
 
@@ -221,15 +226,6 @@ public class Enemy : MonoBehaviour
         if (animator.enabled != shouldEnable)
         {
             animator.enabled = shouldEnable;
-        }
-    }
-
-    private void ResetAnimator()
-    {
-        if (animator != null && animator.enabled)
-        {
-            animator.Rebind();
-            animator.Update(0f);
         }
     }
 

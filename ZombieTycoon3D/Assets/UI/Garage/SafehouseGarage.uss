@@ -815,6 +815,13 @@
     justify-content: flex-end;
     border-left-width: 1px;
     border-left-color: rgba(255, 255, 255, 0.15);
+    transition-property: background-color, border-left-color;
+    transition-duration: 0.12s;
+}
+
+.mission-run-status--damage {
+    background-color: rgba(255, 54, 63, 0.08);
+    border-left-color: rgba(255, 86, 91, 0.92);
 }
 
 .mission-vehicle-name {
@@ -836,6 +843,8 @@
     font-size: 9px;
     -unity-font-style: bold;
     letter-spacing: 1px;
+    transition-property: color;
+    transition-duration: 0.1s;
 }
 
 .mission-health-value {
@@ -843,6 +852,13 @@
     font-size: 11px;
     -unity-font-style: bold;
     letter-spacing: 0.45px;
+    transition-property: color;
+    transition-duration: 0.1s;
+}
+
+.mission-run-status--damage .mission-health-tag,
+.mission-run-status--damage .mission-health-value {
+    color: rgb(255, 104, 109);
 }
 
 .mission-health-segments {

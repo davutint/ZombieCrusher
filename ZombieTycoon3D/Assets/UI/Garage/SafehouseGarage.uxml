@@ -114,7 +114,7 @@
                     <ui:Label text="KM/H" class="mission-speed-unit" />
                 </ui:VisualElement>
 
-                <ui:VisualElement class="mission-run-status">
+                <ui:VisualElement name="mission-run-status" class="mission-run-status">
                     <ui:Label name="mission-vehicle-name" text="AMBULANS" class="mission-vehicle-name" />
                     <ui:VisualElement class="mission-health-copy">
                         <ui:Label text="HP" class="mission-health-tag" />

@@ -10,6 +10,7 @@ public sealed class GarageUiController : MonoBehaviour
     private const int MissionHealthSegmentCount = 8;
     private const float MissionSpeedNeedleSmoothTime = 0.045f;
     private const float MissionSpeedSnapThreshold = 0.015f;
+    private const float MissionDamagePulseDuration = 0.18f;
 
     private enum GarageScreen
     {
@@ -49,6 +50,7 @@ public sealed class GarageUiController : MonoBehaviour
     private VisualElement missionMayhemAnnouncement;
     private Label missionMayhemAnnouncementLabel;
     private Label missionVehicleName;
+    private VisualElement missionRunStatus;
     private VisualElement missionSpeedometer;
     private VisualElement missionSpeedNeedle;
     private Label missionCurrentSpeed;
@@ -101,10 +103,13 @@ public sealed class GarageUiController : MonoBehaviour
     private float mayhemPulseEndTime;
     private bool mayhemAnnouncementVisible;
     private bool mayhemCardPulsing;
+    private bool missionDamagePulsing;
+    private float missionDamagePulseEndTime;
     private int displayedMissionSeconds = int.MinValue;
     private int displayedMissionSpeed = int.MinValue;
     private int displayedMissionHealth = int.MinValue;
     private int displayedMissionMaxHealth = int.MinValue;
+    private float displayedMissionHealthRaw = float.NaN;
     private float missionGaugeMaximumSpeed = 120f;
     private float targetMissionSpeed;
     private float displayedMissionNeedleSpeed;
@@ -192,6 +197,14 @@ public sealed class GarageUiController : MonoBehaviour
                 "mission-mayhem-card--pulse");
         }
 
+        if (missionDamagePulsing
+            && currentTime >= missionDamagePulseEndTime)
+        {
+            missionDamagePulsing = false;
+            missionRunStatus.RemoveFromClassList(
+                "mission-run-status--damage");
+        }
+
         if (missionSpeedAnimationEnabled)
         {
             AnimateMissionSpeedometer();
@@ -205,6 +218,7 @@ public sealed class GarageUiController : MonoBehaviour
         missionResult.style.display = DisplayStyle.None;
         HideMayhemAnnouncement();
         missionSpeedAnimationEnabled = false;
+        ResetMissionDamagePulse();
         previewController.SetVisible(true);
         activeScreen = GarageScreen.Assembly;
         buildState.ClearPreview();
@@ -304,6 +318,8 @@ public sealed class GarageUiController : MonoBehaviour
             : vehicleName.ToUpperInvariant();
         displayedMissionSpeed = int.MinValue;
         missionGaugeMaximumSpeed = Mathf.Max(40f, maximumSpeed);
+        displayedMissionHealthRaw = float.NaN;
+        ResetMissionDamagePulse();
         targetMissionSpeed = 0f;
         displayedMissionNeedleSpeed = 0f;
         missionSpeedNeedleVelocity = 0f;
@@ -378,6 +394,17 @@ public sealed class GarageUiController : MonoBehaviour
         float safeMaximum = Mathf.Max(1f, maximumHealth);
         float safeCurrent = Mathf.Clamp(currentHealth, 0f, safeMaximum);
         float ratio = safeCurrent / safeMaximum;
+        if (!float.IsNaN(displayedMissionHealthRaw)
+            && safeCurrent < displayedMissionHealthRaw - 0.0001f)
+        {
+            missionRunStatus.AddToClassList(
+                "mission-run-status--damage");
+            missionDamagePulsing = true;
+            missionDamagePulseEndTime =
+                Time.unscaledTime + MissionDamagePulseDuration;
+        }
+
+        displayedMissionHealthRaw = safeCurrent;
         int roundedCurrent = Mathf.CeilToInt(safeCurrent);
         int roundedMaximum = Mathf.CeilToInt(safeMaximum);
         if (roundedCurrent != displayedMissionHealth
@@ -515,6 +542,8 @@ public sealed class GarageUiController : MonoBehaviour
             RequireElement<Label>(root, "mission-mayhem-announcement-label");
         missionVehicleName =
             RequireElement<Label>(root, "mission-vehicle-name");
+        missionRunStatus =
+            RequireElement<VisualElement>(root, "mission-run-status");
         missionSpeedometer =
             RequireElement<VisualElement>(root, "mission-speedometer");
         missionSpeedNeedle =
@@ -590,6 +619,14 @@ public sealed class GarageUiController : MonoBehaviour
         previewViewport.RegisterCallback<PointerCaptureOutEvent>(_ => EndPreviewDrag());
 
         CreateStatElements();
+    }
+
+    private void ResetMissionDamagePulse()
+    {
+        missionDamagePulsing = false;
+        missionDamagePulseEndTime = 0f;
+        missionRunStatus?.RemoveFromClassList(
+            "mission-run-status--damage");
     }
 
     private void HideMayhemAnnouncement()

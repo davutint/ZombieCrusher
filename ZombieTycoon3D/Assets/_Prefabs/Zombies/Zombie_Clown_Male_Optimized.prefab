@@ -796,7 +796,7 @@ GameObject:
   - component: {fileID: 5348318283830073671}
   m_Layer: 0
   m_Name: Zombie_Clown_Male_Optimized
-  m_TagString: Untagged
+  m_TagString: Ragdoll
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -11,17 +11,31 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     [SerializeField, Min(0f)] private float stoppingDistance = 2f;
     [SerializeField, Min(1f)] private float turnSpeed = 540f;
 
+    [Header("Contact Threat")]
+    [SerializeField, Min(0f)] private float contactRangePadding = 0.35f;
+    [SerializeField, Min(0.05f)] private float contactDamageInterval = 0.25f;
+    [SerializeField, Min(0f)] private float baseContactDamagePerSecond = 2f;
+    [SerializeField, Range(0f, 1f)]
+    private float additionalAttackerDamageScale = 0.2f;
+    [SerializeField, Min(1)] private int maximumEffectiveAttackers = 10;
+
     private readonly List<Entry> entries = new List<Entry>(512);
     private readonly HashSet<Enemy> registeredEnemies = new HashSet<Enemy>();
 
+    private OldSpawnManager spawnManager;
     private Transform navigationTarget;
+    private Player contactDamageTarget;
+    private float nextContactDamageTime;
 
     public int RegisteredCount => entries.Count;
     public int TickedLastFrame { get; private set; }
+    public int ContactingZombieCount { get; private set; }
+    public int EffectiveAttackerCount { get; private set; }
+    public float LastAppliedContactDamage { get; private set; }
 
     private void Awake()
     {
-        OldSpawnManager spawnManager = GetComponent<OldSpawnManager>();
+        spawnManager = GetComponent<OldSpawnManager>();
         if (spawnManager == null || spawnManager.player == null)
         {
             Debug.LogError(
@@ -32,6 +46,14 @@ public sealed class ZombieAiTickManager : MonoBehaviour
         }
 
         navigationTarget = spawnManager.player;
+        contactDamageTarget = navigationTarget.GetComponent<Player>();
+        if (contactDamageTarget == null)
+        {
+            Debug.LogError(
+                "ZombieAiTickManager: The navigation target requires a Player component for contact damage.",
+                navigationTarget);
+            enabled = false;
+        }
     }
 
     private void OnEnable()
@@ -48,10 +70,12 @@ public sealed class ZombieAiTickManager : MonoBehaviour
     private void Update()
     {
         TickedLastFrame = 0;
+        ContactingZombieCount = 0;
         RemoveDestroyedEntries();
 
         if (navigationTarget == null)
         {
+            ResetContactDamageState();
             return;
         }
 
@@ -70,9 +94,15 @@ public sealed class ZombieAiTickManager : MonoBehaviour
                 continue;
             }
 
-            Steer(entry, navigationTarget.position, deltaTime);
+            if (Steer(entry, navigationTarget.position, deltaTime))
+            {
+                ContactingZombieCount++;
+            }
+
             TickedLastFrame++;
         }
+
+        ProcessContactDamage();
     }
 
     private void OnDisable()
@@ -83,6 +113,7 @@ public sealed class ZombieAiTickManager : MonoBehaviour
         }
 
         TickedLastFrame = 0;
+        ResetContactDamageState();
     }
 
     internal void Register(Enemy enemy, BehaviourRunner runner)
@@ -159,7 +190,10 @@ public sealed class ZombieAiTickManager : MonoBehaviour
         entry.Managed = true;
     }
 
-    private void Steer(Entry entry, Vector3 targetPosition, float deltaTime)
+    private bool Steer(
+        Entry entry,
+        Vector3 targetPosition,
+        float deltaTime)
     {
         Transform enemyTransform = entry.Enemy.transform;
         Vector3 toTarget = targetPosition - enemyTransform.position;
@@ -167,9 +201,10 @@ public sealed class ZombieAiTickManager : MonoBehaviour
 
         float distance = toTarget.magnitude;
         float stopRadius = Mathf.Max(stoppingDistance, entry.AgentRadius);
+        float contactRadius = stopRadius + Mathf.Max(0f, contactRangePadding);
         if (distance <= stopRadius || distance <= Mathf.Epsilon)
         {
-            return;
+            return true;
         }
 
         Vector3 direction = toTarget / distance;
@@ -178,16 +213,65 @@ public sealed class ZombieAiTickManager : MonoBehaviour
             distance - stopRadius);
         enemyTransform.position += direction * moveDistance;
 
-        if (!entry.OriginalUpdateRotation)
+        if (entry.OriginalUpdateRotation)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(
+                direction,
+                Vector3.up);
+            enemyTransform.rotation = Quaternion.RotateTowards(
+                enemyTransform.rotation,
+                targetRotation,
+                Mathf.Max(1f, turnSpeed) * deltaTime);
+        }
+
+        return distance - moveDistance <= contactRadius;
+    }
+
+    private void ProcessContactDamage()
+    {
+        if (ContactingZombieCount <= 0
+            || contactDamageTarget == null
+            || spawnManager == null
+            || !spawnManager.SpawningEnabled)
+        {
+            ResetContactDamageState();
+            return;
+        }
+
+        float currentTime = Time.unscaledTime;
+        float interval = Mathf.Max(0.05f, contactDamageInterval);
+        if (nextContactDamageTime <= 0f)
+        {
+            nextContactDamageTime = currentTime + interval;
+            return;
+        }
+
+        if (currentTime < nextContactDamageTime)
         {
             return;
         }
 
-        Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-        enemyTransform.rotation = Quaternion.RotateTowards(
-            enemyTransform.rotation,
-            targetRotation,
-            Mathf.Max(1f, turnSpeed) * deltaTime);
+        nextContactDamageTime = currentTime + interval;
+        EffectiveAttackerCount = Mathf.Min(
+            ContactingZombieCount,
+            Mathf.Max(1, maximumEffectiveAttackers));
+        float attackerMultiplier = 1f
+            + (EffectiveAttackerCount - 1)
+            * Mathf.Clamp01(additionalAttackerDamageScale);
+        float rawDamage = Mathf.Max(0f, baseContactDamagePerSecond)
+            * attackerMultiplier
+            * interval;
+        LastAppliedContactDamage =
+            contactDamageTarget.ApplyZombieContactDamage(
+                rawDamage,
+                EffectiveAttackerCount);
+    }
+
+    private void ResetContactDamageState()
+    {
+        nextContactDamageTime = 0f;
+        EffectiveAttackerCount = 0;
+        LastAppliedContactDamage = 0f;
     }
 
     private void RemoveDestroyedEntries()
