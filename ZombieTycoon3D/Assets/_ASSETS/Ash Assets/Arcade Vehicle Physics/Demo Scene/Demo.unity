@@ -35759,6 +35759,10 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   zombiePrefabs:
   - {fileID: 6946291167136476673, guid: 806ce8ab3b377fa4abb3bccc7760e458, type: 3}
+  - {fileID: 8804163301870999220, guid: d5d6f7e266c25b0429986e27d3af5aff, type: 3}
+  - {fileID: 2307241359629822279, guid: 4a682239c5be0704ea171770a23c8d02, type: 3}
+  - {fileID: 3006773242038195989, guid: 4647cc988b582ab4ca60b9d473e46fde, type: 3}
+  - {fileID: 7093826657222975927, guid: d25d9451fc3710b4faf2db2b9bf0769a, type: 3}
   maxZombiesInScene: 500
   player: {fileID: 1557745365}
   spawnDistanceMin: 100
