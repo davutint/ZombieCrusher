@@ -32,12 +32,23 @@ public sealed class GaragePreviewController : MonoBehaviour
     [SerializeField, Min(0f)] private float autoRotationSpeed = 6f;
     [SerializeField, Min(0.01f)] private float dragRotationSensitivity = 0.22f;
     [SerializeField, Range(20f, 60f)] private float fieldOfView = 34f;
+    [SerializeField, Range(31f, 45f)] private float partFocusFieldOfView = 31f;
     [SerializeField, Range(1f, 1.2f)] private float framingPadding = 1.06f;
+    [SerializeField, Range(2.05f, 2.8f)] private float partFocusDistanceScale = 2.05f;
+    [SerializeField, Min(0f)] private float cameraTransitionSpeed = 10f;
+    [SerializeField] private Color garageBackgroundColor =
+        new Color32(218, 215, 201, 255);
 
     private readonly Dictionary<string, PreviewVehicleInstance> vehicleCache =
         new(StringComparer.Ordinal);
 
     private PreviewVehicleInstance activeInstance;
+    private GarageAttachmentDefinition focusedAttachment;
+    private Vector3 targetCameraPosition;
+    private Quaternion targetCameraRotation;
+    private float targetCameraFieldOfView;
+    private bool autoRotationEnabled = true;
+    private bool cameraPoseInitialized;
     private bool inputDragging;
     private bool visible;
 
@@ -54,13 +65,22 @@ public sealed class GaragePreviewController : MonoBehaviour
             return;
         }
 
+        previewCamera.clearFlags = CameraClearFlags.SolidColor;
+        previewCamera.backgroundColor = garageBackgroundColor;
         previewCamera.fieldOfView = fieldOfView;
         SetVisible(false);
     }
 
     private void Update()
     {
-        if (!visible
+        if (!visible)
+        {
+            return;
+        }
+
+        UpdateCameraTransition();
+
+        if (!autoRotationEnabled
             || inputDragging
             || activeInstance?.container == null
             || autoRotationSpeed <= 0f)
@@ -80,7 +100,18 @@ public sealed class GaragePreviewController : MonoBehaviour
 
         if (previewCamera != null)
         {
+            if (shouldBeVisible)
+            {
+                previewCamera.clearFlags = CameraClearFlags.SolidColor;
+                previewCamera.backgroundColor = garageBackgroundColor;
+            }
+
             previewCamera.enabled = shouldBeVisible;
+        }
+
+        if (!shouldBeVisible)
+        {
+            cameraPoseInitialized = false;
         }
 
         if (stageRoot != null)
@@ -104,8 +135,13 @@ public sealed class GaragePreviewController : MonoBehaviour
         GarageVehicleDefinition vehicle,
         IEnumerable<GarageAttachmentDefinition> equippedAttachments,
         GarageAttachmentDefinition previewAttachment,
-        bool showEquippedAttachments)
+        bool showEquippedAttachments,
+        GarageAttachmentDefinition focusAttachment,
+        bool allowAutoRotation)
     {
+        focusedAttachment = focusAttachment;
+        autoRotationEnabled = allowAutoRotation;
+
         if (vehicle == null || vehicle.VisualPrefab == null || stageRoot == null)
         {
             HideCachedVehicles();
@@ -157,7 +193,10 @@ public sealed class GaragePreviewController : MonoBehaviour
         }
 
         NormalizeToStage(instance.container.transform);
-        FrameActiveBuild();
+        if (!FrameFocusedAttachment())
+        {
+            FrameActiveBuild();
+        }
     }
 
     public void BeginDrag()
@@ -176,11 +215,20 @@ public sealed class GaragePreviewController : MonoBehaviour
             Vector3.up,
             -horizontalDelta * dragRotationSensitivity,
             Space.World);
+
+        if (focusedAttachment != null)
+        {
+            FrameFocusedAttachment();
+        }
     }
 
     public void EndDrag()
     {
         inputDragging = false;
+        if (focusedAttachment != null)
+        {
+            FrameFocusedAttachment();
+        }
     }
 
     public bool TryGetAttachmentViewportPosition(
@@ -196,16 +244,37 @@ public sealed class GaragePreviewController : MonoBehaviour
             return false;
         }
 
-        string vehicleId = activeInstance.vehicleId;
-        int poseCount = attachment.GetPoseCount(vehicleId);
-        if (poseCount <= 0)
+        if (!TryGetAttachmentWorldPosition(attachment, out Vector3 worldPosition))
         {
             return false;
         }
 
+        Vector3 viewportPoint = previewCamera.WorldToViewportPoint(worldPosition);
+        if (viewportPoint.z <= 0f)
+        {
+            return false;
+        }
+
+        viewportPosition = new Vector2(viewportPoint.x, viewportPoint.y);
+        return true;
+    }
+
+    private bool TryGetAttachmentWorldPosition(
+        GarageAttachmentDefinition attachment,
+        out Vector3 worldPosition)
+    {
+        worldPosition = default;
+        if (attachment == null
+            || previewCamera == null
+            || activeInstance?.container == null)
+        {
+            return false;
+        }
+
+        string vehicleId = activeInstance.vehicleId;
+        int poseCount = attachment.GetPoseCount(vehicleId);
         bool found = false;
         float closestDepth = float.MaxValue;
-        Vector3 closestViewportPoint = default;
         for (int i = 0; i < poseCount; i++)
         {
             if (!attachment.TryGetPose(vehicleId, i, out GarageAttachmentPose pose))
@@ -214,8 +283,8 @@ public sealed class GaragePreviewController : MonoBehaviour
             }
 
             Transform anchor = activeInstance.GetAnchor(pose.Anchor);
-            Vector3 worldPosition = anchor.TransformPoint(pose.LocalPosition);
-            Vector3 candidate = previewCamera.WorldToViewportPoint(worldPosition);
+            Vector3 candidateWorldPosition = anchor.TransformPoint(pose.LocalPosition);
+            Vector3 candidate = previewCamera.WorldToViewportPoint(candidateWorldPosition);
             if (candidate.z <= 0f || candidate.z >= closestDepth)
             {
                 continue;
@@ -223,18 +292,10 @@ public sealed class GaragePreviewController : MonoBehaviour
 
             found = true;
             closestDepth = candidate.z;
-            closestViewportPoint = candidate;
+            worldPosition = candidateWorldPosition;
         }
 
-        if (!found)
-        {
-            return false;
-        }
-
-        viewportPosition = new Vector2(
-            closestViewportPoint.x,
-            closestViewportPoint.y);
-        return true;
+        return found;
     }
 
     private PreviewVehicleInstance GetOrCreateVehicle(
@@ -451,8 +512,6 @@ public sealed class GaragePreviewController : MonoBehaviour
             return;
         }
 
-        previewCamera.fieldOfView = fieldOfView;
-
         Vector3 focus = new Vector3(
             bounds.center.x,
             Mathf.Lerp(bounds.min.y, bounds.max.y, 0.52f),
@@ -496,15 +555,105 @@ public sealed class GaragePreviewController : MonoBehaviour
                 Mathf.Max(verticalDistance, horizontalDistance));
         }
 
-        previewCamera.transform.position = focus + viewDirection * distance;
-        previewCamera.transform.rotation = Quaternion.LookRotation(
-            focus - previewCamera.transform.position,
+        Vector3 cameraPosition = focus + viewDirection * distance;
+        Quaternion cameraRotation = Quaternion.LookRotation(
+            focus - cameraPosition,
             Vector3.up);
         float boundsRadius = bounds.extents.magnitude;
-        previewCamera.nearClipPlane = Mathf.Max(
+        SetCameraTarget(
+            cameraPosition,
+            cameraRotation,
+            fieldOfView,
+            Mathf.Max(0.03f, distance - boundsRadius * 2.2f),
+            distance + boundsRadius * 3f + 10f);
+    }
+
+    private bool FrameFocusedAttachment()
+    {
+        if (focusedAttachment == null
+            || activeInstance?.container == null
+            || previewCamera == null
+            || !TryCalculateBounds(activeInstance.container, out Bounds bounds)
+            || !TryGetAttachmentWorldPosition(
+                focusedAttachment,
+                out Vector3 focus))
+        {
+            return false;
+        }
+
+        Vector3 viewDirection = new Vector3(1.15f, 0.52f, -1.45f).normalized;
+        focus = Vector3.Lerp(focus, bounds.center, 0.28f);
+        float distance = Mathf.Max(
+            2.2f,
+            bounds.extents.magnitude
+            * Mathf.Clamp(partFocusDistanceScale, 2.05f, 2.8f));
+        Vector3 cameraPosition = focus + viewDirection * distance;
+        Quaternion cameraRotation = Quaternion.LookRotation(
+            focus - cameraPosition,
+            Vector3.up);
+        float boundsRadius = bounds.extents.magnitude;
+        SetCameraTarget(
+            cameraPosition,
+            cameraRotation,
+            Mathf.Clamp(partFocusFieldOfView, 31f, 45f),
             0.03f,
-            distance - boundsRadius * 2.2f);
-        previewCamera.farClipPlane = distance + boundsRadius * 3f + 10f;
+            distance + boundsRadius * 3f + 10f);
+        return true;
+    }
+
+    private void SetCameraTarget(
+        Vector3 position,
+        Quaternion rotation,
+        float targetFieldOfView,
+        float nearClipPlane,
+        float farClipPlane)
+    {
+        targetCameraPosition = position;
+        targetCameraRotation = rotation;
+        targetCameraFieldOfView = targetFieldOfView;
+        previewCamera.nearClipPlane = nearClipPlane;
+        previewCamera.farClipPlane = farClipPlane;
+
+        if (cameraPoseInitialized)
+        {
+            return;
+        }
+
+        previewCamera.transform.SetPositionAndRotation(position, rotation);
+        previewCamera.fieldOfView = targetFieldOfView;
+        cameraPoseInitialized = true;
+    }
+
+    private void UpdateCameraTransition()
+    {
+        if (!cameraPoseInitialized || previewCamera == null)
+        {
+            return;
+        }
+
+        if (cameraTransitionSpeed <= 0f)
+        {
+            previewCamera.transform.SetPositionAndRotation(
+                targetCameraPosition,
+                targetCameraRotation);
+            previewCamera.fieldOfView = targetCameraFieldOfView;
+            return;
+        }
+
+        float blend = 1f - Mathf.Exp(
+            -cameraTransitionSpeed * Time.unscaledDeltaTime);
+        previewCamera.transform.position = Vector3.Lerp(
+            previewCamera.transform.position,
+            targetCameraPosition,
+            blend);
+        previewCamera.transform.rotation = Quaternion.Slerp(
+            previewCamera.transform.rotation,
+            targetCameraRotation,
+            blend);
+        previewCamera.fieldOfView = Mathf.Lerp(
+            previewCamera.fieldOfView,
+            targetCameraFieldOfView,
+            blend);
     }
 
     private void HideCachedVehicles()

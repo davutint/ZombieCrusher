@@ -1437,11 +1437,17 @@ public sealed class GarageUiController : MonoBehaviour
     {
         GarageVehicleDefinition displayedVehicle = buildState.DisplayedVehicle;
         bool showEquipped = displayedVehicle == buildState.SelectedVehicle;
+        GarageAttachmentDefinition focusAttachment =
+            activeScreen == GarageScreen.Parts
+                ? buildState.PreviewAttachment
+                : null;
         previewController.SetBuild(
             displayedVehicle,
             buildState.GetEquippedAttachments(),
             buildState.PreviewAttachment,
-            showEquipped);
+            showEquipped,
+            focusAttachment,
+            activeScreen == GarageScreen.Gallery);
     }
 
     private void UpdateCarousel()
