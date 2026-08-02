@@ -320,6 +320,7 @@ public sealed class GaragePreviewController : MonoBehaviour
         visual.transform.localPosition = Vector3.zero;
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = Vector3.one;
+        ArcadeToonMaterialRemapper.ApplyTo(visual);
 
         PreviewVehicleInstance created = new PreviewVehicleInstance
         {
@@ -389,6 +390,7 @@ public sealed class GaragePreviewController : MonoBehaviour
                 instance.container.transform,
                 false);
             attachmentObject.name = attachment.VisualPrefab.name;
+            ArcadeToonMaterialRemapper.ApplyTo(attachmentObject);
             attachmentObjects.Add(attachmentObject);
         }
 

@@ -10241,7 +10241,7 @@ Light:
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 0.64, g: 0.82, b: 1, a: 1}
-  m_Intensity: 3
+  m_Intensity: 0.35
   m_Range: 18
   m_SpotAngle: 70
   m_InnerSpotAngle: 21.80208
@@ -10948,7 +10948,7 @@ Light:
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 1, g: 0.36, b: 0.18, a: 1}
-  m_Intensity: 2.5
+  m_Intensity: 0.2
   m_Range: 18
   m_SpotAngle: 75
   m_InnerSpotAngle: 21.80208
@@ -40750,7 +40750,11 @@ MonoBehaviour:
   autoRotationSpeed: 6
   dragRotationSensitivity: 0.22
   fieldOfView: 34
+  partFocusFieldOfView: 31
   framingPadding: 1.55
+  partFocusDistanceScale: 2.05
+  cameraTransitionSpeed: 10
+  garageBackgroundColor: {r: 0.85490197, g: 0.84313726, b: 0.7882353, a: 1}
 --- !u!114 &1805897394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41279,7 +41283,7 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 0.35, g: 0.62, b: 1, a: 1}
-  m_Intensity: 1.5
+  m_Intensity: 0.15
   m_Range: 14
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208

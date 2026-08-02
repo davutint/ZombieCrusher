@@ -212,6 +212,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
         visual.transform.localPosition = Vector3.zero;
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = Vector3.one;
+        ArcadeToonMaterialRemapper.ApplyTo(visual);
 
         VehicleVisualInstance created = new VehicleVisualInstance
         {
@@ -280,6 +281,7 @@ public sealed class GarageGameplayBuildPresenter : MonoBehaviour
                 instance.bodyPivot,
                 false);
             attachmentObject.name = attachment.VisualPrefab.name;
+            ArcadeToonMaterialRemapper.ApplyTo(attachmentObject);
             attachmentObjects.Add(new AttachmentRuntimeInstance
             {
                 visual = attachmentObject
