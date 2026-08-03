@@ -968,9 +968,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
-    generateMeshLods: 1
+    generateMeshLods: 0
     meshLodGenerationFlags: 0
-    maximumMeshLod: 2
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
