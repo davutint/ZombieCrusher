@@ -37,7 +37,7 @@ public sealed class GaragePreviewController : MonoBehaviour
     [SerializeField, Range(2.05f, 2.8f)] private float partFocusDistanceScale = 2.05f;
     [SerializeField, Min(0f)] private float cameraTransitionSpeed = 10f;
     [SerializeField] private Color garageBackgroundColor =
-        new Color32(218, 215, 201, 255);
+        new Color32(108, 104, 97, 255);
 
     private readonly Dictionary<string, PreviewVehicleInstance> vehicleCache =
         new(StringComparer.Ordinal);

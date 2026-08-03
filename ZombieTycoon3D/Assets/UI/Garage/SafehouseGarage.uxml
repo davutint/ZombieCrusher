@@ -22,8 +22,6 @@
 
         <ui:VisualElement class="content-row">
             <ui:VisualElement class="center-stage">
-                <ui:Label name="context-label" text="Aracı yakından incele" class="stage-context" />
-
                 <ui:VisualElement name="preview-viewport" class="preview-viewport">
                     <ui:VisualElement class="drag-hint" picking-mode="Ignore">
                         <ui:Label text="↔" class="drag-icon" />
@@ -39,7 +37,6 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement class="stats-panel">
-                    <ui:Label text="PERFORMANS" class="stats-title" />
                     <ui:VisualElement name="stat-grid" class="stat-grid" />
                 </ui:VisualElement>
 

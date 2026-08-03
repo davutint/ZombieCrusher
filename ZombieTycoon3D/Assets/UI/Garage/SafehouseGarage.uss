@@ -3016,3 +3016,537 @@
     border-top-color: rgba(103, 186, 255, 0.42);
     border-bottom-color: rgba(103, 186, 255, 0.42);
 }
+
+/* Mockup B: warm concrete stage, restrained charcoal holders, orange actions. */
+:root {
+    --garage-bg: rgba(52, 48, 43, 0.98);
+    --panel-bg: rgba(70, 66, 60, 0.94);
+    --panel-soft: rgba(87, 82, 74, 0.92);
+    --panel-hover: rgba(103, 96, 86, 0.96);
+    --border: rgba(244, 234, 216, 0.16);
+    --border-strong: rgba(244, 234, 216, 0.28);
+    --text: rgb(247, 240, 226);
+    --text-soft: rgb(211, 202, 186);
+    --text-dim: rgb(166, 158, 145);
+    --accent: rgb(241, 91, 43);
+    --accent-soft: rgba(241, 91, 43, 0.16);
+    --positive: rgb(87, 207, 145);
+    --negative: rgb(255, 105, 99);
+}
+
+.garage-root {
+    --garage-bg: rgba(52, 48, 43, 0.98);
+    --panel-bg: rgba(70, 66, 60, 0.94);
+    --panel-soft: rgba(87, 82, 74, 0.92);
+    --panel-hover: rgba(103, 96, 86, 0.96);
+    --border: rgba(244, 234, 216, 0.16);
+    --border-strong: rgba(244, 234, 216, 0.28);
+    --text: rgb(247, 240, 226);
+    --text-soft: rgb(211, 202, 186);
+    --text-dim: rgb(166, 158, 145);
+    --accent: rgb(241, 91, 43);
+    --accent-soft: rgba(241, 91, 43, 0.16);
+    --positive: rgb(87, 207, 145);
+    --negative: rgb(255, 105, 99);
+}
+
+.garage-root .topbar,
+.garage-root .footerbar {
+    background-color: rgba(52, 48, 43, 0.98);
+    border-color: rgba(244, 234, 216, 0.13);
+}
+
+.garage-root .brand-title,
+.garage-root .balance-value,
+.garage-root .top-tab--selected {
+    color: var(--text);
+}
+
+.garage-root .top-tab,
+.garage-root .top-tab:hover,
+.garage-root .top-tab:active,
+.garage-root .top-tab--selected {
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.garage-root .top-tab {
+    color: rgba(211, 202, 186, 0.68);
+}
+
+.garage-root .top-tab:hover {
+    color: var(--text-soft);
+}
+
+.garage-root .top-tab--selected {
+    color: var(--text);
+    -unity-font-style: bold;
+}
+
+.garage-root .topbar-settings-button {
+    color: var(--text-soft);
+}
+
+.garage-root .topbar-settings-button:hover {
+    color: var(--text);
+    background-color: rgba(244, 234, 216, 0.09);
+}
+
+.garage-root .content-row {
+    background-color: rgba(60, 56, 51, 0.05);
+}
+
+.garage-root .stage-context {
+    color: rgba(247, 240, 226, 0.72);
+}
+
+.garage-root .drag-hint,
+.garage-root .showroom-caption {
+    color: var(--text);
+    background-color: rgba(72, 68, 62, 0.88);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(244, 234, 216, 0.20);
+    border-right-color: rgba(244, 234, 216, 0.20);
+    border-top-color: rgba(244, 234, 216, 0.20);
+    border-bottom-color: rgba(244, 234, 216, 0.20);
+}
+
+.garage-root .drag-copy,
+.garage-root .showroom-caption-meta {
+    color: var(--text-soft);
+}
+
+.garage-root .drag-hint {
+    right: 22px;
+    top: 20px;
+    min-width: 250px;
+    height: 50px;
+    padding: 0 18px;
+    justify-content: center;
+    background-color: rgba(109, 102, 94, 0.92);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.garage-root .drag-icon {
+    margin-right: 10px;
+    color: var(--accent);
+    font-size: 17px;
+}
+
+.garage-root .drag-copy {
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: 0.75px;
+}
+
+.garage-root .showroom-caption-meta {
+    border-left-color: rgba(244, 234, 216, 0.20);
+}
+
+.garage-root .showroom-arrow {
+    color: rgb(41, 38, 34);
+    top: 46%;
+    width: 64px;
+    height: 64px;
+    background-color: rgba(239, 231, 214, 0.96);
+    border-left-color: rgba(45, 42, 38, 0.30);
+    border-right-color: rgba(45, 42, 38, 0.30);
+    border-top-color: rgba(45, 42, 38, 0.30);
+    border-bottom-color: rgba(45, 42, 38, 0.30);
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+    font-size: 40px;
+}
+
+.garage-root .showroom-arrow--left {
+    left: 27%;
+}
+
+.garage-root .showroom-arrow--right {
+    right: 22%;
+}
+
+.garage-root .showroom-arrow:hover {
+    color: rgb(255, 250, 238);
+    background-color: var(--accent);
+    border-left-color: rgba(255, 250, 238, 0.58);
+    border-right-color: rgba(255, 250, 238, 0.58);
+    border-top-color: rgba(255, 250, 238, 0.58);
+    border-bottom-color: rgba(255, 250, 238, 0.58);
+}
+
+/* Stats float directly on the stage; the slider remains a passive readout. */
+.garage-root .stats-panel {
+    left: 54px;
+    width: 344px;
+    padding: 0;
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.garage-root .stat-card {
+    height: 62px;
+    min-width: 0;
+    margin-right: 0;
+    margin-bottom: 2px;
+    padding: 0;
+    background-color: transparent;
+    border-bottom-width: 0;
+}
+
+.garage-root .stat-header,
+.garage-root .stat-value-row {
+    height: 37px;
+}
+
+.garage-root .stat-name {
+    width: 124px;
+    color: var(--text);
+    font-size: 13px;
+    letter-spacing: 0.65px;
+}
+
+.garage-root .stat-value {
+    color: var(--text);
+    font-size: 16px;
+}
+
+.garage-root .stat-delta {
+    min-width: 68px;
+    font-size: 11px;
+}
+
+.garage-root .stat-track {
+    height: 6px;
+    margin-top: 0;
+    margin-bottom: 11px;
+    background-color: rgba(244, 234, 216, 0.19);
+}
+
+.garage-root .stat-current-fill,
+.garage-root .stat-preview-fill {
+    background-color: rgba(247, 240, 226, 0.82);
+}
+
+.garage-root .stat-preview-fill--positive {
+    background-color: var(--positive);
+}
+
+.garage-root .stat-preview-fill--negative {
+    background-color: var(--negative);
+}
+
+/* Gallery identity is typography, not another card. */
+.garage-screen--gallery .context-drawer {
+    bottom: 24px;
+    width: 680px;
+    min-width: 600px;
+    max-width: 760px;
+    min-height: 106px;
+    max-height: 118px;
+    padding: 0;
+    background-color: transparent;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.garage-screen--gallery .detail-block {
+    justify-content: center;
+}
+
+.garage-screen--gallery .detail-copy {
+    flex-grow: 1;
+    align-items: center;
+    padding-right: 32px;
+}
+
+.garage-screen--gallery .detail-title {
+    color: var(--text);
+    font-size: 38px;
+    letter-spacing: 4px;
+    -unity-text-align: middle-center;
+}
+
+.garage-screen--gallery .detail-description {
+    min-height: 24px;
+    max-height: 26px;
+    margin-top: 7px;
+    color: var(--text-soft);
+    font-size: 13px;
+    letter-spacing: 1.8px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.garage-screen--gallery .detail-action-block {
+    width: 190px;
+    min-height: 58px;
+    padding-left: 30px;
+    justify-content: center;
+    border-left-width: 1px;
+    border-left-color: rgba(244, 234, 216, 0.35);
+}
+
+.garage-screen--gallery .primary-action:disabled {
+    color: var(--text-soft);
+    background-color: transparent;
+    opacity: 1;
+}
+
+.garage-screen--gallery .context-hint {
+    display: none;
+}
+
+/* Parts keeps one quiet action surface because price and ownership must read clearly. */
+.garage-screen--parts .context-drawer {
+    background-color: rgba(55, 52, 48, 0.91);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(244, 234, 216, 0.18);
+    border-right-color: rgba(244, 234, 216, 0.18);
+    border-top-color: rgba(244, 234, 216, 0.18);
+    border-bottom-color: rgba(244, 234, 216, 0.18);
+}
+
+.garage-screen--parts .detail-title,
+.garage-screen--parts .detail-description {
+    color: var(--text);
+}
+
+.garage-screen--parts .detail-description,
+.garage-screen--parts .context-hint {
+    color: var(--text-soft);
+}
+
+.garage-screen--parts .detail-action-block {
+    border-left-color: rgba(244, 234, 216, 0.18);
+}
+
+.garage-root .filter-chip {
+    color: var(--text-soft);
+    background-color: rgba(58, 55, 50, 0.86);
+    border-left-color: rgba(244, 234, 216, 0.26);
+    border-right-color: rgba(244, 234, 216, 0.26);
+    border-top-color: rgba(244, 234, 216, 0.26);
+    border-bottom-color: rgba(244, 234, 216, 0.26);
+}
+
+.garage-root .filter-chip:hover {
+    color: var(--text);
+    background-color: rgba(82, 77, 69, 0.94);
+}
+
+.garage-root .filter-chip--selected,
+.garage-root .filter-chip--selected:hover {
+    color: var(--text);
+    background-color: rgba(58, 55, 50, 0.94);
+    border-left-color: var(--accent);
+    border-right-color: var(--accent);
+    border-top-color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.garage-root .primary-action,
+.garage-root .mission-button {
+    color: rgb(255, 250, 238);
+    background-color: var(--accent);
+}
+
+.garage-root .primary-action:hover,
+.garage-root .mission-button:hover {
+    background-color: rgb(255, 112, 54);
+}
+
+.garage-root .primary-action:disabled,
+.garage-root .mission-button:disabled {
+    color: rgba(247, 240, 226, 0.48);
+    background-color: rgba(108, 102, 93, 0.68);
+}
+
+/* The mission HUD adopts the same warm holders without changing its geometry. */
+.mission-top-row,
+.mission-effect-feedback,
+.mission-pause-button {
+    color: var(--text);
+    background-color: rgba(52, 48, 43, 0.90);
+    border-left-color: rgba(244, 234, 216, 0.18);
+    border-right-color: rgba(244, 234, 216, 0.18);
+    border-top-color: rgba(244, 234, 216, 0.18);
+    border-bottom-color: rgba(244, 234, 216, 0.18);
+}
+
+.mission-strip-divider,
+.mission-run-status,
+.mission-mayhem-card,
+.mission-result-mayhem-divider,
+.mission-pause-divider {
+    border-color: rgba(244, 234, 216, 0.16);
+}
+
+.mission-strip-divider,
+.mission-result-mayhem-divider,
+.mission-pause-divider {
+    background-color: rgba(244, 234, 216, 0.16);
+}
+
+.mission-kicker,
+.mission-speed-unit,
+.mission-result-eyebrow,
+.mission-result-metric-label,
+.mission-result-mayhem-label,
+.mission-result-reward-label,
+.mission-result-reward-total-label,
+.mission-intro-index,
+.mission-intro-label,
+.mission-pause-metric-label,
+.mission-pause-hint,
+.settings-label,
+.settings-description {
+    color: var(--text-dim);
+}
+
+.mission-primary-value,
+.mission-timer,
+.mission-current-speed,
+.mission-vehicle-name,
+.mission-health-value,
+.mission-result-title,
+.mission-result-metric-value,
+.mission-result-mayhem-value,
+.mission-intro-vehicle,
+.mission-intro-value,
+.mission-pause-title,
+.mission-pause-metric-value,
+.settings-title,
+.settings-action-button {
+    color: var(--text);
+}
+
+.mission-speedometer {
+    background-color: rgba(61, 57, 52, 0.88);
+    border-left-color: rgba(244, 234, 216, 0.22);
+    border-right-color: rgba(244, 234, 216, 0.22);
+    border-top-color: rgba(244, 234, 216, 0.22);
+    border-bottom-color: rgba(244, 234, 216, 0.22);
+}
+
+.mission-speed-tick-mark {
+    background-color: rgba(244, 234, 216, 0.44);
+}
+
+.mission-speed-needle-bar {
+    background-color: var(--accent);
+}
+
+.mission-health-tag {
+    color: var(--accent);
+}
+
+.mission-speed-hub {
+    background-color: var(--text);
+}
+
+.mission-run-status {
+    border-left-color: rgba(244, 234, 216, 0.22);
+}
+
+.mission-mayhem-card {
+    border-top-color: rgba(244, 234, 216, 0.13);
+}
+
+.mission-mayhem-announcement-label {
+    background-color: rgba(52, 48, 43, 0.92);
+    border-left-color: rgba(244, 234, 216, 0.18);
+    border-right-color: rgba(244, 234, 216, 0.18);
+}
+
+.mission-mayhem-track,
+.mission-health-segment,
+.settings-slider .unity-base-slider__tracker {
+    background-color: rgba(244, 234, 216, 0.13);
+}
+
+.mission-result,
+.mission-pause,
+.settings-overlay {
+    background-color: rgba(35, 32, 29, 0.78);
+}
+
+.mission-intro {
+    background-color: rgba(43, 40, 36, 0.54);
+}
+
+.mission-result-panel,
+.mission-intro-panel,
+.mission-pause-panel,
+.settings-panel {
+    background-color: rgba(58, 54, 49, 0.97);
+    border-left-color: rgba(244, 234, 216, 0.20);
+    border-right-color: rgba(244, 234, 216, 0.20);
+    border-bottom-color: rgba(244, 234, 216, 0.20);
+}
+
+.mission-result-panel--success {
+    border-top-color: var(--positive);
+}
+
+.mission-result-panel--failure {
+    border-top-color: var(--negative);
+}
+
+.mission-result-metric,
+.mission-result-mayhem,
+.mission-pause-summary,
+.pause-secondary-button,
+.settings-action-button {
+    background-color: rgba(244, 234, 216, 0.07);
+    border-color: rgba(244, 234, 216, 0.16);
+}
+
+.mission-result-reward {
+    background-color: rgba(87, 82, 74, 0.72);
+    border-left-color: rgba(244, 234, 216, 0.18);
+    border-right-color: rgba(244, 234, 216, 0.18);
+    border-top-color: rgba(244, 234, 216, 0.18);
+    border-bottom-color: rgba(244, 234, 216, 0.18);
+}
+
+.mission-result-reward-value,
+.mission-result-description,
+.mission-intro-tagline,
+.pause-secondary-button,
+.pause-settings-button,
+.settings-close-button {
+    color: var(--text-soft);
+}
+
+.mission-result-button,
+.pause-primary-button,
+.settings-slider .unity-base-slider__dragger {
+    color: rgb(255, 250, 238);
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.mission-pause-button:hover {
+    color: rgb(255, 250, 238);
+    background-color: var(--accent);
+}

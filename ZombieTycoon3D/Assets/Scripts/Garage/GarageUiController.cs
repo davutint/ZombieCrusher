@@ -99,7 +99,6 @@ public sealed class GarageUiController : MonoBehaviour
     private Button galleryTab;
     private Button partsTab;
     private VisualElement leftFilters;
-    private Label contextLabel;
     private VisualElement statGrid;
     private Button carouselPrev;
     private Button carouselNext;
@@ -730,7 +729,6 @@ public sealed class GarageUiController : MonoBehaviour
         galleryTab = RequireElement<Button>(root, "gallery-tab");
         partsTab = RequireElement<Button>(root, "parts-tab");
         leftFilters = RequireElement<VisualElement>(root, "left-filters");
-        contextLabel = RequireElement<Label>(root, "context-label");
         statGrid = RequireElement<VisualElement>(root, "stat-grid");
         carouselPrev = RequireElement<Button>(root, "carousel-prev");
         carouselNext = RequireElement<Button>(root, "carousel-next");
@@ -924,11 +922,9 @@ public sealed class GarageUiController : MonoBehaviour
 
         if (activeScreen == GarageScreen.Gallery)
         {
-            contextLabel.text = "Aracı yakından incele · oklarla vitrini değiştir";
             return;
         }
 
-        contextLabel.text = "Montaj noktasını seç · oklarla uyumlu parçaları incele";
         NormalizePartsFilter(buildState.DisplayedVehicle);
         PopulatePartFilters();
     }
@@ -1195,8 +1191,10 @@ public sealed class GarageUiController : MonoBehaviour
     {
         detailMechanics.style.display = DisplayStyle.None;
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
-        detailTitle.text = vehicle != null ? vehicle.DisplayName : "Araç seç";
-        detailDescription.text = vehicle != null ? vehicle.Description : string.Empty;
+        detailTitle.text = vehicle != null
+            ? vehicle.DisplayName.ToUpperInvariant()
+            : "ARAÇ SEÇ";
+        detailDescription.text = GetVehicleGalleryTagline(vehicle);
 
         bool owned = buildState.IsVehicleOwned(vehicle);
         bool selected = vehicle != null && vehicle == buildState.SelectedVehicle;
@@ -1219,6 +1217,32 @@ public sealed class GarageUiController : MonoBehaviour
             : vehicle != null && economy.CanAfford(vehicle.Price)
                 ? "Satın alma aracı envantere ekler; otomatik seçmez."
                 : "Bu araç için yeterli Hurda yok.";
+    }
+
+    private static string GetVehicleGalleryTagline(GarageVehicleDefinition vehicle)
+    {
+        if (vehicle == null)
+        {
+            return string.Empty;
+        }
+
+        switch (vehicle.VehicleId)
+        {
+            case "ambulance":
+                return "DENGELİ • DAYANIKLI";
+            case "buggy":
+                return "HAFİF • HIZLI • ÇEVİK";
+            case "prison-bus":
+                return "AĞIR • DAYANIKLI • YIKICI";
+            case "muscle-car":
+                return "HIZLI • GÜÇLÜ";
+            case "ute":
+                return "DENGELİ • GÜÇLÜ";
+            case "golf-cart":
+                return "HAFİF • ÇEVİK • KIRILGAN";
+            default:
+                return vehicle.Description.ToUpperInvariant();
+        }
     }
 
     private void PopulatePartDetails()
