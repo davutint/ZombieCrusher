@@ -87,7 +87,16 @@
         </ui:VisualElement>
 
         <ui:VisualElement class="mission-telemetry-stack">
-            <ui:Label name="mission-effect-feedback" text="" class="mission-effect-feedback" />
+            <ui:VisualElement name="mission-effect-feedback" class="mission-effect-feedback">
+                <ui:VisualElement class="mission-effect-feedback-strike">
+                    <ui:VisualElement class="mission-effect-feedback-strike-main" />
+                    <ui:VisualElement class="mission-effect-feedback-strike-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-effect-feedback-copy">
+                    <ui:Label name="mission-effect-feedback-title" text="BOUNTY TARGET" class="mission-effect-feedback-title" />
+                    <ui:Label name="mission-effect-feedback-detail" text="+173 SCORE" class="mission-effect-feedback-detail" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:VisualElement class="mission-vehicle-panel">
                 <ui:VisualElement name="mission-speedometer" class="mission-speedometer">
                     <ui:VisualElement class="mission-speed-tick speed-tick--0"><ui:VisualElement class="mission-speed-tick-mark" /></ui:VisualElement>
@@ -130,11 +139,13 @@
 
                     <ui:VisualElement name="mission-mayhem-card" class="mission-mayhem-card mayhem-tier--none">
                         <ui:VisualElement class="mission-mayhem-header">
-                            <ui:Label name="mission-mayhem-tier" text="BUILD THE HEAT" class="mission-mayhem-tier" />
+                            <ui:Label name="mission-mayhem-tier" text="MAYHEM" class="mission-mayhem-tier" />
                             <ui:Label name="mission-mayhem-multiplier" text="x1.00" class="mission-mayhem-multiplier" />
                         </ui:VisualElement>
                         <ui:VisualElement class="mission-mayhem-track">
-                            <ui:VisualElement name="mission-mayhem-fill" class="mission-mayhem-fill" />
+                            <ui:VisualElement name="mission-mayhem-fill" class="mission-mayhem-fill">
+                                <ui:VisualElement name="mission-mayhem-fill-head" class="mission-mayhem-fill-head" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -142,7 +153,24 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="mission-mayhem-announcement" class="mission-mayhem-announcement mayhem-tier--none">
-            <ui:Label name="mission-mayhem-announcement-label" text="RAMPAGE" class="mission-mayhem-announcement-label" />
+            <ui:VisualElement class="mission-mayhem-streak-pack mission-mayhem-streak-pack--left">
+                <ui:VisualElement class="mission-mayhem-streak mission-mayhem-streak--long" />
+                <ui:VisualElement class="mission-mayhem-streak mission-mayhem-streak--medium" />
+                <ui:VisualElement class="mission-mayhem-streak mission-mayhem-streak--short" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-mayhem-announcement-copy">
+                <ui:Label name="mission-mayhem-announcement-label" text="RAMPAGE" class="mission-mayhem-announcement-label" />
+                <ui:VisualElement class="mission-mayhem-announcement-meta">
+                    <ui:VisualElement class="mission-mayhem-announcement-rule" />
+                    <ui:Label name="mission-mayhem-announcement-multiplier" text="x1.15" class="mission-mayhem-announcement-multiplier" />
+                    <ui:VisualElement class="mission-mayhem-announcement-rule" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-mayhem-streak-pack mission-mayhem-streak-pack--right">
+                <ui:VisualElement class="mission-mayhem-streak mission-mayhem-streak--long" />
+                <ui:VisualElement class="mission-mayhem-streak mission-mayhem-streak--medium" />
+                <ui:VisualElement class="mission-mayhem-streak mission-mayhem-streak--short" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 
@@ -206,13 +234,12 @@
     </ui:VisualElement>
 
     <ui:VisualElement name="mission-intro" class="mission-intro">
-        <ui:VisualElement class="mission-intro-panel">
-            <ui:VisualElement class="mission-intro-header">
-                <ui:Label text="SAFEHOUSE" class="mission-intro-brand" />
-                <ui:Label text="MISSION 01" class="mission-intro-index" />
+        <ui:VisualElement class="mission-intro-stage">
+            <ui:VisualElement class="mission-intro-title-lockup">
+                <ui:VisualElement class="mission-intro-title-rule" />
+                <ui:Label name="mission-intro-vehicle" text="AMBULANCE" class="mission-intro-vehicle" />
+                <ui:VisualElement class="mission-intro-title-rule mission-intro-title-rule--right" />
             </ui:VisualElement>
-            <ui:Label name="mission-intro-vehicle" text="AMBULANCE" class="mission-intro-vehicle" />
-            <ui:VisualElement class="mission-intro-rule" />
             <ui:VisualElement class="mission-intro-objectives">
                 <ui:VisualElement class="mission-intro-objective">
                     <ui:Label text="TARGET" class="mission-intro-label" />
@@ -224,8 +251,14 @@
                     <ui:Label text="02:00" class="mission-intro-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="mission-intro-countdown" text="3" class="mission-intro-countdown" />
-            <ui:Label text="DRIVE · CRUSH · SURVIVE" class="mission-intro-tagline" />
+            <ui:VisualElement class="mission-intro-countdown-row">
+                <ui:VisualElement class="mission-intro-countdown-rule" />
+                <ui:VisualElement name="mission-intro-countdown-shell" class="mission-intro-countdown-shell">
+                    <ui:VisualElement class="mission-intro-countdown-ring" />
+                    <ui:Label name="mission-intro-countdown" text="3" class="mission-intro-countdown" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mission-intro-countdown-rule mission-intro-countdown-rule--right" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 

@@ -11,8 +11,24 @@ public sealed class GarageUiController : MonoBehaviour
     private const float MissionSpeedNeedleSmoothTime = 0.045f;
     private const float MissionSpeedSnapThreshold = 0.015f;
     private const float MissionDamagePulseDuration = 0.18f;
+    private const float MissionCounterPulseDuration = 0.24f;
+    private const float MissionFeedbackPulseDuration = 0.18f;
+    private const float MissionIntroCountdownPulseDuration = 0.24f;
+    private const float MissionMayhemCardPulseDuration = 0.24f;
+    private const float MissionMayhemFillSmoothTime = 0.10f;
+    private const float MayhemAnnouncementDuration = 0.72f;
+    private const float MayhemAnnouncementEnterDuration = 0.12f;
+    private const float MayhemAnnouncementSettleDuration = 0.11f;
+    private const float MayhemAnnouncementExitStart = 0.50f;
     private const string MasterVolumeKey = "zt3d.settings.master-volume";
     private const float SettingsSaveDelay = 0.35f;
+
+    private static readonly Color MissionPrimaryTextColor =
+        new Color32(247, 240, 226, 255);
+    private static readonly Color MissionKillsPulseColor =
+        new Color32(255, 211, 92, 255);
+    private static readonly Color MissionScorePulseColor =
+        new Color32(255, 151, 60, 255);
 
     private enum GarageScreen
     {
@@ -51,8 +67,10 @@ public sealed class GarageUiController : MonoBehaviour
     private Label missionMayhemTier;
     private Label missionMayhemMultiplier;
     private VisualElement missionMayhemFill;
+    private VisualElement missionMayhemFillHead;
     private VisualElement missionMayhemAnnouncement;
     private Label missionMayhemAnnouncementLabel;
+    private Label missionMayhemAnnouncementMultiplier;
     private Label missionVehicleName;
     private VisualElement missionRunStatus;
     private VisualElement missionSpeedometer;
@@ -64,6 +82,7 @@ public sealed class GarageUiController : MonoBehaviour
     private VisualElement missionResult;
     private VisualElement missionIntro;
     private Label missionIntroVehicle;
+    private VisualElement missionIntroCountdownShell;
     private Label missionIntroCountdown;
     private Button missionPauseButton;
     private VisualElement missionPause;
@@ -114,17 +133,35 @@ public sealed class GarageUiController : MonoBehaviour
     private Label balanceValue;
     private Button missionButton;
     private VisualElement previewViewport;
-    private Label missionEffectFeedback;
+    private VisualElement missionEffectFeedback;
+    private Label missionEffectFeedbackTitle;
+    private Label missionEffectFeedbackDetail;
 
     private bool pointerDragging;
     private Vector2 previousPointerPosition;
+    private float mayhemAnnouncementStartTime;
     private float mayhemAnnouncementHideTime;
     private float mayhemPulseEndTime;
+    private float mayhemPulseStartTime;
     private bool mayhemAnnouncementVisible;
     private bool mayhemCardPulsing;
     private bool missionDamagePulsing;
     private float missionDamagePulseEndTime;
     private int displayedMissionSeconds = int.MinValue;
+    private int displayedMissionKills = int.MinValue;
+    private int displayedMissionKillTarget = int.MinValue;
+    private int missionScoreTarget = int.MinValue;
+    private float missionKillsPulseStartTime;
+    private float missionScorePulseStartTime;
+    private bool missionKillsPulsing;
+    private bool missionScorePulsing;
+    private bool missionEffectFeedbackPulsing;
+    private float missionEffectFeedbackPulseStartTime;
+    private bool missionIntroCountdownPulsing;
+    private float missionIntroCountdownPulseStartTime;
+    private float targetMissionMayhemFill;
+    private float displayedMissionMayhemFill = float.NaN;
+    private float missionMayhemFillVelocity;
     private int displayedMissionSpeed = int.MinValue;
     private int displayedMissionHealth = int.MinValue;
     private int displayedMissionMaxHealth = int.MinValue;
@@ -218,19 +255,15 @@ public sealed class GarageUiController : MonoBehaviour
     private void Update()
     {
         float currentTime = Time.unscaledTime;
-        if (mayhemAnnouncementVisible
-            && currentTime >= mayhemAnnouncementHideTime)
+        if (mayhemAnnouncementVisible)
         {
-            mayhemAnnouncementVisible = false;
-            missionMayhemAnnouncement.style.display = DisplayStyle.None;
+            AnimateMayhemAnnouncement(currentTime);
         }
 
-        if (mayhemCardPulsing && currentTime >= mayhemPulseEndTime)
-        {
-            mayhemCardPulsing = false;
-            missionMayhemCard.RemoveFromClassList(
-                "mission-mayhem-card--pulse");
-        }
+        AnimateMissionCounters(currentTime);
+        AnimateMissionEffectFeedback(currentTime);
+        AnimateMissionIntroCountdown(currentTime);
+        AnimateMissionMayhem(currentTime);
 
         if (missionDamagePulsing
             && currentTime >= missionDamagePulseEndTime)
@@ -264,6 +297,8 @@ public sealed class GarageUiController : MonoBehaviour
         missionPauseButton.style.display = DisplayStyle.None;
         CloseSettingsPanel();
         HideMayhemAnnouncement();
+        ResetMissionMayhemDisplay();
+        ResetMissionCounterAnimations();
         missionSpeedAnimationEnabled = false;
         ResetMissionDamagePulse();
         previewController.SetVisible(true);
@@ -291,8 +326,12 @@ public sealed class GarageUiController : MonoBehaviour
             ? "VEHICLE"
             : vehicleName.ToUpperInvariant();
         missionIntroCountdown.text = "3";
+        missionIntroCountdownShell.EnableInClassList(
+            "mission-intro-countdown-shell--launch",
+            false);
         missionIntro.style.display = DisplayStyle.Flex;
         missionPauseButton.style.display = DisplayStyle.None;
+        StartMissionIntroCountdownPulse();
     }
 
     public void UpdateMissionIntroCountdown(string value)
@@ -300,11 +339,25 @@ public sealed class GarageUiController : MonoBehaviour
         if (missionIntroCountdown != null)
         {
             missionIntroCountdown.text = value;
+            missionIntroCountdownShell.EnableInClassList(
+                "mission-intro-countdown-shell--launch",
+                string.Equals(
+                    value,
+                    "CRUSH!",
+                    StringComparison.OrdinalIgnoreCase));
+            StartMissionIntroCountdownPulse();
         }
     }
 
     public void CompleteMissionIntro()
     {
+        missionIntroCountdownPulsing = false;
+        if (missionIntroCountdownShell != null)
+        {
+            missionIntroCountdownShell.style.opacity = 1f;
+            SetElementScale(missionIntroCountdownShell, 1f);
+        }
+
         missionIntro.style.display = DisplayStyle.None;
         missionPauseButton.style.display = DisplayStyle.Flex;
     }
@@ -370,8 +423,31 @@ public sealed class GarageUiController : MonoBehaviour
             return;
         }
 
-        missionKills.text = $"{progress.Kills} / {progress.KillTarget}";
-        missionScore.text = progress.Score.ToString("N0");
+        float currentTime = Time.unscaledTime;
+        if (displayedMissionKills != progress.Kills
+            || displayedMissionKillTarget != progress.KillTarget)
+        {
+            bool shouldResetPulse = displayedMissionKills != int.MinValue
+                && progress.Kills < displayedMissionKills;
+            bool shouldPulse = displayedMissionKills != int.MinValue
+                && progress.Kills > displayedMissionKills;
+            displayedMissionKills = progress.Kills;
+            displayedMissionKillTarget = progress.KillTarget;
+            missionKills.text =
+                $"{progress.Kills} / {progress.KillTarget}";
+            if (shouldPulse)
+            {
+                missionKillsPulsing = true;
+                missionKillsPulseStartTime = currentTime;
+            }
+            else if (shouldResetPulse)
+            {
+                missionKillsPulsing = false;
+                ResetMissionValueStyle(missionKills);
+            }
+        }
+
+        UpdateMissionScore(progress.Score, currentTime);
         missionObjectiveCard.EnableInClassList(
             "mission-objective-card--complete",
             progress.TargetReached);
@@ -387,8 +463,14 @@ public sealed class GarageUiController : MonoBehaviour
         missionMayhemTier.text = MayhemRules.GetLabel(progress.Tier);
         missionMayhemMultiplier.text =
             $"x{progress.ScoreMultiplier:0.00}";
-        missionMayhemFill.style.width =
-            Length.Percent(Mathf.Clamp01(progress.Meter01) * 100f);
+        targetMissionMayhemFill = Mathf.Clamp01(progress.Meter01);
+        if (float.IsNaN(displayedMissionMayhemFill))
+        {
+            displayedMissionMayhemFill = targetMissionMayhemFill;
+            missionMayhemFillVelocity = 0f;
+            ApplyMissionMayhemFill(displayedMissionMayhemFill);
+        }
+
         ApplyMayhemTierClass(missionMayhemCard, progress.Tier);
     }
 
@@ -400,17 +482,25 @@ public sealed class GarageUiController : MonoBehaviour
         }
 
         missionMayhemAnnouncementLabel.text =
-            $"{MayhemRules.GetLabel(progress.Tier)}   x{progress.ScoreMultiplier:0.00}";
+            MayhemRules.GetLabel(progress.Tier);
+        missionMayhemAnnouncementMultiplier.text =
+            $"x{progress.ScoreMultiplier:0.00}";
         ApplyMayhemTierClass(
             missionMayhemAnnouncement,
             progress.Tier);
         missionMayhemAnnouncement.style.display = DisplayStyle.Flex;
+        missionMayhemAnnouncement.style.opacity = 0f;
+        SetElementScale(missionMayhemAnnouncement, 0.74f);
         mayhemAnnouncementVisible = true;
-        mayhemAnnouncementHideTime = Time.unscaledTime + 0.95f;
+        mayhemAnnouncementStartTime = Time.unscaledTime;
+        mayhemAnnouncementHideTime =
+            mayhemAnnouncementStartTime + MayhemAnnouncementDuration;
 
         missionMayhemCard.AddToClassList("mission-mayhem-card--pulse");
         mayhemCardPulsing = true;
-        mayhemPulseEndTime = Time.unscaledTime + 0.24f;
+        mayhemPulseStartTime = Time.unscaledTime;
+        mayhemPulseEndTime =
+            mayhemPulseStartTime + MissionMayhemCardPulseDuration;
     }
 
     public void ConfigureMissionVehicle(
@@ -553,8 +643,21 @@ public sealed class GarageUiController : MonoBehaviour
             return;
         }
 
-        missionEffectFeedback.text = message;
+        SplitMissionFeedback(
+            message,
+            out string feedbackTitle,
+            out string feedbackDetail);
+        missionEffectFeedbackTitle.text = feedbackTitle;
+        missionEffectFeedbackDetail.text = feedbackDetail;
+        missionEffectFeedbackDetail.style.display =
+            string.IsNullOrWhiteSpace(feedbackDetail)
+                ? DisplayStyle.None
+                : DisplayStyle.Flex;
         missionEffectFeedback.style.display = DisplayStyle.Flex;
+        missionEffectFeedback.style.opacity = 0f;
+        SetElementScale(missionEffectFeedback, 0.82f);
+        missionEffectFeedbackPulsing = true;
+        missionEffectFeedbackPulseStartTime = Time.unscaledTime;
         missionEffectFeedback.EnableInClassList(
             "mission-effect-feedback--impact",
             tone == GarageAttachmentFeedbackTone.Impact);
@@ -570,6 +673,9 @@ public sealed class GarageUiController : MonoBehaviour
     {
         if (missionEffectFeedback != null)
         {
+            missionEffectFeedbackPulsing = false;
+            missionEffectFeedback.style.opacity = 0f;
+            SetElementScale(missionEffectFeedback, 0.82f);
             missionEffectFeedback.style.display = DisplayStyle.None;
         }
     }
@@ -649,10 +755,16 @@ public sealed class GarageUiController : MonoBehaviour
             RequireElement<Label>(root, "mission-mayhem-multiplier");
         missionMayhemFill =
             RequireElement<VisualElement>(root, "mission-mayhem-fill");
+        missionMayhemFillHead =
+            RequireElement<VisualElement>(root, "mission-mayhem-fill-head");
         missionMayhemAnnouncement =
             RequireElement<VisualElement>(root, "mission-mayhem-announcement");
         missionMayhemAnnouncementLabel =
             RequireElement<Label>(root, "mission-mayhem-announcement-label");
+        missionMayhemAnnouncementMultiplier =
+            RequireElement<Label>(
+                root,
+                "mission-mayhem-announcement-multiplier");
         missionVehicleName =
             RequireElement<Label>(root, "mission-vehicle-name");
         missionRunStatus =
@@ -674,6 +786,10 @@ public sealed class GarageUiController : MonoBehaviour
         missionIntro = RequireElement<VisualElement>(root, "mission-intro");
         missionIntroVehicle =
             RequireElement<Label>(root, "mission-intro-vehicle");
+        missionIntroCountdownShell =
+            RequireElement<VisualElement>(
+                root,
+                "mission-intro-countdown-shell");
         missionIntroCountdown =
             RequireElement<Label>(root, "mission-intro-countdown");
         missionPauseButton =
@@ -746,7 +862,11 @@ public sealed class GarageUiController : MonoBehaviour
         missionButton = RequireElement<Button>(root, "mission-button");
         previewViewport = RequireElement<VisualElement>(root, "preview-viewport");
         missionEffectFeedback =
-            RequireElement<Label>(root, "mission-effect-feedback");
+            RequireElement<VisualElement>(root, "mission-effect-feedback");
+        missionEffectFeedbackTitle =
+            RequireElement<Label>(root, "mission-effect-feedback-title");
+        missionEffectFeedbackDetail =
+            RequireElement<Label>(root, "mission-effect-feedback-detail");
 
         galleryTab.clicked += () => SwitchScreen(GarageScreen.Gallery);
         partsTab.clicked += () => SwitchScreen(GarageScreen.Parts);
@@ -838,11 +958,340 @@ public sealed class GarageUiController : MonoBehaviour
         mayhemCardPulsing = false;
         if (missionMayhemAnnouncement != null)
         {
+            missionMayhemAnnouncement.style.opacity = 0f;
+            SetElementScale(missionMayhemAnnouncement, 0.74f);
             missionMayhemAnnouncement.style.display = DisplayStyle.None;
         }
 
         missionMayhemCard?.RemoveFromClassList(
             "mission-mayhem-card--pulse");
+        SetElementScale(missionMayhemTier, 1f);
+        SetElementScale(missionMayhemMultiplier, 1f);
+    }
+
+    private void AnimateMissionMayhem(float currentTime)
+    {
+        if (missionMayhemFill == null || missionMayhemFillHead == null)
+        {
+            return;
+        }
+
+        if (!float.IsNaN(displayedMissionMayhemFill))
+        {
+            displayedMissionMayhemFill = Mathf.SmoothDamp(
+                displayedMissionMayhemFill,
+                targetMissionMayhemFill,
+                ref missionMayhemFillVelocity,
+                MissionMayhemFillSmoothTime,
+                Mathf.Infinity,
+                Time.unscaledDeltaTime);
+            if (Mathf.Abs(
+                    displayedMissionMayhemFill
+                    - targetMissionMayhemFill) < 0.001f)
+            {
+                displayedMissionMayhemFill = targetMissionMayhemFill;
+                missionMayhemFillVelocity = 0f;
+            }
+
+            ApplyMissionMayhemFill(displayedMissionMayhemFill);
+            if (displayedMissionMayhemFill > 0.008f)
+            {
+                float energyPulse =
+                    (Mathf.Sin(currentTime * 11f) + 1f) * 0.5f;
+                missionMayhemFillHead.style.opacity =
+                    Mathf.Lerp(0.50f, 1f, energyPulse);
+                SetElementScale(
+                    missionMayhemFillHead,
+                    Mathf.Lerp(0.82f, 1.24f, energyPulse));
+            }
+        }
+
+        if (!mayhemCardPulsing)
+        {
+            return;
+        }
+
+        float pulseProgress = Mathf.InverseLerp(
+            mayhemPulseStartTime,
+            mayhemPulseEndTime,
+            currentTime);
+        if (currentTime >= mayhemPulseEndTime)
+        {
+            mayhemCardPulsing = false;
+            missionMayhemCard.RemoveFromClassList(
+                "mission-mayhem-card--pulse");
+            SetElementScale(missionMayhemTier, 1f);
+            SetElementScale(missionMayhemMultiplier, 1f);
+            return;
+        }
+
+        float pulse = Mathf.Sin(pulseProgress * Mathf.PI);
+        SetElementScale(missionMayhemTier, 1f + pulse * 0.12f);
+        SetElementScale(missionMayhemMultiplier, 1f + pulse * 0.18f);
+    }
+
+    private void ApplyMissionMayhemFill(float fill01)
+    {
+        float clampedFill = Mathf.Clamp01(fill01);
+        missionMayhemFill.style.width = Length.Percent(clampedFill * 100f);
+        missionMayhemFillHead.style.display = clampedFill > 0.008f
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+    }
+
+    private void ResetMissionMayhemDisplay()
+    {
+        targetMissionMayhemFill = 0f;
+        displayedMissionMayhemFill = float.NaN;
+        missionMayhemFillVelocity = 0f;
+        if (missionMayhemFill != null)
+        {
+            missionMayhemFill.style.width = Length.Percent(0f);
+        }
+
+        if (missionMayhemFillHead != null)
+        {
+            missionMayhemFillHead.style.display = DisplayStyle.None;
+            missionMayhemFillHead.style.opacity = 0f;
+            SetElementScale(missionMayhemFillHead, 1f);
+        }
+    }
+
+    private void AnimateMayhemAnnouncement(float currentTime)
+    {
+        if (missionMayhemAnnouncement == null)
+        {
+            return;
+        }
+
+        float elapsed = currentTime - mayhemAnnouncementStartTime;
+        if (currentTime >= mayhemAnnouncementHideTime)
+        {
+            HideMayhemAnnouncement();
+            return;
+        }
+
+        float opacity;
+        float scale;
+        if (elapsed < MayhemAnnouncementEnterDuration)
+        {
+            float enter = Mathf.Clamp01(
+                elapsed / MayhemAnnouncementEnterDuration);
+            float easedEnter = 1f - Mathf.Pow(1f - enter, 3f);
+            opacity = easedEnter;
+            scale = Mathf.LerpUnclamped(0.74f, 1.08f, easedEnter);
+        }
+        else if (elapsed < MayhemAnnouncementEnterDuration
+                 + MayhemAnnouncementSettleDuration)
+        {
+            float settle = Mathf.InverseLerp(
+                MayhemAnnouncementEnterDuration,
+                MayhemAnnouncementEnterDuration
+                    + MayhemAnnouncementSettleDuration,
+                elapsed);
+            opacity = 1f;
+            scale = Mathf.Lerp(1.08f, 1f, settle);
+        }
+        else if (elapsed < MayhemAnnouncementExitStart)
+        {
+            opacity = 1f;
+            scale = 1f;
+        }
+        else
+        {
+            float exit = Mathf.InverseLerp(
+                MayhemAnnouncementExitStart,
+                MayhemAnnouncementDuration,
+                elapsed);
+            float easedExit = exit * exit;
+            opacity = 1f - easedExit;
+            scale = Mathf.Lerp(1f, 1.06f, easedExit);
+        }
+
+        missionMayhemAnnouncement.style.opacity = opacity;
+        SetElementScale(missionMayhemAnnouncement, scale);
+    }
+
+    private void AnimateMissionEffectFeedback(float currentTime)
+    {
+        if (!missionEffectFeedbackPulsing || missionEffectFeedback == null)
+        {
+            return;
+        }
+
+        float progress = Mathf.Clamp01(
+            (currentTime - missionEffectFeedbackPulseStartTime)
+            / MissionFeedbackPulseDuration);
+        if (progress >= 1f)
+        {
+            missionEffectFeedbackPulsing = false;
+            missionEffectFeedback.style.opacity = 1f;
+            SetElementScale(missionEffectFeedback, 1f);
+            return;
+        }
+
+        float eased = 1f - Mathf.Pow(1f - progress, 3f);
+        float scale = progress < 0.66f
+            ? Mathf.Lerp(0.82f, 1.06f, eased)
+            : Mathf.Lerp(1.06f, 1f, Mathf.InverseLerp(0.66f, 1f, progress));
+        missionEffectFeedback.style.opacity = eased;
+        SetElementScale(missionEffectFeedback, scale);
+    }
+
+    private void StartMissionIntroCountdownPulse()
+    {
+        if (missionIntroCountdownShell == null)
+        {
+            return;
+        }
+
+        missionIntroCountdownPulsing = true;
+        missionIntroCountdownPulseStartTime = Time.unscaledTime;
+        missionIntroCountdownShell.style.opacity = 0.12f;
+        SetElementScale(missionIntroCountdownShell, 0.70f);
+    }
+
+    private void AnimateMissionIntroCountdown(float currentTime)
+    {
+        if (!missionIntroCountdownPulsing
+            || missionIntroCountdownShell == null)
+        {
+            return;
+        }
+
+        float progress = Mathf.Clamp01(
+            (currentTime - missionIntroCountdownPulseStartTime)
+            / MissionIntroCountdownPulseDuration);
+        if (progress >= 1f)
+        {
+            missionIntroCountdownPulsing = false;
+            missionIntroCountdownShell.style.opacity = 1f;
+            SetElementScale(missionIntroCountdownShell, 1f);
+            return;
+        }
+
+        float eased = 1f - Mathf.Pow(1f - progress, 3f);
+        float scale = progress < 0.70f
+            ? Mathf.Lerp(0.70f, 1.08f, eased)
+            : Mathf.Lerp(1.08f, 1f, Mathf.InverseLerp(0.70f, 1f, progress));
+        missionIntroCountdownShell.style.opacity = eased;
+        SetElementScale(missionIntroCountdownShell, scale);
+    }
+
+    private static void SplitMissionFeedback(
+        string message,
+        out string title,
+        out string detail)
+    {
+        string safeMessage = message?.Trim() ?? string.Empty;
+        int separatorIndex = safeMessage.IndexOf('\u00b7');
+        if (separatorIndex <= 0)
+        {
+            title = safeMessage;
+            detail = string.Empty;
+            return;
+        }
+
+        title = safeMessage.Substring(0, separatorIndex).Trim();
+        detail = safeMessage.Substring(separatorIndex + 1).Trim();
+    }
+
+    private void UpdateMissionScore(int score, float currentTime)
+    {
+        if (score == missionScoreTarget)
+        {
+            return;
+        }
+
+        bool shouldResetPulse = missionScoreTarget != int.MinValue
+            && score < missionScoreTarget;
+        bool shouldPulse = missionScoreTarget != int.MinValue
+            && score > missionScoreTarget;
+        missionScoreTarget = score;
+        missionScore.text = score.ToString("N0");
+        if (shouldPulse)
+        {
+            missionScorePulsing = true;
+            missionScorePulseStartTime = currentTime;
+        }
+        else if (shouldResetPulse)
+        {
+            missionScorePulsing = false;
+            ResetMissionValueStyle(missionScore);
+        }
+    }
+
+    private void AnimateMissionCounters(float currentTime)
+    {
+        if (missionKillsPulsing)
+        {
+            missionKillsPulsing = AnimateMissionValuePulse(
+                missionKills,
+                currentTime - missionKillsPulseStartTime,
+                0.18f,
+                MissionKillsPulseColor);
+        }
+
+        if (missionScorePulsing)
+        {
+            missionScorePulsing = AnimateMissionValuePulse(
+                missionScore,
+                currentTime - missionScorePulseStartTime,
+                0.14f,
+                MissionScorePulseColor);
+        }
+    }
+
+    private void ResetMissionCounterAnimations()
+    {
+        missionKillsPulsing = false;
+        missionScorePulsing = false;
+        ResetMissionValueStyle(missionKills);
+        ResetMissionValueStyle(missionScore);
+    }
+
+    private static bool AnimateMissionValuePulse(
+        Label label,
+        float elapsed,
+        float amplitude,
+        Color pulseColor)
+    {
+        float progress = elapsed / MissionCounterPulseDuration;
+        if (progress >= 1f)
+        {
+            ResetMissionValueStyle(label);
+            return false;
+        }
+
+        float pulse = Mathf.Sin(Mathf.Clamp01(progress) * Mathf.PI);
+        SetElementScale(label, 1f + pulse * amplitude);
+        label.style.color = Color.Lerp(
+            MissionPrimaryTextColor,
+            pulseColor,
+            pulse);
+        return true;
+    }
+
+    private static void ResetMissionValueStyle(VisualElement element)
+    {
+        if (element == null)
+        {
+            return;
+        }
+
+        SetElementScale(element, 1f);
+        element.style.color = MissionPrimaryTextColor;
+    }
+
+    private static void SetElementScale(
+        VisualElement element,
+        float uniformScale)
+    {
+        Scale scale = default;
+        scale.value = new Vector3(uniformScale, uniformScale, 1f);
+        StyleScale styleScale = default;
+        styleScale.value = scale;
+        element.style.scale = styleScale;
     }
 
     private static void ApplyMayhemTierClass(
