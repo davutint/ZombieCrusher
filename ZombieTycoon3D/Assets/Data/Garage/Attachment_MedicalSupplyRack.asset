@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_MedicalSupplyRack
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: medical-supply-rack
-  displayName: "Medikal Tavan Raf\u0131"
-  description: "G\xF6rev boyunca s\u0131n\u0131rl\u0131 acil onar\u0131m sa\u011Flayan
-    medikal ekipman paketi."
+  displayName: Medical Roof Rack
+  description: A medical equipment pack that provides limited emergency repairs during
+    a mission.
   slot: 5
   visualPrefab: {fileID: 1553468074736348, guid: 1b14b8e14eb429e49a3aaacbc2f0e48e, type: 3}
   compatibleVehicles:
   - vehicleId: ambulance
+    anchor: 0
     localPosition: {x: 0, y: 2.95, z: -0.55}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.9, y: 0.9, z: 0.9}
@@ -42,9 +43,9 @@ MonoBehaviour:
     repairEveryKills: 20
     repairAmount: 5
     maximumRepairs: 4
-    feedbackLabel: "MED\u0130KAL RAF"
+    feedbackLabel: MEDICAL RACK
     feedbackTone: 2
-  gameplayEffectSummary: "Her 20 kill'de 5 HP onar\u0131r; g\xF6rev ba\u015F\u0131na
-    en fazla 4 kez \xE7al\u0131\u015F\u0131r ve +8 HP sa\u011Flar."
-  tradeoffSummary: "Tavan y\xFCk\xFC -1 km/h h\u0131z, -0.5 h\u0131zlanma ve -0.5
-    kontrol."
+  gameplayEffectSummary: Repairs 5 HP every 20 kills, up to 4 times per mission,
+    and adds 8 maximum HP.
+  tradeoffSummary: The roof load costs 1 km/h top speed, 0.5 acceleration and 0.5
+    handling.

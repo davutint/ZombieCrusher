@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_ClosedPushCage
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: closed-push-cage
-  displayName: "Kapal\u0131 \u0130tme Kafesi"
-  description: "Muscle Car'\u0131n \xF6n\xFCn\xFC kapatan sa\u011Flam itme kafesi;
-    d\xFCz hat darbelerini g\xFC\xE7lendirir."
+  displayName: Enclosed Push Cage
+  description: A reinforced cage covering the Muscle Car's front end, built to strengthen
+    straight-line impacts.
   slot: 0
   visualPrefab: {fileID: 1401668275333364, guid: 556549befaca7314bb70bd44ef086f25, type: 3}
   compatibleVehicles:
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: 0, y: 0.64, z: 2.94}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.05, y: 1.05, z: 1.05}
@@ -42,8 +43,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "\u0130TME KAFES\u0130 \xB7 G\xDC\xC7L\xDC DARBE"
+    feedbackLabel: "PUSH CAGE \xB7 HEAVY IMPACT"
     feedbackTone: 0
-  gameplayEffectSummary: "\xD6n temas g\xFCc\xFCn\xFC %25 art\u0131r\u0131r; +10
-    HP ve +0.30x \xE7arpma g\xFCc\xFC sa\u011Flar."
-  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."
+  gameplayEffectSummary: Boosts frontal contact power by 25% and adds 10 HP plus
+    0.30x impact power.
+  tradeoffSummary: -3 km/h top speed, -1.0 acceleration and -0.5 handling.

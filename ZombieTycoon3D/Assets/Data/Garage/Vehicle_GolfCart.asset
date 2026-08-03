@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
   vehicleId: golf-cart
   displayName: Golf Cart
-  description: "Ucuz ve a\u015F\u0131r\u0131 \xE7evik; d\xFC\u015F\xFCk dayan\u0131kl\u0131l\u0131k
-    ile \xE7arpma g\xFCc\xFC dikkatli s\xFCr\xFC\u015F ister."
+  description: Cheap and extremely agile; low durability and impact power demand
+    careful driving.
   visualPrefab: {fileID: 1170052622600160, guid: 2c197f9e9c22d52449cb461925a5876a, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1

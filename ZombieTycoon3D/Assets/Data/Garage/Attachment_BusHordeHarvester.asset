@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_BusHordeHarvester
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: bus-horde-harvester
-  displayName: "S\xFCr\xFC Bi\xE7erd\xF6veri"
-  description: "Prison Bus i\xE7in a\u011F\u0131r \xF6n bi\xE7erd\xF6ver. Kalabal\u0131\u011F\u0131
-    yarar fakat h\u0131zlanma ve manevray\u0131 d\xFC\u015F\xFCr\xFCr."
+  displayName: Horde Harvester
+  description: A heavy front harvester built for the Prison Bus. Cuts through crowds
+    but reduces acceleration and maneuverability.
   slot: 0
   visualPrefab: {fileID: 1857705056884696, guid: 421dceaa53a7bff4399dcdbae4ad55db, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 0, y: 0.85, z: 4.75}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.75, y: 1.2, z: 1.2}
@@ -42,7 +43,9 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "SÜRÜ BİÇERDÖVERİ · AĞIR TEMAS"
+    feedbackLabel: "HORDE HARVESTER \xB7 HEAVY CONTACT"
     feedbackTone: 0
-  gameplayEffectSummary: "Çok geniş ön temas alanında çarpma gücünü %40 artırır; yoğun sürüyü yararak ilerler."
-  tradeoffSummary: "+14 HP ve +0.35x çarpma gücü; -6 km/h hız, -3.0 hızlanma ve -1.0 kontrol."
+  gameplayEffectSummary: Boosts impact power by 40% across an extra-wide frontal
+    contact zone and punches through dense hordes.
+  tradeoffSummary: +14 HP and +0.35x impact power; -6 km/h top speed, -3.0 acceleration
+    and -1.0 handling.

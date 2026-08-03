@@ -417,7 +417,7 @@ public sealed class GarageFlowController : MonoBehaviour
             0 => "3",
             1 => "2",
             2 => "1",
-            _ => "EZ!"
+            _ => "CRUSH!"
         });
     }
 
@@ -644,7 +644,7 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         ShowAttachmentFeedback(
-            $"{award.FeedbackLabel}  ·  +{award.BonusScore:N0} PUAN",
+            $"{award.FeedbackLabel}  ·  +{award.BonusScore:N0} SCORE",
             GarageAttachmentFeedbackTone.Impact);
     }
 

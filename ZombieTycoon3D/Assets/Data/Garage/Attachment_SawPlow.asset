@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_SawPlow
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: saw-plow
-  displayName: "Testere Saban\u0131"
-  description: "Ute i\xE7in a\u011F\u0131r testere a\u011F\u0131zl\u0131 saban; yo\u011Fun
-    s\xFCr\xFC temas\u0131nda y\xFCksek g\xFC\xE7 \xFCretir."
+  displayName: Saw Plow
+  description: A heavy saw-toothed plow for the Ute, delivering high power in dense
+    horde contact.
   slot: 0
   visualPrefab: {fileID: 1027215754947464, guid: c3c985f1a15e81b459dc71ecbee6992a, type: 3}
   compatibleVehicles:
   - vehicleId: ute
+    anchor: 0
     localPosition: {x: 0, y: 0.4, z: 3}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.15, y: 1.15, z: 1.15}
@@ -42,8 +43,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "TESTERE SABANI \xB7 A\u011EIR B\u0130\xC7ME"
+    feedbackLabel: "SAW PLOW \xB7 HEAVY CUT"
     feedbackTone: 0
-  gameplayEffectSummary: "\xD6n temas g\xFCc\xFCn\xFC %35 art\u0131r\u0131r; +10
-    HP ve +0.35x \xE7arpma g\xFCc\xFC sa\u011Flar."
-  tradeoffSummary: "-5 km/h h\u0131z, -2.5 h\u0131zlanma ve -1.0 kontrol."
+  gameplayEffectSummary: Boosts frontal contact power by 35% and adds 10 HP plus
+    0.35x impact power.
+  tradeoffSummary: -5 km/h top speed, -2.5 acceleration and -1.0 handling.

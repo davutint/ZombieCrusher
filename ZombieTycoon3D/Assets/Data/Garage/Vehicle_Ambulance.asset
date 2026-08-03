@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Vehicle_Ambulance
   m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
   vehicleId: ambulance
-  displayName: Ambulans
-  description: "Dengeli ve dayan\u0131kl\u0131 ba\u015Flang\u0131\xE7 arac\u0131."
+  displayName: Ambulance
+  description: A balanced, durable starter vehicle.
   visualPrefab: {fileID: 1974828051501874, guid: 23df9b66f37ce374088d8822ba2fe4b4, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1

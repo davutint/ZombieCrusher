@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
   vehicleId: buggy
   displayName: Buggy
-  description: "Hafif, h\u0131zl\u0131 ve \xE7evik; darbelerde daha k\u0131r\u0131lgan."
+  description: Light, fast and agile, but more fragile under impact.
   visualPrefab: {fileID: 1665187737447004, guid: f65170bd5d5614c42a091c24c0f8104c, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1

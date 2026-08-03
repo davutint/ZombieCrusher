@@ -8,13 +8,13 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="tabbar">
-                <ui:Button name="gallery-tab" text="ARAÇLAR" class="top-tab top-tab--selected" />
-                <ui:Button name="parts-tab" text="PARÇALAR" class="top-tab" />
+                <ui:Button name="gallery-tab" text="VEHICLES" class="top-tab top-tab--selected" />
+                <ui:Button name="parts-tab" text="PARTS" class="top-tab" />
             </ui:VisualElement>
 
             <ui:VisualElement class="topbar-actions">
                 <ui:VisualElement class="balance-block">
-                    <ui:Label name="balance-value" text="0 HURDA" class="balance-value" />
+                    <ui:Label name="balance-value" text="0 SCRAP" class="balance-value" />
                 </ui:VisualElement>
                 <ui:Button name="garage-settings-button" text="⚙" class="topbar-settings-button" />
             </ui:VisualElement>
@@ -25,14 +25,14 @@
                 <ui:VisualElement name="preview-viewport" class="preview-viewport">
                     <ui:VisualElement class="drag-hint" picking-mode="Ignore">
                         <ui:Label text="↔" class="drag-icon" />
-                        <ui:Label text="SÜRÜKLE · ARACI ÇEVİR" class="drag-copy" />
+                        <ui:Label text="DRAG · ROTATE VEHICLE" class="drag-copy" />
                     </ui:VisualElement>
                     <ui:VisualElement name="left-filters" class="filter-row" picking-mode="Ignore" />
                     <ui:Button name="carousel-prev" text="‹" class="showroom-arrow showroom-arrow--left" />
                     <ui:Button name="carousel-next" text="›" class="showroom-arrow showroom-arrow--right" />
                     <ui:VisualElement class="showroom-caption" picking-mode="Ignore">
-                        <ui:Label name="carousel-title" text="ARAÇ 1 / 6" class="showroom-caption-title" />
-                        <ui:Label name="carousel-meta" text="SAHİP" class="showroom-caption-meta" />
+                        <ui:Label name="carousel-title" text="VEHICLE 1 / 6" class="showroom-caption-title" />
+                        <ui:Label name="carousel-meta" text="OWNED" class="showroom-caption-meta" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -43,7 +43,7 @@
                 <ui:VisualElement class="context-drawer">
                     <ui:VisualElement class="detail-block">
                         <ui:VisualElement class="detail-copy">
-                            <ui:Label name="detail-title" text="Ambulans" class="detail-title" />
+                            <ui:Label name="detail-title" text="Ambulance" class="detail-title" />
                             <ui:Label name="detail-description" text="" class="detail-description" />
                             <ui:VisualElement name="detail-mechanics" class="detail-mechanics">
                                 <ui:Label text="" class="detail-mechanic-kicker" />
@@ -53,7 +53,7 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-action-block">
-                            <ui:Button name="context-action" text="2:00 GÖREVE ÇIK" class="primary-action" />
+                            <ui:Button name="context-action" text="START 2:00 RUN" class="primary-action" />
                             <ui:Label name="context-hint" text="" class="context-hint" />
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -62,7 +62,7 @@
         </ui:VisualElement>
 
         <ui:VisualElement class="footerbar">
-            <ui:Button name="mission-button" text="▶  2:00 GÖREVE ÇIK" class="mission-button" />
+            <ui:Button name="mission-button" text="▶  START 2:00 RUN" class="mission-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 
@@ -70,17 +70,17 @@
         <ui:VisualElement class="mission-top-anchor">
             <ui:VisualElement class="mission-top-row">
                 <ui:VisualElement name="mission-objective-card" class="mission-hud-segment mission-objective-card">
-                    <ui:Label text="İMHA" class="mission-kicker" />
+                    <ui:Label text="KILLS" class="mission-kicker" />
                     <ui:Label name="mission-kills" text="0 / 100" class="mission-primary-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-strip-divider" />
                 <ui:VisualElement class="mission-hud-segment mission-timer-card">
-                    <ui:Label text="KALAN SÜRE" class="mission-kicker" />
+                    <ui:Label text="TIME LEFT" class="mission-kicker" />
                     <ui:Label name="mission-timer" text="2:00" class="mission-timer" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-strip-divider" />
                 <ui:VisualElement class="mission-hud-segment mission-score-card">
-                    <ui:Label text="PUAN" class="mission-kicker" />
+                    <ui:Label text="SCORE" class="mission-kicker" />
                     <ui:Label name="mission-score" text="0" class="mission-primary-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -112,7 +112,7 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement name="mission-run-status" class="mission-run-status">
-                    <ui:Label name="mission-vehicle-name" text="AMBULANS" class="mission-vehicle-name" />
+                    <ui:Label name="mission-vehicle-name" text="AMBULANCE" class="mission-vehicle-name" />
                     <ui:VisualElement class="mission-health-copy">
                         <ui:Label text="HP" class="mission-health-tag" />
                         <ui:Label name="mission-health" text="100 / 100" class="mission-health-value" />
@@ -130,7 +130,7 @@
 
                     <ui:VisualElement name="mission-mayhem-card" class="mission-mayhem-card mayhem-tier--none">
                         <ui:VisualElement class="mission-mayhem-header">
-                            <ui:Label name="mission-mayhem-tier" text="TEMPOYU YÜKSELT" class="mission-mayhem-tier" />
+                            <ui:Label name="mission-mayhem-tier" text="BUILD THE HEAT" class="mission-mayhem-tier" />
                             <ui:Label name="mission-mayhem-multiplier" text="x1.00" class="mission-mayhem-multiplier" />
                         </ui:VisualElement>
                         <ui:VisualElement class="mission-mayhem-track">
@@ -150,58 +150,58 @@
 
     <ui:VisualElement name="mission-result" class="mission-result">
         <ui:VisualElement name="mission-result-panel" class="mission-result-panel">
-            <ui:Label text="SAFEHOUSE GÖREV RAPORU" class="mission-result-eyebrow" />
-            <ui:Label name="result-status" text="BAŞARILI" class="mission-result-status" />
-            <ui:Label name="result-title" text="GÖREV TAMAMLANDI" class="mission-result-title" />
+            <ui:Label text="SAFEHOUSE MISSION REPORT" class="mission-result-eyebrow" />
+            <ui:Label name="result-status" text="SUCCESS" class="mission-result-status" />
+            <ui:Label name="result-title" text="MISSION COMPLETE" class="mission-result-title" />
             <ui:Label name="result-description" text="" class="mission-result-description" />
             <ui:VisualElement class="mission-result-metrics">
                 <ui:VisualElement class="mission-result-metric">
-                    <ui:Label text="İMHA" class="mission-result-metric-label" />
+                    <ui:Label text="KILLS" class="mission-result-metric-label" />
                     <ui:Label name="result-kills" text="0 / 100" class="mission-result-metric-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-metric">
-                    <ui:Label text="PUAN" class="mission-result-metric-label" />
+                    <ui:Label text="SCORE" class="mission-result-metric-label" />
                     <ui:Label name="result-score" text="0" class="mission-result-metric-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-metric">
-                    <ui:Label text="BONUS KILL" class="mission-result-metric-label" />
+                    <ui:Label text="BONUS KILLS" class="mission-result-metric-label" />
                     <ui:Label name="result-bonus-kills" text="0" class="mission-result-metric-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-metric">
-                    <ui:Label text="ARAÇ" class="mission-result-metric-label" />
+                    <ui:Label text="VEHICLE" class="mission-result-metric-label" />
                     <ui:Label name="result-health" text="0 / 100" class="mission-result-metric-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="result-mayhem" class="mission-result-mayhem mayhem-tier--none">
                 <ui:VisualElement class="mission-result-mayhem-block">
-                    <ui:Label text="EN YUKSEK KILL-RATE" class="mission-result-mayhem-label" />
-                    <ui:Label name="result-mayhem-tier" text="TEMPO YOK" class="mission-result-mayhem-value" />
+                    <ui:Label text="PEAK KILL RATE" class="mission-result-mayhem-label" />
+                    <ui:Label name="result-mayhem-tier" text="NO HEAT" class="mission-result-mayhem-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-mayhem-divider" />
                 <ui:VisualElement class="mission-result-mayhem-block">
-                    <ui:Label text="EN UZUN ZINCIR" class="mission-result-mayhem-label" />
-                    <ui:Label name="result-best-chain" text="0 KILL" class="mission-result-mayhem-value" />
+                    <ui:Label text="LONGEST CHAIN" class="mission-result-mayhem-label" />
+                    <ui:Label name="result-best-chain" text="0 KILLS" class="mission-result-mayhem-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="mission-result-reward">
                 <ui:VisualElement class="mission-result-reward-row">
-                    <ui:Label text="KILL HURDASI" class="mission-result-reward-label" />
+                    <ui:Label text="KILL SCRAP" class="mission-result-reward-label" />
                     <ui:Label name="result-kill-scrap" text="+0" class="mission-result-reward-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-reward-row">
-                    <ui:Label text="GÖREV BONUSU" class="mission-result-reward-label" />
+                    <ui:Label text="MISSION BONUS" class="mission-result-reward-label" />
                     <ui:Label name="result-success-bonus" text="+0" class="mission-result-reward-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-reward-total">
-                    <ui:Label text="TOPLAM KAZANÇ" class="mission-result-reward-total-label" />
-                    <ui:Label name="result-total-scrap" text="+0 HURDA" class="mission-result-reward-total-value" />
+                    <ui:Label text="TOTAL PAYOUT" class="mission-result-reward-total-label" />
+                    <ui:Label name="result-total-scrap" text="+0 SCRAP" class="mission-result-reward-total-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-result-reward-balance">
-                    <ui:Label text="YENİ BAKİYE" class="mission-result-reward-label" />
-                    <ui:Label name="result-balance" text="0 HURDA" class="mission-result-reward-balance-value" />
+                    <ui:Label text="NEW BALANCE" class="mission-result-reward-label" />
+                    <ui:Label name="result-balance" text="0 SCRAP" class="mission-result-reward-balance-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="result-button" text="GARAJA DÖN" class="mission-result-button" />
+            <ui:Button name="result-button" text="RETURN TO GARAGE" class="mission-result-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 
@@ -209,74 +209,74 @@
         <ui:VisualElement class="mission-intro-panel">
             <ui:VisualElement class="mission-intro-header">
                 <ui:Label text="SAFEHOUSE" class="mission-intro-brand" />
-                <ui:Label text="GÖREV 01" class="mission-intro-index" />
+                <ui:Label text="MISSION 01" class="mission-intro-index" />
             </ui:VisualElement>
-            <ui:Label name="mission-intro-vehicle" text="AMBULANS" class="mission-intro-vehicle" />
+            <ui:Label name="mission-intro-vehicle" text="AMBULANCE" class="mission-intro-vehicle" />
             <ui:VisualElement class="mission-intro-rule" />
             <ui:VisualElement class="mission-intro-objectives">
                 <ui:VisualElement class="mission-intro-objective">
-                    <ui:Label text="HEDEF" class="mission-intro-label" />
-                    <ui:Label text="100 İMHA" class="mission-intro-value" />
+                    <ui:Label text="TARGET" class="mission-intro-label" />
+                    <ui:Label text="100 KILLS" class="mission-intro-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-intro-divider" />
                 <ui:VisualElement class="mission-intro-objective">
-                    <ui:Label text="SÜRE" class="mission-intro-label" />
+                    <ui:Label text="TIME" class="mission-intro-label" />
                     <ui:Label text="02:00" class="mission-intro-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:Label name="mission-intro-countdown" text="3" class="mission-intro-countdown" />
-            <ui:Label text="SÜR · EZ · HAYATTA KAL" class="mission-intro-tagline" />
+            <ui:Label text="DRIVE · CRUSH · SURVIVE" class="mission-intro-tagline" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <ui:VisualElement name="mission-pause" class="mission-pause">
         <ui:VisualElement class="mission-pause-panel">
-            <ui:Label text="SAFEHOUSE // GÖREV 01" class="mission-pause-eyebrow" />
-            <ui:Label text="DURAKLATILDI" class="mission-pause-title" />
+            <ui:Label text="SAFEHOUSE // MISSION 01" class="mission-pause-eyebrow" />
+            <ui:Label text="PAUSED" class="mission-pause-title" />
             <ui:VisualElement class="mission-pause-summary">
                 <ui:VisualElement class="mission-pause-metric">
-                    <ui:Label text="KALAN" class="mission-pause-metric-label" />
+                    <ui:Label text="TIME LEFT" class="mission-pause-metric-label" />
                     <ui:Label name="pause-timer" text="02:00" class="mission-pause-metric-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-pause-divider" />
                 <ui:VisualElement class="mission-pause-metric">
-                    <ui:Label text="İMHA" class="mission-pause-metric-label" />
+                    <ui:Label text="KILLS" class="mission-pause-metric-label" />
                     <ui:Label name="pause-kills" text="0 / 100" class="mission-pause-metric-value" />
                 </ui:VisualElement>
                 <ui:VisualElement class="mission-pause-divider" />
                 <ui:VisualElement class="mission-pause-metric">
-                    <ui:Label text="PUAN" class="mission-pause-metric-label" />
+                    <ui:Label text="SCORE" class="mission-pause-metric-label" />
                     <ui:Label name="pause-score" text="0" class="mission-pause-metric-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="pause-resume-button" text="DEVAM ET" class="pause-primary-button" />
+            <ui:Button name="pause-resume-button" text="RESUME" class="pause-primary-button" />
             <ui:VisualElement class="mission-pause-actions">
-                <ui:Button name="pause-restart-button" text="BAŞTAN BAŞLAT" class="pause-secondary-button pause-restart-button" />
-                <ui:Button name="pause-garage-button" text="GARAJA DÖN" class="pause-secondary-button pause-secondary-button--danger" />
+                <ui:Button name="pause-restart-button" text="RESTART" class="pause-secondary-button pause-restart-button" />
+                <ui:Button name="pause-garage-button" text="RETURN TO GARAGE" class="pause-secondary-button pause-secondary-button--danger" />
             </ui:VisualElement>
-            <ui:Button name="pause-settings-button" text="AYARLAR" class="pause-settings-button" />
-            <ui:Label text="ESC  DEVAM" class="mission-pause-hint" />
+            <ui:Button name="pause-settings-button" text="SETTINGS" class="pause-settings-button" />
+            <ui:Label text="ESC  RESUME" class="mission-pause-hint" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <ui:VisualElement name="settings-overlay" class="settings-overlay">
         <ui:VisualElement class="settings-panel">
             <ui:Label text="SAFEHOUSE" class="settings-eyebrow" />
-            <ui:Label text="AYARLAR" class="settings-title" />
+            <ui:Label text="SETTINGS" class="settings-title" />
             <ui:VisualElement class="settings-rule" />
             <ui:VisualElement class="settings-volume-header">
-                <ui:Label text="SES" class="settings-label" />
+                <ui:Label text="MASTER VOLUME" class="settings-label" />
                 <ui:Label name="master-volume-value" text="80%" class="settings-value" />
             </ui:VisualElement>
             <ui:Slider name="master-volume" low-value="0" high-value="1" value="0.8" class="settings-slider" />
             <ui:VisualElement class="settings-screen-row">
                 <ui:VisualElement>
-                    <ui:Label text="EKRAN" class="settings-label" />
-                    <ui:Label text="Tarayıcı tam ekranı" class="settings-description" />
+                    <ui:Label text="DISPLAY" class="settings-label" />
+                    <ui:Label text="Browser fullscreen" class="settings-description" />
                 </ui:VisualElement>
-                <ui:Button name="fullscreen-button" text="TAM EKRAN" class="settings-action-button" />
+                <ui:Button name="fullscreen-button" text="FULLSCREEN" class="settings-action-button" />
             </ui:VisualElement>
-            <ui:Button name="settings-close-button" text="GERİ" class="settings-close-button" />
+            <ui:Button name="settings-close-button" text="BACK" class="settings-close-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: zombie-plow
   displayName: Zombie Plow
-  description: "Kalabal\u0131\u011F\u0131 yararak ilerleyen a\u011F\u0131r \xF6n
-    kep\xE7e. \xC7arpma g\xFCc\xFC i\xE7in h\u0131z ve \xE7eviklikten fedak\xE2rl\u0131k
-    eder."
+  description: A heavy front scoop that breaks through crowds, trading speed and
+    agility for impact power.
   slot: 0
   visualPrefab: {fileID: 1150652488230542, guid: bc92c9703f92fed428ed998fcfb3d33c, type: 3}
   compatibleVehicles:
   - vehicleId: ambulance
+    anchor: 0
     localPosition: {x: 0, y: 0.72, z: 3.65}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
@@ -43,7 +43,9 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "ZOMBİ PULLUĞU · AĞIR BİÇME"
+    feedbackLabel: "ZOMBIE PLOW \xB7 HEAVY CUT"
     feedbackTone: 0
-  gameplayEffectSummary: "Geniş ön temas alanında çarpma gücünü %30 artırır; kalabalığı düşük hızda biçmeyi kolaylaştırır."
-  tradeoffSummary: "+0.35x çarpma gücü ve +8 HP; -4 km/h hız, -2.0 hızlanma ve -1.0 kontrol."
+  gameplayEffectSummary: Boosts impact power by 30% across a wide frontal contact
+    zone and makes low-speed crushing easier.
+  tradeoffSummary: +0.35x impact power and +8 HP; -4 km/h top speed, -2.0 acceleration
+    and -1.0 handling.

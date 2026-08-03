@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_SpikedSideSkirts
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: spiked-side-skirts
-  displayName: Dikenli Yan Etekler
-  description: "Ute yan hatt\u0131n\u0131 dikenli korumayla g\xFC\xE7lendirir ve
-    yak\u0131n temas\u0131 destekler."
+  displayName: Spiked Side Skirts
+  description: Spiked protection reinforces the Ute's side line and supports close-contact
+    attacks.
   slot: 1
   visualPrefab: {fileID: 1952498728170228, guid: 861068ac1a3d19049be5927b86868fea, type: 3}
   compatibleVehicles:
   - vehicleId: ute
+    anchor: 0
     localPosition: {x: -1.25, y: 0.75, z: -0.05}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 0.86, y: 0.86, z: 0.86}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0.45, y: 0.75, z: 2.4}
   - vehicleId: ute
+    anchor: 0
     localPosition: {x: 1.25, y: 0.75, z: -0.05}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 0.86, y: 0.86, z: 0.86}
@@ -50,8 +52,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "D\u0130KENL\u0130 ETEKLER \xB7 YAN TEMAS"
+    feedbackLabel: "SPIKED SKIRTS \xB7 SIDE CONTACT"
     feedbackTone: 1
-  gameplayEffectSummary: "Yan temas g\xFCc\xFCn\xFC %12 art\u0131r\u0131r, hasar\u0131
-    %5 azalt\u0131r ve +14 HP sa\u011Flar."
-  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."
+  gameplayEffectSummary: Boosts side-contact power by 12%, reduces damage by 5% and
+    adds 14 HP.
+  tradeoffSummary: -3 km/h top speed, -1.0 acceleration and -0.5 handling.

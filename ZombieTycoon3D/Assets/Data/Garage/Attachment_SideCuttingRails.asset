@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Attachment_SideCuttingRails
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: side-cutting-rails
-  displayName: Yan Kesici Raylar
-  description: "Teker hatt\u0131nda yan kesme deste\u011Fi; yak\u0131n temas\u0131
-    g\xFC\xE7lendirirken tutu\u015Fu biraz azalt\u0131r."
+  displayName: Side Cutter Rails
+  description: Side-cutting support along the wheel line. Strengthens close contact
+    while slightly reducing grip.
   slot: 3
   visualPrefab: {fileID: 1542557953998440, guid: 8dc6b558c717a894ab5211bfb0f04233, type: 3}
   compatibleVehicles:
@@ -142,9 +142,7 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "YAN KES\u0130C\u0130LER \xB7 YAN TEMAS"
+    feedbackLabel: "SIDE CUTTERS \xB7 SIDE CONTACT"
     feedbackTone: 0
-  gameplayEffectSummary: "Yan temas g\xFCc\xFCn\xFC %18 art\u0131r\u0131r ve kontrole
-    +0.5 ekler."
-  tradeoffSummary: "Tutu\u015Fu %4, h\u0131z\u0131 2 km/h, h\u0131zlanmay\u0131 1.0
-    ve dayan\u0131kl\u0131l\u0131\u011F\u0131 4 HP azalt\u0131r."
+  gameplayEffectSummary: Boosts side-contact power by 18% and adds +0.5 handling.
+  tradeoffSummary: Costs 4% grip, 2 km/h top speed, 1.0 acceleration and 4 HP durability.

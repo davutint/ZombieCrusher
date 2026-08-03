@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_SideExhaust
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: side-exhaust
-  displayName: Yan Egzoz
-  description: "Motor nefesini a\xE7an yan egzoz; h\u0131z ve ivme kar\u015F\u0131l\u0131\u011F\u0131nda
-    dayan\u0131kl\u0131l\u0131k g\xF6t\xFCr\xFCr."
+  displayName: Side Exhaust
+  description: A side exhaust that frees engine flow, trading durability for speed
+    and acceleration.
   slot: 2
   visualPrefab: {fileID: 1360410021609672, guid: 3265f4e6931402444bad53b920c43dcf, type: 3}
   compatibleVehicles:
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: -1.3, y: 0.88, z: 0.25}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.82, y: 0.82, z: 0.82}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: 1.3, y: 0.88, z: 0.25}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.82, y: 0.82, z: 0.82}
@@ -36,6 +38,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: ute
+    anchor: 0
     localPosition: {x: -1.26, y: 0.94, z: 0.21}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.85, y: 0.85, z: 0.85}
@@ -44,6 +47,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: ute
+    anchor: 0
     localPosition: {x: 1.26, y: 0.94, z: 0.21}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.85, y: 0.85, z: 0.85}
@@ -68,6 +72,6 @@ MonoBehaviour:
     maximumRepairs: 0
     feedbackLabel:
     feedbackTone: 0
-  gameplayEffectSummary: "Azami h\u0131za +7 km/h, h\u0131zlanmaya +3.0 ve \xE7arpma
-    g\xFCc\xFCne +0.05x ekler."
-  tradeoffSummary: "Performans kurulumu dayan\u0131kl\u0131l\u0131ktan 2 HP g\xF6t\xFCr\xFCr."
+  gameplayEffectSummary: Adds +7 km/h top speed, +3.0 acceleration and +0.05x impact
+    power.
+  tradeoffSummary: The performance setup costs 2 HP durability.

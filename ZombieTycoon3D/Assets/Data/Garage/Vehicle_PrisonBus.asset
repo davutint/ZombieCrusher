@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Vehicle_PrisonBus
   m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
   vehicleId: prison-bus
-  displayName: "Mahk\xFBm Otob\xFCs\xFC"
-  description: "Yava\u015F fakat y\xFCksek dayan\u0131kl\u0131l\u0131k ve \xE7arpma
-    g\xFCc\xFC sunar."
+  displayName: Prison Bus
+  description: Slow, but built with exceptional durability and impact power.
   visualPrefab: {fileID: 1063686525367896, guid: fe5ed12131487254b846805388248640, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1

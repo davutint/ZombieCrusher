@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_BuggyRazorBumper
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: buggy-razor-bumper
-  displayName: "Hafif \xC7ivi Tamponu"
-  description: "Buggy i\xE7in hafif ve geni\u015F \xF6n savunma. Darbe alan\u0131n\u0131
-    b\xFCy\xFCt\xFCrken \xE7eviklikten az miktarda g\xF6t\xFCr\xFCr."
+  displayName: Lightweight Spike Bumper
+  description: A wide, lightweight front guard for the Buggy. Expands the impact
+    zone with only a small agility penalty.
   slot: 0
   visualPrefab: {fileID: 1820418990125658, guid: bd2111187663dea4f888f6c1b838d6e3, type: 3}
   compatibleVehicles:
   - vehicleId: buggy
+    anchor: 0
     localPosition: {x: 0, y: 0.65, z: 2.35}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.76, y: 0.76, z: 0.76}
@@ -42,7 +43,9 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "ÇİVİ TAMPONU · HIZLI DARBE"
+    feedbackLabel: "SPIKE BUMPER \xB7 QUICK IMPACT"
     feedbackTone: 0
-  gameplayEffectSummary: "Kompakt ön temas alanında çarpma gücünü %20 artırır ve düşük hızlı ezmeyi destekler."
-  tradeoffSummary: "+6 HP ve +0.25x çarpma gücü; -2 km/h hız, -1.0 hızlanma ve -0.5 kontrol."
+  gameplayEffectSummary: Boosts impact power by 20% across a compact frontal contact
+    zone and supports low-speed crushing.
+  tradeoffSummary: +6 HP and +0.25x impact power; -2 km/h top speed, -1.0 acceleration
+    and -0.5 handling.

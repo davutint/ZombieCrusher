@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Attachment_RearDoorCage
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: rear-door-cage
-  displayName: "Arka Kap\u0131 Kafesi"
-  description: "Arka kap\u0131lar\u0131 ve g\xF6vde a\xE7\u0131kl\u0131\u011F\u0131n\u0131
-    g\xFC\xE7lendiren hafif koruma kafesi."
+  displayName: Rear Door Cage
+  description: A light protective cage reinforcing the rear doors and body opening.
   slot: 1
   visualPrefab: {fileID: 1344630951737224, guid: 46dcb5443d8c569499509eee8cd53bf2, type: 3}
   compatibleVehicles:
   - vehicleId: ambulance
+    anchor: 0
     localPosition: {x: 0, y: 1.45, z: -3.19}
     localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1.08, y: 1.08, z: 1.08}
@@ -42,8 +42,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "ARKA KAPI KAFES\u0130 \xB7 %12 HASAR AZALTMA"
+    feedbackLabel: "REAR DOOR CAGE \xB7 12% DAMAGE REDUCTION"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temas hasar\u0131n\u0131 %12 azalt\u0131r ve maksimum
-    dayan\u0131kl\u0131l\u0131\u011Fa 22 HP ekler."
-  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."
+  gameplayEffectSummary: Reduces zombie contact damage by 12% and adds 22 maximum
+    HP.
+  tradeoffSummary: -3 km/h top speed, -1.0 acceleration and -0.5 handling.

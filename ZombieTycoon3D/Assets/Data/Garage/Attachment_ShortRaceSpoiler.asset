@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_ShortRaceSpoiler
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: short-race-spoiler
-  displayName: "K\u0131sa Yar\u0131\u015F Spoyleri"
-  description: "Kompakt arka aero par\xE7as\u0131; y\xFCksek h\u0131zda tutu\u015F
-    ve kontrol kazand\u0131r\u0131r."
+  displayName: Short Race Spoiler
+  description: A compact rear aero package that improves grip and control at high
+    speed.
   slot: 4
   visualPrefab: {fileID: 1265308867535792, guid: 7c60a5d224365054796426277bdf6304, type: 3}
   compatibleVehicles:
   - vehicleId: buggy
+    anchor: 0
     localPosition: {x: 0, y: 1.52, z: -2.03}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: 0, y: 1.34, z: -2.65}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.08, y: 1.08, z: 1.08}
@@ -52,6 +54,6 @@ MonoBehaviour:
     maximumRepairs: 0
     feedbackLabel:
     feedbackTone: 0
-  gameplayEffectSummary: "Tutu\u015Fu %8 ve downforce de\u011Ferini 1.5 art\u0131r\u0131r;
-    +3 km/h ve +1.0 kontrol verir."
-  tradeoffSummary: "Aero kurulumu dayan\u0131kl\u0131l\u0131ktan 1 HP g\xF6t\xFCr\xFCr."
+  gameplayEffectSummary: Improves grip by 8%, adds 1.5 downforce, +3 km/h top speed
+    and +1.0 handling.
+  tradeoffSummary: The aero setup costs 1 HP durability.

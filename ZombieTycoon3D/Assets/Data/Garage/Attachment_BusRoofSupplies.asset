@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Attachment_BusRoofSupplies
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: bus-roof-supplies
-  displayName: Tavan Erzak Paketi
-  description: "Uzun g\xF6revler i\xE7in tavana sabitlenen korumal\u0131 erzak ve
-    yak\u0131t paketi."
+  displayName: Roof Supply Pack
+  description: A protected roof-mounted supply and fuel pack for extended missions.
   slot: 5
   visualPrefab: {fileID: 1744057547907270, guid: 96bd005ab9f0b454ebaf6e79b0f26231, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 0, y: 3.2, z: -0.6}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.25, y: 1.25, z: 1.25}
@@ -42,7 +42,9 @@ MonoBehaviour:
     repairEveryKills: 25
     repairAmount: 6
     maximumRepairs: 3
-    feedbackLabel: TAVAN ERZAKI
+    feedbackLabel: ROOF SUPPLIES
     feedbackTone: 2
-  gameplayEffectSummary: "Her 25 kill'de 6 HP onarır; bir görevde en fazla 3 kez çalışır. Ayrıca maksimum dayanıklılığa 12 HP ekler."
-  tradeoffSummary: "Tavan yükü -2 km/h hız, -0.5 hızlanma ve -0.5 kontrol götürür."
+  gameplayEffectSummary: Repairs 6 HP every 25 kills, up to 3 times per mission,
+    and adds 12 maximum HP.
+  tradeoffSummary: The roof load costs 2 km/h top speed, 0.5 acceleration and 0.5
+    handling.

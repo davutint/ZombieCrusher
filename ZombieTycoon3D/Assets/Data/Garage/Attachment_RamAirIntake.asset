@@ -13,16 +13,20 @@ MonoBehaviour:
   m_Name: Attachment_RamAirIntake
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: ram-air-intake
-  displayName: "Y\xFCksek Ak\u0131\u015F Emme"
-  description: "Motorun h\u0131z ve ivmesini y\xFCkseltir; hafif g\xF6vde kesintileri
-    dayan\u0131kl\u0131l\u0131\u011F\u0131 azalt\u0131r."
+  displayName: High-Flow Intake
+  description: Improves engine speed and acceleration; open bodywork reduces durability.
   slot: 2
   visualPrefab: {fileID: 1155052706714072, guid: 0014c5be71de957428533bb159c41ee6, type: 3}
   compatibleVehicles:
   - vehicleId: ambulance
+    anchor: 0
     localPosition: {x: 0, y: 1.05, z: 1.85}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
+    createsImpactZone: 0
+    impactZoneCenter: {x: 0, y: 0, z: 0}
+    impactZoneEuler: {x: 0, y: 0, z: 0}
+    impactZoneSize: {x: 0, y: 0, z: 0}
   price: 200
   modifier:
     maxSpeed: 8
@@ -40,5 +44,6 @@ MonoBehaviour:
     maximumRepairs: 0
     feedbackLabel:
     feedbackTone: 0
-  gameplayEffectSummary: "Azami hıza +8 km/h, hızlanmaya +4.0 ve çarpma gücüne +0.05x ekler."
-  tradeoffSummary: "Açık performans kurulumu -0.5 kontrol ve -3 HP dayanıklılık götürür."
+  gameplayEffectSummary: Adds +8 km/h top speed, +4.0 acceleration and +0.05x impact
+    power.
+  tradeoffSummary: The open performance setup costs 0.5 handling and 3 HP durability.

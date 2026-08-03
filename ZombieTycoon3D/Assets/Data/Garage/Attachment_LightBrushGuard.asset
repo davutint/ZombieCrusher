@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_LightBrushGuard
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: light-brush-guard
-  displayName: "Hafif F\u0131r\xE7a Korumas\u0131"
-  description: "Hafif ara\xE7lar i\xE7in d\xFC\u015F\xFCk a\u011F\u0131rl\u0131kl\u0131
-    \xF6n koruma ve kontroll\xFC darbe deste\u011Fi."
+  displayName: Light Brush Guard
+  description: A low-weight front guard for light vehicles, providing controlled
+    impact support.
   slot: 0
   visualPrefab: {fileID: 1884074283172592, guid: 461367d4dc403d843bcc3ffa2fc4f307, type: 3}
   compatibleVehicles:
   - vehicleId: buggy
+    anchor: 0
     localPosition: {x: 0, y: 0.62, z: 2.15}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1.05, y: 1.05, z: 1.05}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 1.9, y: 0.7, z: 0.8}
   - vehicleId: golf-cart
+    anchor: 0
     localPosition: {x: 0, y: 0.38, z: 1.48}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 0.75, y: 0.75, z: 0.75}
@@ -50,8 +52,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "FIR\xC7A KORUMASI \xB7 HAF\u0130F DARBE"
+    feedbackLabel: "BRUSH GUARD \xB7 LIGHT IMPACT"
     feedbackTone: 0
-  gameplayEffectSummary: "\xD6n temas g\xFCc\xFCn\xFC %10 art\u0131r\u0131r; +5 HP
-    ve +0.15x \xE7arpma g\xFCc\xFC verir."
-  tradeoffSummary: "-1 km/h h\u0131z ve -0.5 h\u0131zlanma."
+  gameplayEffectSummary: Boosts frontal contact power by 10% and adds 5 HP plus 0.15x
+    impact power.
+  tradeoffSummary: -1 km/h top speed and -0.5 acceleration.

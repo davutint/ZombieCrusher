@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_BuggySidePlates
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: buggy-side-plates
-  displayName: Delikli Yan Plakalar
-  description: "G\xF6vde yanlar\u0131n\u0131 hafif plakalarla korur; Buggy'nin k\u0131r\u0131lganl\u0131\u011F\u0131n\u0131
-    a\u011F\u0131rl\u0131\u011F\u0131 fazla art\u0131rmadan azalt\u0131r."
+  displayName: Perforated Side Plates
+  description: Light side plating reduces the Buggy's fragility without adding excessive
+    weight.
   slot: 1
   visualPrefab: {fileID: 1848808177823152, guid: edcd7b8acae5b9e4ba2d7b14c0f41ff8, type: 3}
   compatibleVehicles:
   - vehicleId: buggy
+    anchor: 0
     localPosition: {x: -1.06, y: 0.95, z: 0}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.2, y: 1.2, z: 1.2}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: buggy
+    anchor: 0
     localPosition: {x: 1.06, y: 0.95, z: 0}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.2, y: 1.2, z: 1.2}
@@ -50,7 +52,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "YAN PLAKALAR · %10 HASAR AZALTMA"
+    feedbackLabel: "SIDE PLATES \xB7 10% DAMAGE REDUCTION"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temasından alınan araç hasarını %10 azaltır ve kırılgan Buggy'ye 18 HP ekler."
-  tradeoffSummary: "Hafif zırh -3 km/h hız, -1.0 hızlanma ve -0.5 kontrol götürür."
+  gameplayEffectSummary: Reduces zombie contact damage by 10% and adds 18 HP to the
+    fragile Buggy.
+  tradeoffSummary: Light armor costs 3 km/h top speed, 1.0 acceleration and 0.5 handling.

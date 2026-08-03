@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_LightPlating
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: light-plating
-  displayName: Hafif Kaplama
-  description: "G\xF6vde dayan\u0131kl\u0131l\u0131\u011F\u0131n\u0131 y\xFCkseltir;
-    ek a\u011F\u0131rl\u0131k h\u0131zlanmay\u0131 ve kontrol\xFC bir miktar d\xFC\u015F\xFCr\xFCr."
+  displayName: Light Plating
+  description: Improves chassis durability while slightly reducing acceleration and
+    handling.
   slot: 1
   visualPrefab: {fileID: 1837151923621358, guid: 44e6895ba5da26a4b9c17f16428d7750, type: 3}
   compatibleVehicles:
   - vehicleId: ambulance
+    anchor: 0
     localPosition: {x: -1.36, y: 1.45, z: -0.25}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1, y: 1, z: 1}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: ambulance
+    anchor: 0
     localPosition: {x: 1.36, y: 1.45, z: -0.25}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: -1, y: 1, z: 1}
@@ -36,6 +38,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: -1.28, y: 0.92, z: -0.1}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.05, y: 1.05, z: 1.05}
@@ -44,6 +47,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: 1.28, y: 0.92, z: -0.1}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.05, y: 1.05, z: 1.05}
@@ -66,9 +70,7 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "HAF\u0130F KAPLAMA \xB7 %15 HASAR AZALTMA"
+    feedbackLabel: "LIGHT PLATING \xB7 15% DAMAGE REDUCTION"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temas\u0131ndan al\u0131nan ara\xE7 hasar\u0131n\u0131
-    %15 azalt\u0131r ve dayan\u0131kl\u0131l\u0131\u011Fa 25 HP ekler."
-  tradeoffSummary: "Koruma kar\u015F\u0131l\u0131\u011F\u0131nda -5 km/h h\u0131z,
-    -1.5 h\u0131zlanma ve -1.0 kontrol."
+  gameplayEffectSummary: Reduces zombie contact damage by 15% and adds 25 HP durability.
+  tradeoffSummary: Protection costs 5 km/h top speed, 1.5 acceleration and 1.0 handling.

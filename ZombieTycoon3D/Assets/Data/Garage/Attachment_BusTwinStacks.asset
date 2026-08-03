@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_BusTwinStacks
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: bus-twin-stacks
-  displayName: "\xC7ift Egzoz Bacas\u0131"
-  description: "A\u011F\u0131r motordan daha rahat ak\u0131\u015F alarak h\u0131zlanmay\u0131
-    destekleyen \xE7ift egzoz bacas\u0131."
+  displayName: Twin Exhaust Stacks
+  description: Twin exhaust stacks improve flow from the heavy engine and support
+    stronger acceleration.
   slot: 2
   visualPrefab: {fileID: 1235155533903052, guid: 49449f1f8bc687143804bef2efc099c0, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.55, y: 2.4, z: 2.35}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.55, y: 2.4, z: 2.35}
     localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 1, y: 1, z: 1}
@@ -52,5 +54,6 @@ MonoBehaviour:
     maximumRepairs: 0
     feedbackLabel:
     feedbackTone: 0
-  gameplayEffectSummary: "Ağır motora +5 km/h azami hız, +3.0 hızlanma ve +0.05x çarpma gücü kazandırır."
-  tradeoffSummary: "Ek egzoz yükü araç dayanıklılığını 2 HP düşürür."
+  gameplayEffectSummary: Adds +5 km/h top speed, +3.0 acceleration and +0.05x impact
+    power to the heavy engine.
+  tradeoffSummary: The extra exhaust load costs 2 HP durability.

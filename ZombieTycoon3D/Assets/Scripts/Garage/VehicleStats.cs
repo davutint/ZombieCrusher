@@ -106,15 +106,15 @@ public static class GarageVehicleStatPresentation
         GarageVehicleStat.ImpactPower
     };
 
-    public static string GetTurkishLabel(GarageVehicleStat stat)
+    public static string GetEnglishLabel(GarageVehicleStat stat)
     {
         return stat switch
         {
-            GarageVehicleStat.Speed => "HIZ",
-            GarageVehicleStat.Acceleration => "HIZLANMA",
-            GarageVehicleStat.Handling => "KONTROL",
-            GarageVehicleStat.Durability => "DAYANIKLILIK",
-            GarageVehicleStat.ImpactPower => "ÇARPMA GÜCÜ",
+            GarageVehicleStat.Speed => "SPEED",
+            GarageVehicleStat.Acceleration => "ACCELERATION",
+            GarageVehicleStat.Handling => "HANDLING",
+            GarageVehicleStat.Durability => "DURABILITY",
+            GarageVehicleStat.ImpactPower => "IMPACT POWER",
             _ => stat.ToString().ToUpperInvariant()
         };
     }

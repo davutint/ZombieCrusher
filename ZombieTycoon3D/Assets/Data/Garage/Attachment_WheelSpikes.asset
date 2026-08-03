@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Attachment_WheelSpikes
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: wheel-spikes
-  displayName: "Jant B\u0131\xE7aklar\u0131"
-  description: "Yak\u0131n temasta \xE7arpma etkisini art\u0131r\u0131r. Ek d\xF6nen
-    k\xFCtle h\u0131z ve ivmeyi biraz d\xFC\u015F\xFCr\xFCr."
+  displayName: Wheel Blades
+  description: Improves close-contact impact. The additional rotating mass slightly
+    reduces speed and acceleration.
   slot: 3
   visualPrefab: {fileID: 1577577700157948, guid: 5e66363e6eeccf941b04f67caf808bdb, type: 3}
   compatibleVehicles:
@@ -250,10 +250,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "JANT BI\xC7AKLARI \xB7 YAN TEMAS"
+    feedbackLabel: "WHEEL BLADES \xB7 SIDE CONTACT"
     feedbackTone: 0
-  gameplayEffectSummary: "D\xF6rt yan temas b\xF6lgesinde \xE7arpma g\xFCc\xFCn\xFC
-    %20 art\u0131r\u0131r; direksiyon tepkisine +1.0 ekler."
-  tradeoffSummary: "Yan bi\xE7me g\xFCc\xFC kar\u015F\u0131l\u0131\u011F\u0131nda
-    tutu\u015F %6, h\u0131z 2 km/h, h\u0131zlanma 1.0 ve dayan\u0131kl\u0131l\u0131k
-    5 HP d\xFC\u015Fer."
+  gameplayEffectSummary: Boosts impact power by 20% across four side-contact zones
+    and adds +1.0 steering response.
+  tradeoffSummary: Costs 6% grip, 2 km/h top speed, 1.0 acceleration and 5 HP durability.

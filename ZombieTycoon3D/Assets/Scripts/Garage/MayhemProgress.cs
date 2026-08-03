@@ -85,7 +85,7 @@ public static class MayhemRules
             MayhemTier.Carnage => "CARNAGE",
             MayhemTier.Slaughter => "SLAUGHTER",
             MayhemTier.Mayhem => "MAYHEM",
-            _ => "TEMPOYU YUKSELT"
+            _ => "BUILD THE HEAT"
         };
     }
 }

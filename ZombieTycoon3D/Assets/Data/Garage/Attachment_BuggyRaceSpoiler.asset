@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Attachment_BuggyRaceSpoiler
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: buggy-race-spoiler
-  displayName: Arazi Spoileri
-  description: "Y\xFCksek h\u0131zda Buggy'yi daha dengeli tutan arka aero par\xE7as\u0131."
+  displayName: Off-Road Spoiler
+  description: A rear aero package that keeps the Buggy settled at high speed.
   slot: 4
   visualPrefab: {fileID: 1784865849887820, guid: dfbafd6c6e20322469ea33ac4fdd013a, type: 3}
   compatibleVehicles:
   - vehicleId: buggy
+    anchor: 0
     localPosition: {x: 0, y: 1.55, z: -2.05}
     localEuler: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
@@ -43,5 +44,6 @@ MonoBehaviour:
     maximumRepairs: 0
     feedbackLabel:
     feedbackTone: 0
-  gameplayEffectSummary: "Yüksek hızda tutuşu %12 ve downforce değerini 2 artırır; ayrıca +4 km/h hız ve +2.0 kontrol verir."
-  tradeoffSummary: "Aero kurulumu gövde dayanıklılığından 2 HP götürür."
+  gameplayEffectSummary: Improves grip by 12%, adds 2 downforce, +4 km/h top speed
+    and +2.0 handling.
+  tradeoffSummary: The aero setup costs 2 HP durability.

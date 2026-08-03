@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
   vehicleId: ute
   displayName: Ute
-  description: "Dengeli dayan\u0131kl\u0131l\u0131k, g\xFC\xE7l\xFC \xE7arpma ve
-    ekipman ta\u015F\u0131ma kapasitesi sunar."
+  description: Balanced durability, strong impact power and generous equipment capacity.
   visualPrefab: {fileID: 1364802344601326, guid: 0ecf00181b469b2438043da6adbb8de7, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1

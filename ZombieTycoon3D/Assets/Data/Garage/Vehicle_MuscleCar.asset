@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GarageVehicleDefinition
   vehicleId: muscle-car
   displayName: Muscle Car
-  description: "Y\xFCksek azami h\u0131z ve g\xFC\xE7l\xFC d\xFCz hat performans\u0131;
-    z\u0131rhs\u0131z kald\u0131\u011F\u0131nda k\u0131r\u0131lgand\u0131r."
+  description: High top speed and powerful straight-line performance, but fragile
+    without armor.
   visualPrefab: {fileID: 1720750727606104, guid: 142475bf32587464f86a974127ca5f1c, type: 3}
   previewEuler: {x: 0, y: 28, z: 0}
   previewScale: 1

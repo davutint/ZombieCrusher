@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Attachment_MuscleDoorArmor
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: muscle-door-armor
-  displayName: "Muscle Kap\u0131 Z\u0131rh\u0131"
-  description: "Muscle Car kap\u0131 hatt\u0131n\u0131 koruyan a\u011F\u0131r plakalar."
+  displayName: Muscle Door Armor
+  description: Heavy plates that protect the Muscle Car's door line.
   slot: 1
   visualPrefab: {fileID: 1117291802257842, guid: a7b8d0d9ed0999149974573df30e446d, type: 3}
   compatibleVehicles:
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: -1.3, y: 0.95, z: -0.15}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.15, y: 1.15, z: 1.15}
@@ -27,6 +28,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: muscle-car
+    anchor: 0
     localPosition: {x: 1.3, y: 0.95, z: -0.15}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.15, y: 1.15, z: 1.15}
@@ -49,8 +51,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "KAPI ZIRHI \xB7 %10 HASAR AZALTMA"
+    feedbackLabel: "DOOR ARMOR \xB7 10% DAMAGE REDUCTION"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temas hasar\u0131n\u0131 %10 azalt\u0131r ve maksimum
-    dayan\u0131kl\u0131l\u0131\u011Fa 22 HP ekler."
-  tradeoffSummary: "-4 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.8 kontrol."
+  gameplayEffectSummary: Reduces zombie contact damage by 10% and adds 22 maximum
+    HP.
+  tradeoffSummary: -4 km/h top speed, -1.0 acceleration and -0.8 handling.

@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_BeltDriveKit
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: belt-drive-kit
-  displayName: "Kay\u0131\u015F Tahrik Kiti"
-  description: "Hafif aktarma y\xFCkseltmesi; h\u0131zlanmay\u0131 belirgin art\u0131r\u0131r
-    fakat kontrol\xFC azalt\u0131r."
+  displayName: Belt Drive Kit
+  description: A lightweight drivetrain upgrade that sharply improves acceleration
+    at the cost of handling.
   slot: 2
   visualPrefab: {fileID: 1134796965149526, guid: 774996433395e594db308d6cd0480297, type: 3}
   compatibleVehicles:
   - vehicleId: golf-cart
+    anchor: 0
     localPosition: {x: 0, y: 0.48, z: -1.34}
     localEuler: {x: 0, y: 180, z: 0}
     localScale: {x: 0.55, y: 0.55, z: 0.55}
@@ -44,5 +45,5 @@ MonoBehaviour:
     maximumRepairs: 0
     feedbackLabel:
     feedbackTone: 0
-  gameplayEffectSummary: "Azami h\u0131za +4 km/h ve h\u0131zlanmaya +4.0 ekler."
-  tradeoffSummary: "Kontrolden 1.0 ve dayan\u0131kl\u0131l\u0131ktan 2 HP g\xF6t\xFCr\xFCr."
+  gameplayEffectSummary: Adds +4 km/h top speed and +4.0 acceleration.
+  tradeoffSummary: Costs 1.0 handling and 2 HP durability.

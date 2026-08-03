@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_BusBarricadeArmor
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: bus-barricade-armor
-  displayName: "Barikat Z\u0131rh\u0131"
-  description: "Otob\xFCs\xFCn iki yan\u0131n\u0131 \xE7oklu barikat plakalar\u0131yla
-    kaplar ve b\xFCy\xFCk dayan\u0131kl\u0131l\u0131k kazand\u0131r\u0131r."
+  displayName: Barricade Armor
+  description: Layered barricade plates cover both sides of the bus and deliver a
+    major durability boost.
   slot: 1
   visualPrefab: {fileID: 1417429084167010, guid: a2a7efe7a8052de49a858aca56080c48, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.76, y: 1.55, z: 1.75}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.6, y: 1.4, z: 1}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.76, y: 1.55, z: -1.75}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.6, y: 1.4, z: 1}
@@ -36,6 +38,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.76, y: 1.55, z: 1.75}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.6, y: 1.4, z: 1}
@@ -44,6 +47,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.76, y: 1.55, z: -1.75}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.6, y: 1.4, z: 1}
@@ -66,7 +70,9 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "BARİKAT ZIRHI · %25 HASAR AZALTMA"
+    feedbackLabel: "BARRICADE ARMOR \xB7 25% DAMAGE REDUCTION"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temasından alınan araç hasarını %25 azaltır ve ağır gövdeye 40 HP ekler."
-  tradeoffSummary: "Ağır koruma -7 km/h hız, -2.0 hızlanma ve -1.0 kontrol götürür."
+  gameplayEffectSummary: Reduces zombie contact damage by 25% and adds 40 HP to the
+    heavy chassis.
+  tradeoffSummary: Heavy protection costs 7 km/h top speed, 2.0 acceleration and
+    1.0 handling.

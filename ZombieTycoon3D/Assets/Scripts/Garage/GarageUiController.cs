@@ -288,7 +288,7 @@ public sealed class GarageUiController : MonoBehaviour
     public void ShowMissionIntro(string vehicleName)
     {
         missionIntroVehicle.text = string.IsNullOrWhiteSpace(vehicleName)
-            ? "ARAÇ"
+            ? "VEHICLE"
             : vehicleName.ToUpperInvariant();
         missionIntroCountdown.text = "3";
         missionIntro.style.display = DisplayStyle.Flex;
@@ -423,7 +423,7 @@ public sealed class GarageUiController : MonoBehaviour
         }
 
         missionVehicleName.text = string.IsNullOrWhiteSpace(vehicleName)
-            ? "ARAÇ"
+            ? "VEHICLE"
             : vehicleName.ToUpperInvariant();
         displayedMissionSpeed = int.MinValue;
         missionGaugeMaximumSpeed = Mathf.Max(40f, maximumSpeed);
@@ -586,17 +586,17 @@ public sealed class GarageUiController : MonoBehaviour
         missionSpeedAnimationEnabled = false;
         previewController.SetVisible(false);
 
-        resultStatus.text = result.Succeeded ? "BAŞARILI" : "BAŞARISIZ";
+        resultStatus.text = result.Succeeded ? "SUCCESS" : "FAILED";
         resultTitle.text = result.Succeeded
-            ? "GÖREV TAMAMLANDI"
+            ? "MISSION COMPLETE"
             : result.EndReason == MissionEndReason.VehicleDestroyed
-                ? "ARAÇ PARÇALANDI"
-                : "HEDEF KAÇTI";
+                ? "VEHICLE DESTROYED"
+                : "TARGET MISSED";
         resultDescription.text = result.Succeeded
-            ? "İmha hedefi tamamlandı. Safehouse ekibi dönüş için hazır."
+            ? "Kill target secured. The Safehouse crew is ready for your return."
             : result.EndReason == MissionEndReason.VehicleDestroyed
-                ? "Araç görev alanında kullanılamaz hâle geldi."
-                : "Süre doldu ancak imha hedefi tamamlanamadı.";
+                ? "The vehicle was disabled in the mission zone."
+                : "Time expired before the kill target was reached.";
 
         resultKills.text =
             $"{result.Progress.Kills} / {result.Progress.KillTarget}";
@@ -607,15 +607,15 @@ public sealed class GarageUiController : MonoBehaviour
             + $" / {Mathf.CeilToInt(Mathf.Max(1f, result.MaximumHealth))}";
         MayhemTier highestTier = result.Progress.Mayhem.HighestTier;
         resultMayhemTier.text = highestTier == MayhemTier.None
-            ? "TEMPO YOK"
+            ? "NO HEAT"
             : MayhemRules.GetLabel(highestTier);
         resultBestChain.text =
-            $"{result.Progress.Mayhem.BestChain:N0} KILL";
+            $"{result.Progress.Mayhem.BestChain:N0} KILLS";
         ApplyMayhemTierClass(resultMayhem, highestTier);
         resultKillScrap.text = $"+{result.Reward.KillScrap:N0}";
         resultSuccessBonus.text = $"+{result.Reward.CompletionBonus:N0}";
-        resultTotalScrap.text = $"+{result.Reward.TotalScrap:N0} HURDA";
-        resultBalance.text = $"{result.Reward.BalanceAfter:N0} HURDA";
+        resultTotalScrap.text = $"+{result.Reward.TotalScrap:N0} SCRAP";
+        resultBalance.text = $"{result.Reward.BalanceAfter:N0} SCRAP";
 
         missionResultPanel.EnableInClassList(
             "mission-result-panel--success",
@@ -820,8 +820,8 @@ public sealed class GarageUiController : MonoBehaviour
     private void UpdateFullscreenButton()
     {
         fullscreenButton.text = Screen.fullScreen
-            ? "TAM EKRANDAN ÇIK"
-            : "TAM EKRAN";
+            ? "EXIT FULLSCREEN"
+            : "FULLSCREEN";
     }
 
     private void ResetMissionDamagePulse()
@@ -887,7 +887,7 @@ public sealed class GarageUiController : MonoBehaviour
             return;
         }
 
-        balanceValue.text = $"{economy.Scrap:N0} HURDA";
+        balanceValue.text = $"{economy.Scrap:N0} SCRAP";
         UpdateTabs();
         PopulateScreen();
         PopulateContextDrawer();
@@ -1193,30 +1193,30 @@ public sealed class GarageUiController : MonoBehaviour
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         detailTitle.text = vehicle != null
             ? vehicle.DisplayName.ToUpperInvariant()
-            : "ARAÇ SEÇ";
+            : "SELECT VEHICLE";
         detailDescription.text = GetVehicleGalleryTagline(vehicle);
 
         bool owned = buildState.IsVehicleOwned(vehicle);
         bool selected = vehicle != null && vehicle == buildState.SelectedVehicle;
         contextAction.text = selected
-            ? "AKTİF ARAÇ"
+            ? "ACTIVE VEHICLE"
             : owned
-                ? "ARACI SEÇ"
+                ? "SELECT VEHICLE"
             : vehicle != null
-                ? $"SATIN AL · {vehicle.Price:N0} HURDA"
-                : "ARAÇ SEÇ";
+                ? $"BUY · {vehicle.Price:N0} SCRAP"
+                : "SELECT VEHICLE";
         contextAction.SetEnabled(
             vehicle != null
             && !selected
             && (owned || economy.CanAfford(vehicle.Price)));
         contextAction.clicked += HandleContextAction;
         contextHint.text = selected
-            ? "Göreve bu araç ve takılı build ile çıkacaksın."
+            ? "You will deploy with this vehicle and its equipped build."
             : owned
-                ? "Bu aracı aktif görev aracı olarak seç."
+                ? "Set this as your active mission vehicle."
             : vehicle != null && economy.CanAfford(vehicle.Price)
-                ? "Satın alma aracı envantere ekler; otomatik seçmez."
-                : "Bu araç için yeterli Hurda yok.";
+                ? "Purchasing adds the vehicle to your garage without selecting it."
+                : "Not enough Scrap for this vehicle.";
     }
 
     private static string GetVehicleGalleryTagline(GarageVehicleDefinition vehicle)
@@ -1229,17 +1229,17 @@ public sealed class GarageUiController : MonoBehaviour
         switch (vehicle.VehicleId)
         {
             case "ambulance":
-                return "DENGELİ • DAYANIKLI";
+                return "BALANCED • DURABLE";
             case "buggy":
-                return "HAFİF • HIZLI • ÇEVİK";
+                return "LIGHT • FAST • AGILE";
             case "prison-bus":
-                return "AĞIR • DAYANIKLI • YIKICI";
+                return "HEAVY • TOUGH • DEVASTATING";
             case "muscle-car":
-                return "HIZLI • GÜÇLÜ";
+                return "FAST • POWERFUL";
             case "ute":
-                return "DENGELİ • GÜÇLÜ";
+                return "BALANCED • POWERFUL";
             case "golf-cart":
-                return "HAFİF • ÇEVİK • KIRILGAN";
+                return "LIGHT • AGILE • FRAGILE";
             default:
                 return vehicle.Description.ToUpperInvariant();
         }
@@ -1250,11 +1250,11 @@ public sealed class GarageUiController : MonoBehaviour
         detailMechanics.style.display = DisplayStyle.None;
         GarageVehicleDefinition vehicle = buildState.DisplayedVehicle;
         GarageAttachmentDefinition attachment = buildState.PreviewAttachment;
-        detailTitle.text = attachment != null ? attachment.DisplayName : "Uyumlu parça yok";
+        detailTitle.text = attachment != null ? attachment.DisplayName : "No compatible parts";
         detailDescription.text =
             attachment != null
                 ? attachment.Description
-                : "Bu montaj noktası için uyumlu parça bulunamadı.";
+                : "No compatible part is available for this mount.";
         detailEffect.text = string.Empty;
         detailTradeoff.text = string.Empty;
 
@@ -1267,38 +1267,38 @@ public sealed class GarageUiController : MonoBehaviour
 
         if (attachment == null)
         {
-            contextAction.text = "PARÇA SEÇ";
+            contextAction.text = "SELECT PART";
             contextAction.SetEnabled(false);
-            contextHint.text = "MONTAJ NOKTASI SEÇ";
+            contextHint.text = "SELECT A MOUNT";
         }
         else if (!vehicleOwned)
         {
-            contextAction.text = "ÖNCE ARACI SATIN AL";
+            contextAction.text = "BUY VEHICLE FIRST";
             contextAction.SetEnabled(false);
-            contextHint.text = $"{vehicle.DisplayName.ToUpperInvariant()} GEREKLİ";
+            contextHint.text = $"{vehicle.DisplayName.ToUpperInvariant()} REQUIRED";
         }
         else if (!vehicleSelected)
         {
-            contextAction.text = "ÖNCE ARACI SEÇ";
+            contextAction.text = "SELECT VEHICLE FIRST";
             contextAction.SetEnabled(false);
-            contextHint.text = "AKTİF ARAÇ GEREKLİ";
+            contextHint.text = "ACTIVE VEHICLE REQUIRED";
         }
         else
         {
             contextAction.text = equipped
-                ? "SÖK"
+                ? "REMOVE"
                 : owned
-                    ? "TAK"
-                : $"SATIN AL · {attachment.Price:N0} HURDA";
+                    ? "EQUIP"
+                : $"BUY · {attachment.Price:N0} SCRAP";
             contextAction.SetEnabled(
                 equipped || owned || economy.CanAfford(attachment.Price));
             contextHint.text = equipped
-                ? "TAKILI"
+                ? "EQUIPPED"
                 : owned
-                    ? "ENVANTERDE"
+                    ? "OWNED"
                 : economy.CanAfford(attachment.Price)
-                    ? "SATIN ALINABİLİR"
-                    : "HURDA YETERSİZ";
+                    ? "AVAILABLE"
+                    : "NOT ENOUGH SCRAP";
         }
 
         contextAction.clicked += HandleContextAction;
@@ -1374,7 +1374,7 @@ public sealed class GarageUiController : MonoBehaviour
             VisualElement header = new VisualElement();
             header.AddToClassList("stat-header");
 
-            Label name = new Label(GarageVehicleStatPresentation.GetTurkishLabel(stat));
+            Label name = new Label(GarageVehicleStatPresentation.GetEnglishLabel(stat));
             name.AddToClassList("stat-name");
 
             VisualElement valueRow = new VisualElement();
@@ -1484,14 +1484,14 @@ public sealed class GarageUiController : MonoBehaviour
             int index = IndexOfVehicle(vehicles, vehicle);
 
             carouselTitle.text = vehicles.Count > 0
-                ? $"ARAÇ  {index + 1} / {vehicles.Count}"
-                : "ARAÇ YOK";
+                ? $"VEHICLE  {index + 1} / {vehicles.Count}"
+                : "NO VEHICLES";
             carouselMeta.text = vehicle == buildState.SelectedVehicle
-                ? "AKTİF ARAÇ"
+                ? "ACTIVE VEHICLE"
                 : buildState.IsVehicleOwned(vehicle)
-                    ? "SAHİP"
+                    ? "OWNED"
                     : vehicle != null
-                        ? $"{vehicle.Price:N0} HURDA"
+                        ? $"{vehicle.Price:N0} SCRAP"
                         : string.Empty;
             carouselPrev.SetEnabled(vehicles.Count > 1);
             carouselNext.SetEnabled(vehicles.Count > 1);
@@ -1504,14 +1504,14 @@ public sealed class GarageUiController : MonoBehaviour
         int partIndex = attachments.IndexOf(attachment);
         carouselTitle.text = attachments.Count > 0
             ? $"{GetSlotLabel(partsFilter).ToUpperInvariant()}  {partIndex + 1} / {attachments.Count}"
-            : $"{GetSlotLabel(partsFilter).ToUpperInvariant()}  ·  UYUMLU PARÇA YOK";
+            : $"{GetSlotLabel(partsFilter).ToUpperInvariant()}  ·  NO COMPATIBLE PARTS";
         carouselMeta.text = attachment != null
             && buildState.GetEquipped(attachment.Slot) == attachment
-                ? "TAKILI"
+                ? "EQUIPPED"
                 : buildState.IsAttachmentOwned(attachment)
-                    ? "SAHİP"
+                    ? "OWNED"
                     : attachment != null
-                        ? $"{attachment.Price:N0} HURDA"
+                        ? $"{attachment.Price:N0} SCRAP"
                         : string.Empty;
         carouselPrev.SetEnabled(attachments.Count > 1);
         carouselNext.SetEnabled(attachments.Count > 1);
@@ -1578,12 +1578,12 @@ public sealed class GarageUiController : MonoBehaviour
     {
         return slot switch
         {
-            GarageAttachmentSlot.Front => "ÖN PARÇA",
-            GarageAttachmentSlot.Armor => "ZIRH",
-            GarageAttachmentSlot.Engine => "MOTOR",
-            GarageAttachmentSlot.Wheels => "TEKERLEK",
-            GarageAttachmentSlot.RearAero => "ARKA / AERO",
-            GarageAttachmentSlot.RoofUtility => "TAVAN / EKİPMAN",
+            GarageAttachmentSlot.Front => "FRONT",
+            GarageAttachmentSlot.Armor => "ARMOR",
+            GarageAttachmentSlot.Engine => "ENGINE",
+            GarageAttachmentSlot.Wheels => "WHEELS",
+            GarageAttachmentSlot.RearAero => "REAR / AERO",
+            GarageAttachmentSlot.RoofUtility => "ROOF / UTILITY",
             _ => slot.ToString().ToUpperInvariant()
         };
     }
@@ -1592,12 +1592,12 @@ public sealed class GarageUiController : MonoBehaviour
     {
         return slot switch
         {
-            GarageAttachmentSlot.Front => "ÖN",
-            GarageAttachmentSlot.Armor => "ZIRH",
-            GarageAttachmentSlot.Engine => "MOTOR",
-            GarageAttachmentSlot.Wheels => "TEKER",
-            GarageAttachmentSlot.RearAero => "ARKA",
-            GarageAttachmentSlot.RoofUtility => "TAVAN",
+            GarageAttachmentSlot.Front => "FRONT",
+            GarageAttachmentSlot.Armor => "ARMOR",
+            GarageAttachmentSlot.Engine => "ENGINE",
+            GarageAttachmentSlot.Wheels => "WHEEL",
+            GarageAttachmentSlot.RearAero => "REAR",
+            GarageAttachmentSlot.RoofUtility => "ROOF",
             _ => slot.ToString().ToUpperInvariant()
         };
     }

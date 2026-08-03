@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_WindowCage
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: window-cage
-  displayName: Pencere Kafesi
-  description: "Yan cam a\xE7\u0131kl\u0131klar\u0131n\u0131 koruyan kafes; g\xF6r\xFC\u015F\xFC
-    korurken hasar\u0131 azalt\u0131r."
+  displayName: Window Cage
+  description: A cage protecting the side-window openings while preserving visibility
+    and reducing damage.
   slot: 1
   visualPrefab: {fileID: 1395933157865066, guid: 325058588e94ff4469ad3fdb8f17700c, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.68, y: 1.85, z: 1.6}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.1, y: 1.1, z: 1.1}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.68, y: 1.85, z: 1.6}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.1, y: 1.1, z: 1.1}
@@ -36,6 +38,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.68, y: 1.85, z: -0.8}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.1, y: 1.1, z: 1.1}
@@ -44,6 +47,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.68, y: 1.85, z: -0.8}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.1, y: 1.1, z: 1.1}
@@ -66,8 +70,8 @@ MonoBehaviour:
     repairEveryKills: 0
     repairAmount: 0
     maximumRepairs: 0
-    feedbackLabel: "PENCERE KAFES\u0130 \xB7 %12 HASAR AZALTMA"
+    feedbackLabel: "WINDOW CAGE \xB7 12% DAMAGE REDUCTION"
     feedbackTone: 1
-  gameplayEffectSummary: "Zombi temas hasar\u0131n\u0131 %12 azalt\u0131r ve maksimum
-    dayan\u0131kl\u0131l\u0131\u011Fa 18 HP ekler."
-  tradeoffSummary: "-3 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5 kontrol."
+  gameplayEffectSummary: Reduces zombie contact damage by 12% and adds 18 maximum
+    HP.
+  tradeoffSummary: -3 km/h top speed, -1.0 acceleration and -0.5 handling.

@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Attachment_FieldWorkshop
   m_EditorClassIdentifier: Assembly-CSharp::GarageAttachmentDefinition
   attachmentId: field-workshop
-  displayName: "Saha At\xF6lyesi"
-  description: "Ta\u015F\u0131nabilir yak\u0131t ve tamir ekipman\u0131; g\xF6rev
-    i\xE7inde s\u0131n\u0131rl\u0131 onar\u0131m sa\u011Flar."
+  displayName: Field Workshop
+  description: Portable fuel and repair equipment that provides limited recovery
+    during a mission.
   slot: 5
   visualPrefab: {fileID: 1429595321135946, guid: 621f2914db81fd5408d9349d0e0b453b, type: 3}
   compatibleVehicles:
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.61, y: 1.12, z: -2.45}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.3, y: 1.3, z: 1.3}
@@ -28,6 +29,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.61, y: 1.12, z: -2.45}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.3, y: 1.3, z: 1.3}
@@ -36,6 +38,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: -1.61, y: 1.12, z: -1.82}
     localEuler: {x: 0, y: 90, z: 0}
     localScale: {x: 1.3, y: 1.3, z: 1.3}
@@ -44,6 +47,7 @@ MonoBehaviour:
     impactZoneEuler: {x: 0, y: 0, z: 0}
     impactZoneSize: {x: 0, y: 0, z: 0}
   - vehicleId: prison-bus
+    anchor: 0
     localPosition: {x: 1.61, y: 1.12, z: -1.82}
     localEuler: {x: 0, y: -90, z: 0}
     localScale: {x: 1.3, y: 1.3, z: 1.3}
@@ -66,9 +70,9 @@ MonoBehaviour:
     repairEveryKills: 20
     repairAmount: 4
     maximumRepairs: 5
-    feedbackLabel: "SAHA AT\xD6LYES\u0130"
+    feedbackLabel: FIELD WORKSHOP
     feedbackTone: 2
-  gameplayEffectSummary: "Her 20 kill'de 4 HP onar\u0131r; g\xF6rev ba\u015F\u0131na
-    en fazla 5 kez \xE7al\u0131\u015F\u0131r ve +10 HP sa\u011Flar."
-  tradeoffSummary: "Ekipman y\xFCk\xFC -2 km/h h\u0131z, -1.0 h\u0131zlanma ve -0.5
-    kontrol."
+  gameplayEffectSummary: Repairs 4 HP every 20 kills, up to 5 times per mission,
+    and adds 10 maximum HP.
+  tradeoffSummary: The equipment load costs 2 km/h top speed, 1.0 acceleration and
+    0.5 handling.
