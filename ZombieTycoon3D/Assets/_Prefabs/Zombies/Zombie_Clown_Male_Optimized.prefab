@@ -864,7 +864,7 @@ MonoBehaviour:
     requiredImpactSpeedMultiplier: 0.95
     contactThreatMultiplier: 1
     killScoreMultiplier: 2.5
-    killFeedbackLabel: ÖDÜL HEDEFİ
+    killFeedbackLabel: BOUNTY TARGET
 --- !u!114 &6639962410805100963
 MonoBehaviour:
   m_ObjectHideFlags: 0

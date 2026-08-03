@@ -11,6 +11,7 @@ TagManager:
   - Ramp
   - BodyShot
   - Ladder
+  - Ragdoll
   layers:
   - Default
   - TransparentFX
@@ -31,7 +32,7 @@ TagManager:
   - Effects
   - Player
   - DestroyItDebris
-  - 
+  - ArenaBoundary
   - 
   - 
   - 
