@@ -20,6 +20,8 @@ public sealed class GarageUiController : MonoBehaviour
     private const float MayhemAnnouncementEnterDuration = 0.12f;
     private const float MayhemAnnouncementSettleDuration = 0.11f;
     private const float MayhemAnnouncementExitStart = 0.50f;
+    private const float RewardOfferRefreshInterval = 0.5f;
+    private const float RewardFeedbackDuration = 1.6f;
     private const string MasterVolumeKey = "zt3d.settings.master-volume";
     private const float SettingsSaveDelay = 0.35f;
 
@@ -99,6 +101,7 @@ public sealed class GarageUiController : MonoBehaviour
     private Label masterVolumeValue;
     private Button fullscreenButton;
     private Button settingsCloseButton;
+    private Button salvageDropButton;
     private VisualElement missionResultPanel;
     private Label resultStatus;
     private Label resultTitle;
@@ -114,7 +117,11 @@ public sealed class GarageUiController : MonoBehaviour
     private Label resultSuccessBonus;
     private Label resultTotalScrap;
     private Label resultBalance;
+    private VisualElement resultRewardedBonusRow;
+    private Label resultRewardedBonus;
+    private Label resultRewardedStatus;
     private Button resultButton;
+    private Button resultRewardedButton;
     private Button galleryTab;
     private Button partsTab;
     private VisualElement leftFilters;
@@ -174,9 +181,20 @@ public sealed class GarageUiController : MonoBehaviour
     private bool settingsSavePending;
     private bool settingsVisible;
     private float settingsSaveTime;
+    private float nextRewardOfferRefreshTime;
+    private float salvageFeedbackHideTime;
+    private bool salvageDropPending;
+    private bool salvageFeedbackVisible;
+    private bool missionRewardedPending;
+    private bool missionRewardGranted;
+    private bool currentMissionCanDoubleScrap;
+    private bool garageVisible;
+    private int currentMissionBaseScrap;
 
     public event Action MissionRequested;
     public event Action ResultAcknowledged;
+    public event Action RewardedMissionDoubleRequested;
+    public event Action SalvageDropRequested;
     public event Action MissionPauseRequested;
     public event Action MissionResumeRequested;
     public event Action MissionRestartRequested;
@@ -230,6 +248,8 @@ public sealed class GarageUiController : MonoBehaviour
         LoadSettings();
         buildState.Changed += Refresh;
         economy.Changed += Refresh;
+        CrazyGamesPlatformService.RewardedStateChanged +=
+            HandleRewardedStateChanged;
         Refresh();
     }
 
@@ -244,6 +264,9 @@ public sealed class GarageUiController : MonoBehaviour
         {
             economy.Changed -= Refresh;
         }
+
+        CrazyGamesPlatformService.RewardedStateChanged -=
+            HandleRewardedStateChanged;
 
         if (settingsSavePending)
         {
@@ -284,11 +307,27 @@ public sealed class GarageUiController : MonoBehaviour
             settingsSavePending = false;
         }
 
+        if (salvageFeedbackVisible
+            && currentTime >= salvageFeedbackHideTime)
+        {
+            salvageFeedbackVisible = false;
+            RefreshRewardedOffers();
+        }
+
+        if (currentTime >= nextRewardOfferRefreshTime)
+        {
+            nextRewardOfferRefreshTime =
+                currentTime + RewardOfferRefreshInterval;
+            RefreshRewardedOffers();
+        }
+
         UpdatePartHotspotPositions();
     }
 
     public void ShowGarage()
     {
+        garageVisible = true;
+        currentMissionCanDoubleScrap = false;
         garageRoot.style.display = DisplayStyle.Flex;
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.None;
@@ -305,10 +344,12 @@ public sealed class GarageUiController : MonoBehaviour
         activeScreen = GarageScreen.Gallery;
         buildState.ClearPreview();
         Refresh();
+        RefreshRewardedOffers();
     }
 
     public void HideGarageForMission()
     {
+        garageVisible = false;
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.Flex;
         missionResult.style.display = DisplayStyle.None;
@@ -682,6 +723,7 @@ public sealed class GarageUiController : MonoBehaviour
 
     public void ShowMissionResult(MissionResult result)
     {
+        garageVisible = false;
         garageRoot.style.display = DisplayStyle.None;
         missionHud.style.display = DisplayStyle.None;
         missionResult.style.display = DisplayStyle.Flex;
@@ -722,6 +764,19 @@ public sealed class GarageUiController : MonoBehaviour
         resultSuccessBonus.text = $"+{result.Reward.CompletionBonus:N0}";
         resultTotalScrap.text = $"+{result.Reward.TotalScrap:N0} SCRAP";
         resultBalance.text = $"{result.Reward.BalanceAfter:N0} SCRAP";
+        currentMissionCanDoubleScrap = result.CanDoubleScrap;
+        currentMissionBaseScrap = result.Reward.TotalScrap;
+        missionRewardedPending = false;
+        missionRewardGranted = false;
+        resultRewardedBonusRow.style.display = DisplayStyle.None;
+        resultRewardedStatus.style.display = DisplayStyle.None;
+        resultRewardedStatus.RemoveFromClassList(
+            "mission-result-rewarded-status--success");
+        resultButton.text = result.Succeeded
+            ? "COLLECT"
+            : "RETURN TO GARAGE";
+        resultButton.SetEnabled(true);
+        RefreshRewardedOffers();
 
         missionResultPanel.EnableInClassList(
             "mission-result-panel--success",
@@ -735,6 +790,133 @@ public sealed class GarageUiController : MonoBehaviour
         resultStatus.EnableInClassList(
             "mission-result-status--failure",
             !result.Succeeded);
+    }
+
+    public void SetMissionRewardedPending(bool pending)
+    {
+        missionRewardedPending = pending;
+        resultButton.SetEnabled(!pending);
+        resultRewardedButton.SetEnabled(!pending);
+        resultRewardedStatus.text = pending
+            ? "CONNECTING TO REWARD VIDEO..."
+            : string.Empty;
+        resultRewardedStatus.style.display = pending
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+        RefreshRewardedOffers();
+    }
+
+    public void ShowRewardedMissionGranted(
+        int bonusScrap,
+        int newBalance)
+    {
+        missionRewardedPending = false;
+        missionRewardGranted = true;
+        int safeBonus = Mathf.Max(0, bonusScrap);
+        resultRewardedBonus.text = $"+{safeBonus:N0}";
+        resultRewardedBonusRow.style.display = DisplayStyle.Flex;
+        resultTotalScrap.text =
+            $"+{currentMissionBaseScrap + safeBonus:N0} SCRAP";
+        resultBalance.text = $"{Mathf.Max(0, newBalance):N0} SCRAP";
+        resultRewardedStatus.text =
+            $"REWARD SECURED  +{safeBonus:N0} SCRAP";
+        resultRewardedStatus.style.display = DisplayStyle.Flex;
+        resultRewardedStatus.AddToClassList(
+            "mission-result-rewarded-status--success");
+        resultButton.SetEnabled(true);
+        RefreshRewardedOffers();
+    }
+
+    public void ShowRewardedMissionUnavailable(string message)
+    {
+        missionRewardedPending = false;
+        resultButton.SetEnabled(true);
+        resultRewardedStatus.text = string.IsNullOrWhiteSpace(message)
+            ? "AD UNAVAILABLE — COLLECT NORMAL REWARD"
+            : message;
+        resultRewardedStatus.style.display = DisplayStyle.Flex;
+        resultRewardedStatus.RemoveFromClassList(
+            "mission-result-rewarded-status--success");
+        RefreshRewardedOffers();
+    }
+
+    public void SetSalvageDropPending(bool pending)
+    {
+        salvageDropPending = pending;
+        salvageFeedbackVisible = false;
+        salvageDropButton.text = pending
+            ? "CONNECTING..."
+            : $"▶  SALVAGE DROP  +{CrazyGamesPlatformService.SalvageDropScrap:N0}";
+        salvageDropButton.SetEnabled(!pending);
+        salvageDropButton.style.display = DisplayStyle.Flex;
+    }
+
+    public void ShowSalvageDropGranted(int amount)
+    {
+        salvageDropPending = false;
+        salvageFeedbackVisible = true;
+        salvageFeedbackHideTime =
+            Time.unscaledTime + RewardFeedbackDuration;
+        salvageDropButton.text =
+            $"✓  +{Mathf.Max(0, amount):N0} SCRAP SECURED";
+        salvageDropButton.SetEnabled(false);
+        salvageDropButton.style.display = DisplayStyle.Flex;
+    }
+
+    public void ShowSalvageDropUnavailable(string message)
+    {
+        salvageDropPending = false;
+        salvageFeedbackVisible = true;
+        salvageFeedbackHideTime =
+            Time.unscaledTime + RewardFeedbackDuration;
+        salvageDropButton.text = string.IsNullOrWhiteSpace(message)
+            ? "AD UNAVAILABLE"
+            : message;
+        salvageDropButton.SetEnabled(false);
+        salvageDropButton.style.display = DisplayStyle.Flex;
+    }
+
+    private void HandleRewardedStateChanged()
+    {
+        RefreshRewardedOffers();
+    }
+
+    private void RefreshRewardedOffers()
+    {
+        if (salvageDropButton == null || resultRewardedButton == null)
+        {
+            return;
+        }
+
+        bool canOffer =
+            CrazyGamesPlatformService.CanOfferRewardedAd;
+        bool showSalvage = salvageDropPending
+                           || salvageFeedbackVisible
+                           || (garageVisible && canOffer);
+        salvageDropButton.style.display = showSalvage
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+        if (showSalvage
+            && !salvageDropPending
+            && !salvageFeedbackVisible)
+        {
+            salvageDropButton.text =
+                $"▶  SALVAGE DROP  +{CrazyGamesPlatformService.SalvageDropScrap:N0}";
+            salvageDropButton.SetEnabled(true);
+        }
+
+        bool showMissionReward = missionRewardedPending
+                                 || (currentMissionCanDoubleScrap
+                                     && !missionRewardGranted
+                                     && canOffer);
+        resultRewardedButton.style.display = showMissionReward
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+        if (showMissionReward && !missionRewardedPending)
+        {
+            resultRewardedButton.text = "▶  DOUBLE SCRAP";
+            resultRewardedButton.SetEnabled(true);
+        }
     }
 
     private void BindVisualTree()
@@ -818,6 +1000,8 @@ public sealed class GarageUiController : MonoBehaviour
             RequireElement<Button>(root, "fullscreen-button");
         settingsCloseButton =
             RequireElement<Button>(root, "settings-close-button");
+        salvageDropButton =
+            RequireElement<Button>(root, "salvage-drop-button");
         missionResultPanel =
             RequireElement<VisualElement>(root, "mission-result-panel");
         resultStatus = RequireElement<Label>(root, "result-status");
@@ -841,7 +1025,15 @@ public sealed class GarageUiController : MonoBehaviour
         resultTotalScrap =
             RequireElement<Label>(root, "result-total-scrap");
         resultBalance = RequireElement<Label>(root, "result-balance");
+        resultRewardedBonusRow =
+            RequireElement<VisualElement>(root, "result-rewarded-bonus-row");
+        resultRewardedBonus =
+            RequireElement<Label>(root, "result-rewarded-bonus");
+        resultRewardedStatus =
+            RequireElement<Label>(root, "result-rewarded-status");
         resultButton = RequireElement<Button>(root, "result-button");
+        resultRewardedButton =
+            RequireElement<Button>(root, "result-rewarded-button");
         galleryTab = RequireElement<Button>(root, "gallery-tab");
         partsTab = RequireElement<Button>(root, "parts-tab");
         leftFilters = RequireElement<VisualElement>(root, "left-filters");
@@ -874,6 +1066,10 @@ public sealed class GarageUiController : MonoBehaviour
         carouselNext.clicked += () => CycleShowroom(1);
         missionButton.clicked += () => MissionRequested?.Invoke();
         resultButton.clicked += () => ResultAcknowledged?.Invoke();
+        resultRewardedButton.clicked +=
+            () => RewardedMissionDoubleRequested?.Invoke();
+        salvageDropButton.clicked +=
+            () => SalvageDropRequested?.Invoke();
         missionPauseButton.clicked +=
             () => MissionPauseRequested?.Invoke();
         pauseResumeButton.clicked +=
@@ -906,6 +1102,10 @@ public sealed class GarageUiController : MonoBehaviour
         UpdateVolumeLabel(volume);
         UpdateFullscreenButton();
         settingsOverlay.style.display = DisplayStyle.None;
+        fullscreenButton.style.display =
+            CrazyGamesPlatformService.ShouldHideCustomFullscreen
+                ? DisplayStyle.None
+                : DisplayStyle.Flex;
     }
 
     private void OpenSettingsPanel()

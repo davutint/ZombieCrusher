@@ -13,6 +13,7 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="topbar-actions">
+                <ui:Button name="salvage-drop-button" text="▶  SALVAGE DROP  +100" class="salvage-drop-button" style="display: none;" />
                 <ui:VisualElement class="balance-block">
                     <ui:Label name="balance-value" text="0 SCRAP" class="balance-value" />
                 </ui:VisualElement>
@@ -178,58 +179,79 @@
 
     <ui:VisualElement name="mission-result" class="mission-result">
         <ui:VisualElement name="mission-result-panel" class="mission-result-panel">
-            <ui:Label text="SAFEHOUSE MISSION REPORT" class="mission-result-eyebrow" />
-            <ui:Label name="result-status" text="SUCCESS" class="mission-result-status" />
-            <ui:Label name="result-title" text="MISSION COMPLETE" class="mission-result-title" />
-            <ui:Label name="result-description" text="" class="mission-result-description" />
+            <ui:VisualElement class="mission-result-header">
+                <ui:Label text="SAFEHOUSE / RUN REPORT" class="mission-result-eyebrow" />
+                <ui:VisualElement class="mission-result-status-line">
+                    <ui:VisualElement class="mission-result-status-mark" />
+                    <ui:Label name="result-status" text="SUCCESS" class="mission-result-status" />
+                </ui:VisualElement>
+                <ui:Label name="result-title" text="MISSION COMPLETE" class="mission-result-title" />
+                <ui:Label name="result-description" text="" class="mission-result-description" />
+            </ui:VisualElement>
+            <ui:VisualElement class="mission-result-rule" />
             <ui:VisualElement class="mission-result-metrics">
                 <ui:VisualElement class="mission-result-metric">
                     <ui:Label text="KILLS" class="mission-result-metric-label" />
                     <ui:Label name="result-kills" text="0 / 100" class="mission-result-metric-value" />
                 </ui:VisualElement>
+                <ui:VisualElement class="mission-result-metric-divider" />
                 <ui:VisualElement class="mission-result-metric">
                     <ui:Label text="SCORE" class="mission-result-metric-label" />
                     <ui:Label name="result-score" text="0" class="mission-result-metric-value" />
                 </ui:VisualElement>
+                <ui:VisualElement class="mission-result-metric-divider" />
                 <ui:VisualElement class="mission-result-metric">
                     <ui:Label text="BONUS KILLS" class="mission-result-metric-label" />
                     <ui:Label name="result-bonus-kills" text="0" class="mission-result-metric-value" />
                 </ui:VisualElement>
+                <ui:VisualElement class="mission-result-metric-divider" />
                 <ui:VisualElement class="mission-result-metric">
                     <ui:Label text="VEHICLE" class="mission-result-metric-label" />
                     <ui:Label name="result-health" text="0 / 100" class="mission-result-metric-value" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="result-mayhem" class="mission-result-mayhem mayhem-tier--none">
-                <ui:VisualElement class="mission-result-mayhem-block">
-                    <ui:Label text="PEAK KILL RATE" class="mission-result-mayhem-label" />
-                    <ui:Label name="result-mayhem-tier" text="NO HEAT" class="mission-result-mayhem-value" />
+            <ui:VisualElement class="mission-result-rule mission-result-rule--subtle" />
+            <ui:VisualElement class="mission-result-lower">
+                <ui:VisualElement name="result-mayhem" class="mission-result-mayhem mayhem-tier--none">
+                    <ui:VisualElement class="mission-result-mayhem-block">
+                        <ui:Label text="PEAK KILL RATE" class="mission-result-mayhem-label" />
+                        <ui:Label name="result-mayhem-tier" text="NO HEAT" class="mission-result-mayhem-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mission-result-mayhem-divider" />
+                    <ui:VisualElement class="mission-result-mayhem-block">
+                        <ui:Label text="LONGEST CHAIN" class="mission-result-mayhem-label" />
+                        <ui:Label name="result-best-chain" text="0 KILLS" class="mission-result-mayhem-value" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="mission-result-mayhem-divider" />
-                <ui:VisualElement class="mission-result-mayhem-block">
-                    <ui:Label text="LONGEST CHAIN" class="mission-result-mayhem-label" />
-                    <ui:Label name="result-best-chain" text="0 KILLS" class="mission-result-mayhem-value" />
+                <ui:VisualElement class="mission-result-section-divider" />
+                <ui:VisualElement class="mission-result-reward">
+                    <ui:VisualElement class="mission-result-reward-row">
+                        <ui:Label text="KILL SCRAP" class="mission-result-reward-label" />
+                        <ui:Label name="result-kill-scrap" text="+0" class="mission-result-reward-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mission-result-reward-row">
+                        <ui:Label text="MISSION BONUS" class="mission-result-reward-label" />
+                        <ui:Label name="result-success-bonus" text="+0" class="mission-result-reward-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="result-rewarded-bonus-row" class="mission-result-reward-row mission-result-rewarded-bonus-row" style="display: none;">
+                        <ui:Label text="VIDEO BONUS" class="mission-result-reward-label" />
+                        <ui:Label name="result-rewarded-bonus" text="+0" class="mission-result-reward-value mission-result-rewarded-bonus" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mission-result-reward-total">
+                        <ui:Label text="TOTAL PAYOUT" class="mission-result-reward-total-label" />
+                        <ui:Label name="result-total-scrap" text="+0 SCRAP" class="mission-result-reward-total-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mission-result-reward-balance">
+                        <ui:Label text="NEW BALANCE" class="mission-result-reward-label" />
+                        <ui:Label name="result-balance" text="0 SCRAP" class="mission-result-reward-balance-value" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement class="mission-result-reward">
-                <ui:VisualElement class="mission-result-reward-row">
-                    <ui:Label text="KILL SCRAP" class="mission-result-reward-label" />
-                    <ui:Label name="result-kill-scrap" text="+0" class="mission-result-reward-value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="mission-result-reward-row">
-                    <ui:Label text="MISSION BONUS" class="mission-result-reward-label" />
-                    <ui:Label name="result-success-bonus" text="+0" class="mission-result-reward-value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="mission-result-reward-total">
-                    <ui:Label text="TOTAL PAYOUT" class="mission-result-reward-total-label" />
-                    <ui:Label name="result-total-scrap" text="+0 SCRAP" class="mission-result-reward-total-value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="mission-result-reward-balance">
-                    <ui:Label text="NEW BALANCE" class="mission-result-reward-label" />
-                    <ui:Label name="result-balance" text="0 SCRAP" class="mission-result-reward-balance-value" />
-                </ui:VisualElement>
+            <ui:Label name="result-rewarded-status" text="" class="mission-result-rewarded-status" style="display: none;" />
+            <ui:VisualElement class="mission-result-actions">
+                <ui:Button name="result-button" text="COLLECT" class="mission-result-button" />
+                <ui:Button name="result-rewarded-button" text="▶  DOUBLE SCRAP" class="mission-result-button mission-result-rewarded-button" style="display: none;" />
             </ui:VisualElement>
-            <ui:Button name="result-button" text="RETURN TO GARAGE" class="mission-result-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 

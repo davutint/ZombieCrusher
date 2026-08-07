@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -67,8 +68,14 @@ public sealed class GarageEconomyController : MonoBehaviour
         }
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
+        CrazyGamesPlatformService.EnsureExists();
+        while (!CrazyGamesPlatformService.IsReady)
+        {
+            yield return null;
+        }
+
         LoadProgression();
         initialized = true;
         Changed?.Invoke();
@@ -118,6 +125,20 @@ public sealed class GarageEconomyController : MonoBehaviour
             completionBonus,
             total,
             scrap);
+    }
+
+    public int GrantScrap(int amount)
+    {
+        int safeAmount = Mathf.Max(0, amount);
+        if (safeAmount <= 0)
+        {
+            return scrap;
+        }
+
+        scrap = Mathf.Max(0, scrap + safeAmount);
+        SaveProgression();
+        Changed?.Invoke();
+        return scrap;
     }
 
     public bool TryPurchaseVehicle(GarageVehicleDefinition vehicle)
@@ -178,16 +199,19 @@ public sealed class GarageEconomyController : MonoBehaviour
         try
         {
             ResetToDefaultProgression();
-            if (PlayerPrefs.HasKey(SaveKey))
+            if (CrazyGamesPlatformService.StorageHasKey(SaveKey))
             {
-                RestoreCurrentSave(PlayerPrefs.GetString(SaveKey));
+                RestoreCurrentSave(
+                    CrazyGamesPlatformService.StorageGetString(SaveKey));
                 return;
             }
 
-            if (PlayerPrefs.HasKey(LegacySaveKey))
+            if (CrazyGamesPlatformService.StorageHasKey(LegacySaveKey))
             {
                 migratedLegacySave =
-                    RestoreLegacySave(PlayerPrefs.GetString(LegacySaveKey));
+                    RestoreLegacySave(
+                        CrazyGamesPlatformService.StorageGetString(
+                            LegacySaveKey));
             }
         }
         finally
@@ -288,9 +312,10 @@ public sealed class GarageEconomyController : MonoBehaviour
 
     private static void ArchiveCorruptSave(string saveKey, string json)
     {
-        PlayerPrefs.SetString(saveKey + ".corrupt", json ?? string.Empty);
-        PlayerPrefs.DeleteKey(saveKey);
-        PlayerPrefs.Save();
+        CrazyGamesPlatformService.StorageSetString(
+            saveKey + ".corrupt",
+            json ?? string.Empty);
+        CrazyGamesPlatformService.StorageDeleteKey(saveKey);
     }
 
     private void ResetToDefaultProgression()
@@ -331,8 +356,9 @@ public sealed class GarageEconomyController : MonoBehaviour
 
         data.vehicleLoadouts = buildState.CreateLoadoutSaveData();
 
-        PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(data));
-        PlayerPrefs.Save();
+        CrazyGamesPlatformService.StorageSetString(
+            SaveKey,
+            JsonUtility.ToJson(data));
     }
 
     private void HandleBuildChanged()

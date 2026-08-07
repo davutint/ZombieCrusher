@@ -81,4 +81,7 @@ public readonly struct MissionResult
     public float RemainingSeconds { get; }
     public float RemainingHealth { get; }
     public float MaximumHealth { get; }
+    public bool CanDoubleScrap =>
+        Reward.TotalScrap > 0
+        && (Succeeded || EndReason == MissionEndReason.VehicleDestroyed);
 }

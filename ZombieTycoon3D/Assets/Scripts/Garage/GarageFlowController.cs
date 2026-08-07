@@ -58,9 +58,13 @@ public sealed class GarageFlowController : MonoBehaviour
     private float nextHealthUpdateTime;
     private bool feedbackVisible;
     private MayhemTier previousMayhemTier;
+    private MissionResult currentMissionResult;
+    private bool missionRewardDoubled;
 
     private void Awake()
     {
+        CrazyGamesPlatformService.EnsureExists();
+
         if (buildState == null)
         {
             buildState = GetComponent<GarageBuildState>();
@@ -99,6 +103,10 @@ public sealed class GarageFlowController : MonoBehaviour
             garageUi.MissionResumeRequested += ResumeMission;
             garageUi.MissionRestartRequested += RestartMission;
             garageUi.MissionGarageRequested += ReturnToGarageFromPause;
+            garageUi.RewardedMissionDoubleRequested +=
+                HandleRewardedMissionDoubleRequested;
+            garageUi.SalvageDropRequested +=
+                HandleSalvageDropRequested;
         }
 
         if (scoreManager != null)
@@ -208,6 +216,10 @@ public sealed class GarageFlowController : MonoBehaviour
             garageUi.MissionResumeRequested -= ResumeMission;
             garageUi.MissionRestartRequested -= RestartMission;
             garageUi.MissionGarageRequested -= ReturnToGarageFromPause;
+            garageUi.RewardedMissionDoubleRequested -=
+                HandleRewardedMissionDoubleRequested;
+            garageUi.SalvageDropRequested -=
+                HandleSalvageDropRequested;
         }
 
         if (scoreManager != null)
@@ -224,6 +236,7 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         EventManager.OnPlayerDeath -= HandlePlayerDeath;
+        CrazyGamesPlatformService.SetGameplayActive(false);
         RestoreTemporalState();
     }
 
@@ -279,6 +292,7 @@ public sealed class GarageFlowController : MonoBehaviour
         if (missionActive
             || missionIntroActive
             || resultVisible
+            || CrazyGamesPlatformService.IsAdRequestInProgress
             || buildState.SelectedVehicle == null)
         {
             return;
@@ -351,6 +365,7 @@ public sealed class GarageFlowController : MonoBehaviour
     private void OpenGarage()
     {
         RestoreTemporalState();
+        CrazyGamesPlatformService.SetGameplayActive(false);
         missionActive = false;
         missionIntroActive = false;
         missionPaused = false;
@@ -373,6 +388,7 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         RestoreTemporalState();
+        CrazyGamesPlatformService.SetGameplayActive(false);
         missionActive = false;
         missionPaused = false;
         MissionProgress progress = scoreManager.FinishMission();
@@ -389,10 +405,16 @@ public sealed class GarageFlowController : MonoBehaviour
             missionTimeRemaining,
             player.GetCurrentHealth(),
             player.GetMaxHealth());
+        currentMissionResult = result;
+        missionRewardDoubled = false;
 
         StopMissionGameplay(true);
         resultVisible = true;
         garageUi.ShowMissionResult(result);
+        if (succeeded)
+        {
+            CrazyGamesPlatformService.ReportHappyTime();
+        }
     }
 
     private void UpdateMissionIntro()
@@ -441,6 +463,7 @@ public sealed class GarageFlowController : MonoBehaviour
         missionActive = true;
         spawnManager.BeginMission();
         garageUi.CompleteMissionIntro();
+        CrazyGamesPlatformService.SetGameplayActive(true);
     }
 
     private void PauseMission()
@@ -451,6 +474,7 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         missionPaused = true;
+        CrazyGamesPlatformService.SetGameplayActive(false);
         scoreManager.SetMissionPaused(true);
         spawnManager.SetSpawningEnabled(false);
         inputController.enabled = false;
@@ -475,6 +499,7 @@ public sealed class GarageFlowController : MonoBehaviour
 
         RestoreTemporalState();
         missionPaused = false;
+        CrazyGamesPlatformService.SetGameplayActive(true);
         scoreManager.SetMissionPaused(false);
         vehicleController.enabled = true;
         inputController.enabled = true;
@@ -490,6 +515,7 @@ public sealed class GarageFlowController : MonoBehaviour
         }
 
         RestoreTemporalState();
+        CrazyGamesPlatformService.SetGameplayActive(false);
         missionActive = false;
         missionPaused = false;
         scoreManager.CancelMission();
@@ -594,10 +620,79 @@ public sealed class GarageFlowController : MonoBehaviour
 
     private void HandleResultAcknowledged()
     {
-        if (resultVisible)
+        if (resultVisible
+            && !CrazyGamesPlatformService.IsAdRequestInProgress)
         {
             OpenGarage();
         }
+    }
+
+    private void HandleRewardedMissionDoubleRequested()
+    {
+        if (!resultVisible
+            || !currentMissionResult.CanDoubleScrap
+            || missionRewardDoubled)
+        {
+            return;
+        }
+
+        garageUi.SetMissionRewardedPending(true);
+        CrazyGamesPlatformService.RequestRewardedAd(
+            () =>
+            {
+                if (this == null || !resultVisible)
+                {
+                    return;
+                }
+
+                int bonusScrap =
+                    currentMissionResult.Reward.TotalScrap;
+                int newBalance = economy.GrantScrap(bonusScrap);
+                missionRewardDoubled = true;
+                garageUi.ShowRewardedMissionGranted(
+                    bonusScrap,
+                    newBalance);
+            },
+            message =>
+            {
+                if (this != null)
+                {
+                    garageUi.ShowRewardedMissionUnavailable(message);
+                }
+            });
+    }
+
+    private void HandleSalvageDropRequested()
+    {
+        if (missionActive
+            || missionIntroActive
+            || resultVisible
+            || CrazyGamesPlatformService.IsAdRequestInProgress)
+        {
+            return;
+        }
+
+        garageUi.SetSalvageDropPending(true);
+        CrazyGamesPlatformService.RequestRewardedAd(
+            () =>
+            {
+                if (this == null)
+                {
+                    return;
+                }
+
+                int amount =
+                    CrazyGamesPlatformService.SalvageDropScrap;
+                economy.GrantScrap(amount);
+                garageUi.ShowSalvageDropGranted(amount);
+            },
+            message =>
+            {
+                if (this != null)
+                {
+                    garageUi.ShowSalvageDropUnavailable(message);
+                }
+            });
     }
 
     private void HandleMissionProgressChanged(MissionProgress progress)
