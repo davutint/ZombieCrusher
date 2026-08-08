@@ -2,13 +2,15 @@
 
 ## Project Identity
 
-`ZombieTycoon3D` is a Unity `6000.2.7f2` project built around DOTS/ECS zombie simulation, vehicle interaction, navigation, animation, and high-entity-count performance.
+`ZombieTycoon3D` is a Unity `6000.3.10f1` project built around DOTS/ECS zombie simulation, vehicle interaction, navigation, animation, and high-entity-count performance.
 
-The live project root is:
+The repository is used from both Windows and macOS. Resolve the live checkout with `git rev-parse --show-toplevel`; do not encode one machine's absolute path into project source or package references.
+
+Known Windows project root:
 
 `C:\GithubProjeler\ZombieCrusher\ZombieTycoon3D`
 
-The Git repository root is one directory above:
+Known Windows Git repository root:
 
 `C:\GithubProjeler\ZombieCrusher`
 
@@ -18,7 +20,9 @@ The Git repository root is one directory above:
 - `Assets/Scripts/GameJamScripts`: procedural animation and performance helpers.
 - `Assets/Scripts/Cars`: vehicle definitions and initialization.
 - `Assets/Scripts`: legacy or hybrid MonoBehaviour gameplay scripts.
-- `Assets/Scenes/DOTSTEST.unity`: current enabled build scene and primary development scene.
+- `Assets/Scenes/DOTSTEST.unity`: primary Windows development scene; it is not the platform release scene list.
+- `Assets/Settings/Build Profiles/CrazyGames WebGL.asset`: CrazyGames release profile; builds `CrazyGamesBootstrap.unity` followed by the original vendor demo gameplay scene.
+- `Assets/Settings/Build Profiles/iOS App Store.asset`: iOS release profile; builds only `Assets/Scenes/iOS/Demo_iOS.unity`.
 - `Assets/Scenes/DOTSTEST/New Sub Scene.unity`: DOTS SubScene used by the primary scene.
 - `Assets/Scenes/MainMenu.unity`: project scene, currently not an enabled build scene.
 - `Packages/com.projectdawn.navigation`: embedded Project Dawn Navigation package.
@@ -66,14 +70,25 @@ Do not create “temporary,” “placeholder,” “foundation,” or “neutra
 
 ## Build and Development
 
-Use Unity `6000.2.7f2`.
+Use Unity `6000.3.10f1` on every development machine.
 
 - Open the project through Unity Hub at `ZombieTycoon3D`.
-- Use `Assets/Scenes/DOTSTEST.unity` as the current primary development scene unless the owner selects another scene.
+- Use `Assets/Scenes/DOTSTEST.unity` as the primary Windows development scene unless the owner selects another scene.
+- For platform builds, activate the matching committed Build Profile instead of editing the global scene list: `CrazyGames WebGL` on Windows/WebGL, `iOS App Store` on macOS/iOS.
 - Unity compiles scripts through the Editor. Do not run an external C# compilation command as a substitute for Unity compilation.
 - Unity Test Framework is installed, but a dedicated project-owned regression suite is not established. Distinguish package/sample tests from game-owned tests.
 - Run focused EditMode or PlayMode tests through Unity MCP when the task requires verification or the owner explicitly requests them.
 - Report only tests that were actually run and their real result.
+
+## Cross-Platform Main-Branch Workflow
+
+- The owner intentionally uses one `main` branch for Windows/CrazyGames development and macOS/iOS release work.
+- Keep platform-specific runtime and Editor code behind assembly-definition platform constraints or `UNITY_WEBGL` / `UNITY_IOS` compile guards. Do not solve platform separation by deleting the other platform's source.
+- Apple.Core, Apple.GameKit, Google Mobile Ads, and External Dependency Manager are committed as embedded packages under `Packages/`. Do not replace them with machine-local absolute `file:` paths or require a separate manual package installation after pull.
+- Do not commit `Library`, `Temp`, generated Apple Play Mode support bundles, CocoaPods/Xcode exports, builds, crash recovery data, or other machine-local artifacts.
+- Git LFS must be installed on both machines because native plug-in libraries and project media use LFS. After pulling, run `git lfs pull` before opening Unity and never commit an LFS pointer as if it were the actual package binary.
+- Before pulling on either machine, close Unity. After pulling and `git lfs pull`, open with exactly `6000.3.10f1`, wait for package import and compilation, activate that machine's Build Profile, then inspect Console before continuing development.
+- A successful compile for one platform is not proof for the other. Release-affecting changes require an iOS compile/export check on macOS and a CrazyGames WebGL regression build or smoke test as appropriate.
 
 ## Coding and Architecture
 

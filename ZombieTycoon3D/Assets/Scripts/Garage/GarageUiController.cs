@@ -96,10 +96,34 @@ public sealed class GarageUiController : MonoBehaviour
     private Button pauseGarageButton;
     private Button pauseSettingsButton;
     private VisualElement settingsOverlay;
+    private ScrollView settingsScroll;
     private Button garageSettingsButton;
+    private Button garageAdFreeButton;
     private Slider masterVolume;
     private Label masterVolumeValue;
+    private VisualElement fullscreenRow;
     private Button fullscreenButton;
+    private VisualElement gameCenterRow;
+    private Button leaderboardsButton;
+    private Label leaderboardsStatus;
+    private VisualElement adFreeRewardsRow;
+    private Button buyAdFreeRewardsButton;
+    private Button restorePurchasesButton;
+    private VisualElement privacyOptionsRow;
+    private Button privacyOptionsButton;
+    private VisualElement legalLinksRow;
+    private Button privacyPolicyButton;
+    private Button supportButton;
+    private VisualElement accountDeletionRow;
+    private Button deleteAccountButton;
+    private Label accountDeletionStatus;
+    private VisualElement deleteAccountOverlay;
+    private Button deleteAccountCancelButton;
+    private Button deleteAccountConfirmButton;
+    private VisualElement serviceNotificationOverlay;
+    private Label serviceNotificationMessage;
+    private Button serviceNotificationAcknowledgeButton;
+    private Label commerceStatus;
     private Button settingsCloseButton;
     private Button salvageDropButton;
     private VisualElement missionResultPanel;
@@ -118,6 +142,7 @@ public sealed class GarageUiController : MonoBehaviour
     private Label resultTotalScrap;
     private Label resultBalance;
     private VisualElement resultRewardedBonusRow;
+    private Label resultRewardedBonusLabel;
     private Label resultRewardedBonus;
     private Label resultRewardedStatus;
     private Button resultButton;
@@ -248,7 +273,7 @@ public sealed class GarageUiController : MonoBehaviour
         LoadSettings();
         buildState.Changed += Refresh;
         economy.Changed += Refresh;
-        CrazyGamesPlatformService.RewardedStateChanged +=
+        GamePlatformService.RewardedStateChanged +=
             HandleRewardedStateChanged;
         Refresh();
     }
@@ -265,7 +290,7 @@ public sealed class GarageUiController : MonoBehaviour
             economy.Changed -= Refresh;
         }
 
-        CrazyGamesPlatformService.RewardedStateChanged -=
+        GamePlatformService.RewardedStateChanged -=
             HandleRewardedStateChanged;
 
         if (settingsSavePending)
@@ -429,7 +454,16 @@ public sealed class GarageUiController : MonoBehaviour
             return;
         }
 
+        if (GamePlatformService.IsPlayerAccountDeletionInProgress)
+        {
+            return;
+        }
+
         settingsOverlay.style.display = DisplayStyle.None;
+        if (deleteAccountOverlay != null)
+        {
+            deleteAccountOverlay.style.display = DisplayStyle.None;
+        }
         settingsVisible = false;
         if (settingsSavePending)
         {
@@ -798,7 +832,9 @@ public sealed class GarageUiController : MonoBehaviour
         resultButton.SetEnabled(!pending);
         resultRewardedButton.SetEnabled(!pending);
         resultRewardedStatus.text = pending
-            ? "CONNECTING TO REWARD VIDEO..."
+            ? GamePlatformService.HasAdFreeRewards
+                ? "APPLYING DOUBLE REWARD..."
+                : "CONNECTING TO REWARD VIDEO..."
             : string.Empty;
         resultRewardedStatus.style.display = pending
             ? DisplayStyle.Flex
@@ -813,13 +849,18 @@ public sealed class GarageUiController : MonoBehaviour
         missionRewardedPending = false;
         missionRewardGranted = true;
         int safeBonus = Mathf.Max(0, bonusScrap);
+        bool instantReward = GamePlatformService.HasAdFreeRewards;
+        resultRewardedBonusLabel.text = instantReward
+            ? "INSTANT BONUS"
+            : "VIDEO BONUS";
         resultRewardedBonus.text = $"+{safeBonus:N0}";
         resultRewardedBonusRow.style.display = DisplayStyle.Flex;
         resultTotalScrap.text =
             $"+{currentMissionBaseScrap + safeBonus:N0} SCRAP";
         resultBalance.text = $"{Mathf.Max(0, newBalance):N0} SCRAP";
-        resultRewardedStatus.text =
-            $"REWARD SECURED  +{safeBonus:N0} SCRAP";
+        resultRewardedStatus.text = instantReward
+            ? $"INSTANT REWARD SECURED  +{safeBonus:N0} SCRAP"
+            : $"VIDEO REWARD SECURED  +{safeBonus:N0} SCRAP";
         resultRewardedStatus.style.display = DisplayStyle.Flex;
         resultRewardedStatus.AddToClassList(
             "mission-result-rewarded-status--success");
@@ -846,7 +887,7 @@ public sealed class GarageUiController : MonoBehaviour
         salvageFeedbackVisible = false;
         salvageDropButton.text = pending
             ? "CONNECTING..."
-            : $"▶  SALVAGE DROP  +{CrazyGamesPlatformService.SalvageDropScrap:N0}";
+            : $"▶  SALVAGE DROP  +{GamePlatformService.SalvageDropScrap:N0}";
         salvageDropButton.SetEnabled(!pending);
         salvageDropButton.style.display = DisplayStyle.Flex;
     }
@@ -879,6 +920,8 @@ public sealed class GarageUiController : MonoBehaviour
     private void HandleRewardedStateChanged()
     {
         RefreshRewardedOffers();
+        RefreshIosSettings();
+        RefreshServiceNotification();
     }
 
     private void RefreshRewardedOffers()
@@ -889,10 +932,11 @@ public sealed class GarageUiController : MonoBehaviour
         }
 
         bool canOffer =
-            CrazyGamesPlatformService.CanOfferRewardedAd;
-        bool showSalvage = salvageDropPending
+            GamePlatformService.CanOfferRewardedAd;
+        bool showSalvage = GamePlatformService.SupportsSalvageDrop
+                           && (salvageDropPending
                            || salvageFeedbackVisible
-                           || (garageVisible && canOffer);
+                           || (garageVisible && canOffer));
         salvageDropButton.style.display = showSalvage
             ? DisplayStyle.Flex
             : DisplayStyle.None;
@@ -901,21 +945,48 @@ public sealed class GarageUiController : MonoBehaviour
             && !salvageFeedbackVisible)
         {
             salvageDropButton.text =
-                $"▶  SALVAGE DROP  +{CrazyGamesPlatformService.SalvageDropScrap:N0}";
+                $"▶  SALVAGE DROP  +{GamePlatformService.SalvageDropScrap:N0}";
             salvageDropButton.SetEnabled(true);
         }
 
         bool showMissionReward = missionRewardedPending
                                  || (currentMissionCanDoubleScrap
-                                     && !missionRewardGranted
-                                     && canOffer);
+                                     && !missionRewardGranted);
         resultRewardedButton.style.display = showMissionReward
             ? DisplayStyle.Flex
             : DisplayStyle.None;
         if (showMissionReward && !missionRewardedPending)
         {
-            resultRewardedButton.text = "▶  DOUBLE SCRAP";
-            resultRewardedButton.SetEnabled(true);
+            long doubledPayout =
+                (long)Mathf.Max(0, currentMissionBaseScrap) * 2L;
+            string doubledPayoutLabel =
+                $"{doubledPayout:N0} SCRAP";
+            resultRewardedButton.text =
+                GamePlatformService.HasAdFreeRewards
+                    ? $"CLAIM  {doubledPayoutLabel}"
+                    : $"▶  GET  {doubledPayoutLabel}";
+            resultRewardedButton.SetEnabled(canOffer);
+
+            if (!canOffer)
+            {
+                if (resultRewardedStatus.style.display
+                    == DisplayStyle.None)
+                {
+                    resultRewardedStatus.text =
+                        "REWARD VIDEO LOADING...";
+                    resultRewardedStatus.style.display =
+                        DisplayStyle.Flex;
+                    resultRewardedStatus.RemoveFromClassList(
+                        "mission-result-rewarded-status--success");
+                }
+            }
+            else if (!missionRewardGranted
+                     && !resultRewardedStatus.ClassListContains(
+                         "mission-result-rewarded-status--success"))
+            {
+                resultRewardedStatus.text = string.Empty;
+                resultRewardedStatus.style.display = DisplayStyle.None;
+            }
         }
     }
 
@@ -991,13 +1062,65 @@ public sealed class GarageUiController : MonoBehaviour
             RequireElement<Button>(root, "pause-settings-button");
         settingsOverlay =
             RequireElement<VisualElement>(root, "settings-overlay");
+        settingsScroll =
+            RequireElement<ScrollView>(root, "settings-scroll");
         garageSettingsButton =
             RequireElement<Button>(root, "garage-settings-button");
+        garageAdFreeButton =
+            RequireElement<Button>(root, "garage-ad-free-button");
         masterVolume = RequireElement<Slider>(root, "master-volume");
         masterVolumeValue =
             RequireElement<Label>(root, "master-volume-value");
+        fullscreenRow =
+            RequireElement<VisualElement>(root, "fullscreen-row");
         fullscreenButton =
             RequireElement<Button>(root, "fullscreen-button");
+        gameCenterRow =
+            RequireElement<VisualElement>(root, "game-center-row");
+        leaderboardsButton =
+            RequireElement<Button>(root, "leaderboards-button");
+        leaderboardsStatus =
+            RequireElement<Label>(root, "leaderboards-status");
+        adFreeRewardsRow =
+            RequireElement<VisualElement>(root, "ad-free-rewards-row");
+        buyAdFreeRewardsButton =
+            RequireElement<Button>(root, "buy-ad-free-rewards-button");
+        restorePurchasesButton =
+            RequireElement<Button>(root, "restore-purchases-button");
+        privacyOptionsRow =
+            RequireElement<VisualElement>(root, "privacy-options-row");
+        privacyOptionsButton =
+            RequireElement<Button>(root, "privacy-options-button");
+        legalLinksRow =
+            RequireElement<VisualElement>(root, "legal-links-row");
+        privacyPolicyButton =
+            RequireElement<Button>(root, "privacy-policy-button");
+        supportButton =
+            RequireElement<Button>(root, "support-button");
+        accountDeletionRow =
+            RequireElement<VisualElement>(root, "account-deletion-row");
+        deleteAccountButton =
+            RequireElement<Button>(root, "delete-account-button");
+        accountDeletionStatus =
+            RequireElement<Label>(root, "account-deletion-status");
+        deleteAccountOverlay =
+            RequireElement<VisualElement>(root, "delete-account-overlay");
+        deleteAccountCancelButton =
+            RequireElement<Button>(root, "delete-account-cancel-button");
+        deleteAccountConfirmButton =
+            RequireElement<Button>(root, "delete-account-confirm-button");
+        serviceNotificationOverlay =
+            RequireElement<VisualElement>(
+                root,
+                "service-notification-overlay");
+        serviceNotificationMessage =
+            RequireElement<Label>(root, "service-notification-message");
+        serviceNotificationAcknowledgeButton =
+            RequireElement<Button>(
+                root,
+                "service-notification-acknowledge-button");
+        commerceStatus =
+            RequireElement<Label>(root, "commerce-status");
         settingsCloseButton =
             RequireElement<Button>(root, "settings-close-button");
         salvageDropButton =
@@ -1027,6 +1150,8 @@ public sealed class GarageUiController : MonoBehaviour
         resultBalance = RequireElement<Label>(root, "result-balance");
         resultRewardedBonusRow =
             RequireElement<VisualElement>(root, "result-rewarded-bonus-row");
+        resultRewardedBonusLabel =
+            RequireElement<Label>(root, "result-rewarded-bonus-label");
         resultRewardedBonus =
             RequireElement<Label>(root, "result-rewarded-bonus");
         resultRewardedStatus =
@@ -1079,9 +1204,22 @@ public sealed class GarageUiController : MonoBehaviour
         pauseGarageButton.clicked +=
             () => MissionGarageRequested?.Invoke();
         garageSettingsButton.clicked += OpenSettingsPanel;
+        garageAdFreeButton.clicked += PurchaseAdFreeRewards;
         pauseSettingsButton.clicked += OpenSettingsPanel;
         settingsCloseButton.clicked += CloseSettingsPanel;
         fullscreenButton.clicked += ToggleFullscreen;
+        leaderboardsButton.clicked += OpenLeaderboards;
+        buyAdFreeRewardsButton.clicked += PurchaseAdFreeRewards;
+        restorePurchasesButton.clicked += RestorePurchases;
+        privacyOptionsButton.clicked += OpenPrivacyOptions;
+        privacyPolicyButton.clicked += OpenPrivacyPolicy;
+        supportButton.clicked += OpenSupport;
+        deleteAccountButton.clicked += OpenDeleteAccountConfirmation;
+        deleteAccountCancelButton.clicked +=
+            CloseDeleteAccountConfirmation;
+        deleteAccountConfirmButton.clicked += ConfirmDeleteAccount;
+        serviceNotificationAcknowledgeButton.clicked +=
+            AcknowledgeServiceNotification;
         masterVolume.RegisterValueChangedCallback(
             HandleMasterVolumeChanged);
 
@@ -1102,15 +1240,27 @@ public sealed class GarageUiController : MonoBehaviour
         UpdateVolumeLabel(volume);
         UpdateFullscreenButton();
         settingsOverlay.style.display = DisplayStyle.None;
-        fullscreenButton.style.display =
-            CrazyGamesPlatformService.ShouldHideCustomFullscreen
+        deleteAccountOverlay.style.display = DisplayStyle.None;
+        serviceNotificationOverlay.style.display = DisplayStyle.None;
+        fullscreenRow.style.display =
+            GamePlatformService.ShouldHideCustomFullscreen
                 ? DisplayStyle.None
                 : DisplayStyle.Flex;
+        gameCenterRow.style.display =
+            GamePlatformService.SupportsLeaderboards
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+        leaderboardsStatus.text = string.Empty;
+        commerceStatus.text = string.Empty;
+        accountDeletionStatus.text = string.Empty;
+        RefreshIosSettings();
+        RefreshServiceNotification();
     }
 
     private void OpenSettingsPanel()
     {
         UpdateFullscreenButton();
+        RefreshIosSettings();
         settingsOverlay.style.display = DisplayStyle.Flex;
         settingsVisible = true;
     }
@@ -1135,6 +1285,221 @@ public sealed class GarageUiController : MonoBehaviour
     {
         Screen.fullScreen = !Screen.fullScreen;
         UpdateFullscreenButton();
+    }
+
+    private void OpenLeaderboards()
+    {
+        leaderboardsStatus.text = string.Empty;
+        GamePlatformService.ShowLeaderboards(
+            message => leaderboardsStatus.text = message);
+    }
+
+    private void PurchaseAdFreeRewards()
+    {
+        commerceStatus.text = string.Empty;
+        GamePlatformService.PurchaseAdFreeRewards(
+            message =>
+            {
+                commerceStatus.text = message;
+                RefreshIosSettings();
+            });
+        RefreshIosSettings();
+    }
+
+    private void RestorePurchases()
+    {
+        commerceStatus.text = "RESTORING PURCHASES...";
+        GamePlatformService.RestorePurchases((success, message) =>
+        {
+            commerceStatus.text = string.IsNullOrWhiteSpace(message)
+                ? (success ? "PURCHASES RESTORED" : "RESTORE FAILED")
+                : message;
+            RefreshIosSettings();
+        });
+    }
+
+    private void OpenPrivacyOptions()
+    {
+        commerceStatus.text = string.Empty;
+        GamePlatformService.ShowPrivacyOptions(
+            message => commerceStatus.text = message);
+    }
+
+    private void OpenPrivacyPolicy()
+    {
+        commerceStatus.text = string.Empty;
+        GamePlatformService.OpenPrivacyPolicy(
+            message => commerceStatus.text = message);
+    }
+
+    private void OpenSupport()
+    {
+        commerceStatus.text = string.Empty;
+        GamePlatformService.OpenSupport(
+            message => commerceStatus.text = message);
+    }
+
+    private void OpenDeleteAccountConfirmation()
+    {
+        if (GamePlatformService.IsPlayerAccountDeletionInProgress)
+        {
+            return;
+        }
+
+        accountDeletionStatus.text = string.Empty;
+        deleteAccountConfirmButton.text = "DELETE PERMANENTLY";
+        deleteAccountConfirmButton.SetEnabled(true);
+        deleteAccountCancelButton.SetEnabled(true);
+        deleteAccountOverlay.style.display = DisplayStyle.Flex;
+    }
+
+    private void CloseDeleteAccountConfirmation()
+    {
+        if (GamePlatformService.IsPlayerAccountDeletionInProgress)
+        {
+            return;
+        }
+
+        deleteAccountOverlay.style.display = DisplayStyle.None;
+    }
+
+    private void ConfirmDeleteAccount()
+    {
+        if (GamePlatformService.IsPlayerAccountDeletionInProgress)
+        {
+            return;
+        }
+
+        deleteAccountConfirmButton.text = "DELETING...";
+        deleteAccountConfirmButton.SetEnabled(false);
+        deleteAccountCancelButton.SetEnabled(false);
+        GamePlatformService.DeletePlayerAccount((success, message) =>
+        {
+            if (success)
+            {
+                economy.ResetAfterPlayerAccountDeletion();
+            }
+
+            accountDeletionStatus.text = string.IsNullOrWhiteSpace(message)
+                ? (success
+                    ? "ACCOUNT AND CLOUD SAVE DELETED"
+                    : "ACCOUNT DELETION FAILED")
+                : message;
+            deleteAccountOverlay.style.display = DisplayStyle.None;
+            deleteAccountConfirmButton.text = "DELETE PERMANENTLY";
+            deleteAccountConfirmButton.SetEnabled(true);
+            deleteAccountCancelButton.SetEnabled(true);
+            RefreshIosSettings();
+        });
+    }
+
+    private void RefreshServiceNotification()
+    {
+        if (serviceNotificationOverlay == null
+            || serviceNotificationMessage == null)
+        {
+            return;
+        }
+
+        bool hasNotification =
+            GamePlatformService.HasPendingServiceNotification;
+        serviceNotificationMessage.text = hasNotification
+            ? GamePlatformService.PendingServiceNotificationMessage
+            : string.Empty;
+        serviceNotificationOverlay.style.display = hasNotification
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+    }
+
+    private void AcknowledgeServiceNotification()
+    {
+        GamePlatformService.AcknowledgeServiceNotification();
+        RefreshServiceNotification();
+    }
+
+    private void RefreshIosSettings()
+    {
+#if UNITY_IOS
+        settingsScroll.verticalScrollerVisibility =
+            ScrollerVisibility.Hidden;
+        settingsScroll.horizontalScrollerVisibility =
+            ScrollerVisibility.Hidden;
+#endif
+
+        if (garageAdFreeButton == null
+            || adFreeRewardsRow == null
+            || privacyOptionsRow == null
+            || legalLinksRow == null
+            || accountDeletionRow == null)
+        {
+            return;
+        }
+
+        bool supportsPurchase =
+            GamePlatformService.SupportsAdFreeRewardsPurchase;
+        bool ownsPurchase = GamePlatformService.HasAdFreeRewards;
+        bool purchasePending =
+            GamePlatformService.IsPurchaseInProgress;
+        string localizedPrice =
+            GamePlatformService.AdFreeRewardsLocalizedPrice;
+        bool productReady = ownsPurchase
+                            || !string.IsNullOrWhiteSpace(localizedPrice);
+
+        garageAdFreeButton.style.display = supportsPurchase
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+        if (supportsPurchase)
+        {
+            garageAdFreeButton.text = ownsPurchase
+                ? "AD-FREE  ✓"
+                : purchasePending
+                    ? "PROCESSING..."
+                    : productReady
+                        ? $"AD-FREE  ·  {localizedPrice.ToUpperInvariant()}"
+                        : "AD-FREE  ·  LOADING";
+            garageAdFreeButton.SetEnabled(
+                !ownsPurchase && !purchasePending && productReady);
+        }
+
+        adFreeRewardsRow.style.display = supportsPurchase
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+        if (supportsPurchase)
+        {
+            buyAdFreeRewardsButton.text = ownsPurchase
+                ? "OWNED"
+                : purchasePending
+                    ? "PROCESSING..."
+                    : !productReady
+                        ? "LOADING..."
+                        : localizedPrice.ToUpperInvariant();
+            buyAdFreeRewardsButton.SetEnabled(
+                !ownsPurchase && !purchasePending && productReady);
+            restorePurchasesButton.SetEnabled(!purchasePending);
+        }
+
+        privacyOptionsRow.style.display =
+            GamePlatformService.CanShowPrivacyOptions
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+
+        legalLinksRow.style.display =
+            GamePlatformService.SupportsLegalLinks
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+
+        bool supportsAccountDeletion =
+            GamePlatformService.SupportsPlayerAccountDeletion;
+        bool accountDeletionPending =
+            GamePlatformService.IsPlayerAccountDeletionInProgress;
+        accountDeletionRow.style.display = supportsAccountDeletion
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
+        deleteAccountButton.SetEnabled(
+            supportsAccountDeletion && !accountDeletionPending);
+        deleteAccountButton.text = accountDeletionPending
+            ? "DELETING..."
+            : "DELETE DATA";
     }
 
     private void UpdateFullscreenButton()

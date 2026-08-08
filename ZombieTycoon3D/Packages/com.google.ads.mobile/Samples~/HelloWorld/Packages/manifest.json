@@ -1,0 +1,16 @@
+{
+  "scopedRegistries": [
+    {
+      "name": "google",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.unity.ugui": "1.0.0",
+    "com.unity.modules.androidjni": "1.0.0",
+    "com.google.ads.mobile" : "11.3.0"
+  }
+}

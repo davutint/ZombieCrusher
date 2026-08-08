@@ -9,8 +9,8 @@ public sealed class CrazyGamesBootstrap : MonoBehaviour
 
     private IEnumerator Start()
     {
-        CrazyGamesPlatformService.EnsureExists();
-        while (!CrazyGamesPlatformService.IsReady)
+        GamePlatformService.EnsureExists();
+        while (!GamePlatformService.IsReady)
         {
             yield return null;
         }

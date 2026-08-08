@@ -970,7 +970,14 @@ namespace VHierarchy
 
         static void UpdateExpandedIdsList() // delayCall loop
         {
-            expandedIds = hierarchyWindow?.GetFieldValue("m_SceneHierarchy")?.GetFieldValue("m_TreeViewState")?.GetPropertyValue<List<int>>("expandedIDs") ?? new List<int>();
+            var expandedIdsValue = hierarchyWindow?
+                .GetFieldValue("m_SceneHierarchy")?
+                .GetFieldValue("m_TreeViewState")?
+                .GetPropertyValue("expandedIDs");
+
+            expandedIds = expandedIdsValue is IEnumerable<int> values
+                ? values.ToList()
+                : new List<int>();
 
             EditorApplication.delayCall -= UpdateExpandedIdsList;
             EditorApplication.delayCall += UpdateExpandedIdsList;
@@ -1850,5 +1857,4 @@ namespace VHierarchy
     }
 }
 #endif
-
 

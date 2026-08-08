@@ -4,15 +4,22 @@
 *.cginc text
 *.shader text
 
-*.mat merge=unityyamlmerge eol=lf
-*.anim merge=unityyamlmerge eol=lf
-*.unity merge=unityyamlmerge eol=lf
-*.prefab merge=unityyamlmerge eol=lf
-*.physicsMaterial2D merge=unityyamlmerge eol=lf
-*.physicMaterial merge=unityyamlmerge eol=lf
-*.asset merge=unityyamlmerge eol=lf
-*.meta merge=unityyamlmerge eol=lf
-*.controller merge=unityyamlmerge eol=lf
+*.mat merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.anim merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.unity merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.prefab merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.physicsMaterial2D merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.physicMaterial merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.asset merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+# Unity serializes some empty YAML scalar values with a trailing space.
+*.meta merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+*.controller merge=unityyamlmerge eol=lf whitespace=-blank-at-eol
+
+# Preserve vendored package formatting; do not rewrite third-party sources.
+ZombieTycoon3D/Packages/com.apple.unityplugin.core/** whitespace=-blank-at-eol,-blank-at-eof
+ZombieTycoon3D/Packages/com.apple.unityplugin.gamekit/** whitespace=-blank-at-eol,-blank-at-eof
+ZombieTycoon3D/Packages/com.google.ads.mobile/** whitespace=-blank-at-eol,-blank-at-eof
+ZombieTycoon3D/Packages/com.google.external-dependency-manager/** whitespace=-blank-at-eol,-blank-at-eof
 
 
 ## git-lfs ##

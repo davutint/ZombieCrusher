@@ -1,0 +1,20 @@
+<linker>
+  <!--
+    Apple.GameKit obtains the Game Center identity signature through NSData
+    wrappers created with reflection. IL2CPP may otherwise strip NSData's
+    IntPtr constructor, causing identity verification to fall back to an
+    anonymous Unity Authentication session on device builds.
+  -->
+  <assembly fullname="Apple.Core">
+    <type fullname="Apple.Core.Runtime.NSData" preserve="all" />
+  </assembly>
+
+  <!--
+    Apple.GameKit materializes leaderboard objects through a reflected
+    IntPtr constructor. Keep that constructor in IL2CPP device builds so
+    score submission can load the configured leaderboard.
+  -->
+  <assembly fullname="Apple.GameKit">
+    <type fullname="Apple.GameKit.Leaderboards.GKLeaderboard" preserve="all" />
+  </assembly>
+</linker>

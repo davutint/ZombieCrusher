@@ -3,6 +3,8 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+.DS_Store
+._*
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -11,6 +13,20 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 *.log
+
+# Unity scene recovery data is machine-local and may contain crash snapshots.
+/ZombieTycoon3D/Assets/_Recovery/
+/ZombieTycoon3D/Assets/_Recovery.meta
+
+# Apple plug-in Play Mode support is generated for the current Mac/Unity install.
+/ZombieTycoon3D/Assets/Apple Plug-In Support/Editor/PlayModeSupport/
+/ZombieTycoon3D/Assets/Apple Plug-In Support/Editor/PlayModeSupport.meta
+
+# Unity Performance Testing creates these machine-local build records.
+/ZombieTycoon3D/Assets/Resources/PerformanceTestRunInfo.json
+/ZombieTycoon3D/Assets/Resources/PerformanceTestRunInfo.json.meta
+/ZombieTycoon3D/Assets/Resources/PerformanceTestRunSettings.json
+/ZombieTycoon3D/Assets/Resources/PerformanceTestRunSettings.json.meta
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1

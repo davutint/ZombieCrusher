@@ -1,0 +1,11 @@
+framework module GameKitWrapper {
+  umbrella header "GameKitWrapper.h"
+  export *
+
+  module * { export * }
+}
+
+module GameKitWrapper.Swift {
+  header "GameKitWrapper-Swift.h"
+  requires objc
+}

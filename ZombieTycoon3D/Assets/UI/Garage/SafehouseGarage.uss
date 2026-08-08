@@ -3190,6 +3190,11 @@
     font-size: 9px;
 }
 
+.settings-feedback {
+    min-height: 18px;
+    -unity-text-align: middle-center;
+}
+
 .settings-action-button {
     width: 132px;
     color: var(--text);
@@ -3198,6 +3203,21 @@
     border-right-color: rgba(103, 186, 255, 0.42);
     border-top-color: rgba(103, 186, 255, 0.42);
     border-bottom-color: rgba(103, 186, 255, 0.42);
+}
+
+.settings-row-copy {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.settings-commerce-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.settings-action-button--compact {
+    width: 92px;
+    margin-left: 6px;
 }
 
 /* Mockup B: warm concrete stage, restrained charcoal holders, orange actions. */
@@ -3778,6 +3798,40 @@
     border-bottom-color: var(--accent);
 }
 
+.garage-ad-free-button {
+    height: 36px;
+    min-width: 142px;
+    max-width: 176px;
+    margin-right: 16px;
+    padding-left: 12px;
+    padding-right: 12px;
+    color: rgb(255, 250, 238);
+    background-color: rgba(241, 88, 36, 0.16);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(241, 88, 36, 0.78);
+    border-right-color: rgba(241, 88, 36, 0.78);
+    border-top-color: rgba(241, 88, 36, 0.78);
+    border-bottom-color: rgba(241, 88, 36, 0.78);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    letter-spacing: 0.45px;
+}
+
+.garage-ad-free-button:hover {
+    background-color: rgba(241, 88, 36, 0.28);
+}
+
+.garage-ad-free-button:disabled {
+    opacity: 0.72;
+}
+
 .mission-result-rewarded-bonus {
     color: var(--positive);
 }
@@ -3826,4 +3880,832 @@
 
 .mission-result-rewarded-button:hover {
     background-color: rgba(241, 88, 36, 0.18);
+}
+
+.mission-result-rewarded-button:disabled {
+    opacity: 0.72;
+}
+
+/* iOS-only sizing. The class is added by IosSafeAreaController, so WebGL keeps
+   its existing desktop layout. */
+.platform-ios .topbar {
+    height: 88px;
+}
+
+.platform-ios .brand-title {
+    font-size: 22px;
+}
+
+.platform-ios .balance-value {
+    font-size: 21px;
+}
+
+.platform-ios .top-tab {
+    min-height: 52px;
+    padding-left: 22px;
+    padding-right: 22px;
+    font-size: 16px;
+}
+
+.platform-ios .topbar-settings-button {
+    width: 52px;
+    height: 52px;
+    margin-right: 14px;
+    font-size: 16px;
+}
+
+.platform-ios .showroom-arrow {
+    width: 76px;
+    height: 76px;
+    border-top-left-radius: 38px;
+    border-top-right-radius: 38px;
+    border-bottom-left-radius: 38px;
+    border-bottom-right-radius: 38px;
+}
+
+.platform-ios .filter-chip {
+    min-height: 50px;
+    padding-left: 18px;
+    padding-right: 18px;
+    font-size: 14px;
+}
+
+.platform-ios .primary-action,
+.platform-ios .mission-button,
+.platform-ios .mission-result-button,
+.platform-ios .mission-result-rewarded-button,
+.platform-ios .pause-primary-button,
+.platform-ios .pause-secondary-button,
+.platform-ios .pause-settings-button,
+.platform-ios .settings-action-button,
+.platform-ios .settings-close-button {
+    min-height: 58px;
+    font-size: 16px;
+}
+
+.platform-ios .mission-pause-button {
+    width: 64px;
+    height: 56px;
+    font-size: 20px;
+}
+
+.platform-ios .mission-kicker,
+.platform-ios .mission-health-tag,
+.platform-ios .mission-speed-unit {
+    font-size: 14px;
+}
+
+.platform-ios .mission-primary-value {
+    font-size: 26px;
+}
+
+.platform-ios .mission-timer {
+    font-size: 28px;
+}
+
+.platform-ios .settings-slider {
+    min-height: 52px;
+}
+
+/* App Store settings content can exceed a landscape phone's height. */
+.settings-panel {
+    height: 88%;
+    max-height: 88%;
+}
+
+.settings-scroll {
+    flex-grow: 1;
+    min-height: 0;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.settings-action-button--danger {
+    color: rgb(255, 184, 178);
+    background-color: rgba(190, 46, 54, 0.16);
+    border-left-color: rgba(255, 102, 111, 0.55);
+    border-right-color: rgba(255, 102, 111, 0.55);
+    border-top-color: rgba(255, 102, 111, 0.55);
+    border-bottom-color: rgba(255, 102, 111, 0.55);
+}
+
+.settings-action-button--danger:hover {
+    color: rgb(255, 238, 236);
+    background-color: rgba(190, 46, 54, 0.30);
+}
+
+.account-delete-overlay {
+    background-color: rgba(3, 6, 9, 0.94);
+}
+
+.account-delete-panel {
+    height: auto;
+    max-height: 88%;
+}
+
+.account-delete-eyebrow {
+    color: rgb(255, 126, 118);
+}
+
+.account-delete-description {
+    margin-top: 18px;
+    margin-bottom: 20px;
+    color: var(--text-soft);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.account-delete-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.account-delete-cancel-button,
+.account-delete-confirm-button {
+    flex-grow: 1;
+}
+
+.account-delete-cancel-button {
+    margin-right: 8px;
+}
+
+.account-delete-confirm-button {
+    width: 190px;
+}
+
+.service-notification-overlay {
+    background-color: rgba(3, 6, 9, 0.96);
+}
+
+.service-notification-panel {
+    height: auto;
+    max-height: 88%;
+}
+
+.service-notification-scroll {
+    max-height: 240px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+/* iOS landscape compact layout.
+   Keep this block last: the garage stylesheet contains several desktop design
+   layers, while iPhone landscape has very little vertical UI space. */
+.platform-ios .garage-root .topbar {
+    height: 48px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+.platform-ios .garage-root .brand-row {
+    flex-shrink: 0;
+}
+
+.platform-ios .garage-root .brand-mark {
+    margin-right: 7px;
+    font-size: 10px;
+}
+
+.platform-ios .garage-root .brand-title {
+    font-size: 14px;
+    letter-spacing: 0.8px;
+}
+
+.platform-ios .garage-root .tabbar {
+    height: 48px;
+    min-width: 200px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+.platform-ios .garage-root .top-tab {
+    height: 40px;
+    min-height: 40px;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+}
+
+.platform-ios .garage-root .topbar-actions {
+    width: auto;
+    min-width: 272px;
+    flex-shrink: 0;
+}
+
+.platform-ios .garage-root .garage-ad-free-button {
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
+    height: 32px;
+    margin-right: 10px;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 8px;
+    letter-spacing: 0.25px;
+}
+
+.platform-ios .garage-root .balance-value {
+    font-size: 15px;
+}
+
+.platform-ios .garage-root .topbar-settings-button {
+    width: 40px;
+    height: 40px;
+    margin-left: 8px;
+    margin-right: 0;
+    font-size: 15px;
+}
+
+.platform-ios .garage-root .footerbar {
+    height: 52px;
+}
+
+.platform-ios .garage-root .mission-button {
+    top: 6px;
+    width: 230px;
+    min-width: 230px;
+    height: 40px;
+    min-height: 40px;
+    font-size: 12px;
+}
+
+.platform-ios .garage-root .drag-hint {
+    right: 12px;
+    top: 8px;
+    min-width: 176px;
+    height: 30px;
+    padding-left: 9px;
+    padding-right: 9px;
+}
+
+.platform-ios .garage-root .drag-copy {
+    font-size: 8px;
+}
+
+.platform-ios .garage-root .showroom-caption {
+    top: 8px;
+    min-width: 182px;
+    height: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.platform-ios .garage-root .showroom-caption-title {
+    font-size: 9px;
+}
+
+.platform-ios .garage-root .showroom-caption-meta {
+    margin-left: 9px;
+    padding-left: 9px;
+    font-size: 8px;
+}
+
+.platform-ios .garage-root .showroom-arrow {
+    width: 44px;
+    height: 44px;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+    font-size: 27px;
+}
+
+.platform-ios .garage-root .showroom-arrow--left {
+    left: 29%;
+}
+
+.platform-ios .garage-root .showroom-arrow--right {
+    right: 27%;
+}
+
+.platform-ios .garage-root .showroom-arrow:hover {
+    color: rgb(41, 38, 34);
+    background-color: rgba(239, 231, 214, 0.96);
+    border-left-color: rgba(45, 42, 38, 0.30);
+    border-right-color: rgba(45, 42, 38, 0.30);
+    border-top-color: rgba(45, 42, 38, 0.30);
+    border-bottom-color: rgba(45, 42, 38, 0.30);
+}
+
+.platform-ios .garage-root .stats-panel {
+    left: 14px;
+    width: 200px;
+    min-height: 0;
+    max-height: none;
+}
+
+.platform-ios .garage-root .stat-card {
+    height: 34px;
+    margin-bottom: 1px;
+}
+
+.platform-ios .garage-root .stat-header,
+.platform-ios .garage-root .stat-value-row {
+    height: 20px;
+}
+
+.platform-ios .garage-root .stat-name {
+    width: 77px;
+    font-size: 8px;
+}
+
+.platform-ios .garage-root .stat-value {
+    font-size: 10px;
+}
+
+.platform-ios .garage-root .stat-delta {
+    min-width: 44px;
+    margin-left: 4px;
+    font-size: 8px;
+}
+
+.platform-ios .garage-root .stat-track {
+    height: 3px;
+    margin-bottom: 5px;
+}
+
+.platform-ios .garage-root.garage-screen--gallery .context-drawer,
+.platform-ios .garage-root.garage-screen--parts .context-drawer {
+    left: auto;
+    right: 10px;
+    bottom: 10px;
+    width: 250px;
+    min-width: 0;
+    max-width: 250px;
+    min-height: 68px;
+    max-height: 76px;
+    padding: 8px 9px;
+    translate: 0 0;
+    background-color: rgba(58, 54, 49, 0.94);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(244, 234, 216, 0.18);
+    border-right-color: rgba(244, 234, 216, 0.18);
+    border-top-color: rgba(244, 234, 216, 0.18);
+    border-bottom-color: rgba(244, 234, 216, 0.18);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.platform-ios .garage-root.garage-screen--gallery .detail-copy,
+.platform-ios .garage-root.garage-screen--parts .detail-copy {
+    align-items: flex-start;
+    padding-right: 8px;
+}
+
+.platform-ios .garage-root.garage-screen--gallery .detail-title,
+.platform-ios .garage-root.garage-screen--parts .detail-title {
+    font-size: 16px;
+    letter-spacing: 0.8px;
+    -unity-text-align: middle-left;
+}
+
+.platform-ios .garage-root.garage-screen--gallery .detail-description,
+.platform-ios .garage-root.garage-screen--parts .detail-description {
+    min-height: 14px;
+    max-height: 16px;
+    margin-top: 2px;
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    -unity-text-align: middle-left;
+}
+
+.platform-ios .garage-root.garage-screen--gallery .detail-action-block,
+.platform-ios .garage-root.garage-screen--parts .detail-action-block {
+    width: 104px;
+    min-height: 44px;
+    padding-left: 6px;
+}
+
+.platform-ios .garage-root.garage-screen--gallery .primary-action,
+.platform-ios .garage-root.garage-screen--parts .primary-action {
+    height: 44px;
+    min-height: 44px;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 8px;
+    letter-spacing: 0.2px;
+}
+
+/* Parts needs more copy space than the vehicle gallery because attachment
+   names and purchase states can both be long on a landscape phone. */
+.platform-ios .garage-root.garage-screen--parts .context-drawer {
+    width: 300px;
+    max-width: 300px;
+    min-height: 92px;
+    max-height: 96px;
+}
+
+.platform-ios .garage-root.garage-screen--parts .detail-copy {
+    min-width: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.platform-ios .garage-root.garage-screen--parts .detail-title {
+    max-height: 31px;
+    font-size: 11px;
+    letter-spacing: 0.35px;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.platform-ios .garage-root.garage-screen--parts .detail-description {
+    display: none;
+}
+
+.platform-ios .garage-root.garage-screen--parts .context-hint {
+    max-height: 12px;
+    margin-top: 3px;
+    font-size: 7px;
+    letter-spacing: 0.35px;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.platform-ios .garage-root.garage-screen--parts .detail-action-block {
+    justify-content: center;
+}
+
+.platform-ios .garage-root.garage-screen--parts .primary-action {
+    height: 42px;
+    min-height: 42px;
+}
+
+.platform-ios .garage-root.garage-screen--parts .stats-panel {
+    width: 220px;
+}
+
+.platform-ios .garage-root.garage-screen--parts .stat-name {
+    width: 82px;
+    margin-right: 4px;
+    font-size: 7px;
+}
+
+.platform-ios .garage-root.garage-screen--parts .stat-value {
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.platform-ios .garage-root.garage-screen--parts .stat-delta {
+    min-width: 36px;
+    margin-left: 2px;
+    font-size: 7px;
+    white-space: nowrap;
+}
+
+.platform-ios .garage-root .filter-chip {
+    height: 34px;
+    min-height: 34px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 11px;
+}
+
+.platform-ios .mission-result {
+    padding: 14px;
+}
+
+.platform-ios .mission-result-panel {
+    width: 860px;
+    max-width: 96%;
+    max-height: 94%;
+    padding: 14px 20px 16px 20px;
+}
+
+.platform-ios .mission-result-eyebrow {
+    font-size: 10px;
+}
+
+.platform-ios .mission-result-status-line {
+    display: none;
+}
+
+.platform-ios .mission-result-title {
+    margin-top: 3px;
+    font-size: 28px;
+}
+
+.platform-ios .mission-result-description {
+    display: none;
+}
+
+.platform-ios .mission-result-rule {
+    margin-top: 8px;
+}
+
+.platform-ios .mission-result-rule--subtle {
+    margin-top: 1px;
+}
+
+.platform-ios .mission-result-metrics {
+    height: 58px;
+}
+
+.platform-ios .mission-result-metric {
+    min-width: 80px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.platform-ios .mission-result-metric-label,
+.platform-ios .mission-result-mayhem-label,
+.platform-ios .mission-result-reward-label,
+.platform-ios .mission-result-reward-total-label {
+    font-size: 10px;
+}
+
+.platform-ios .mission-result-metric-value {
+    margin-top: 3px;
+    font-size: 20px;
+}
+
+.platform-ios .mission-result-lower {
+    min-height: 106px;
+    padding-top: 9px;
+}
+
+.platform-ios .mission-result-mayhem {
+    padding-right: 16px;
+}
+
+.platform-ios .mission-result-mayhem-value {
+    margin-top: 4px;
+    font-size: 17px;
+}
+
+.platform-ios .mission-result-section-divider {
+    margin-right: 18px;
+}
+
+.platform-ios .mission-result-reward-row,
+.platform-ios .mission-result-reward-balance {
+    height: 18px;
+}
+
+.platform-ios .mission-result-reward-value,
+.platform-ios .mission-result-reward-balance-value {
+    font-size: 13px;
+}
+
+.platform-ios .mission-result-reward-total {
+    height: 30px;
+    margin-top: 3px;
+    padding-top: 4px;
+}
+
+.platform-ios .mission-result-reward-total-value {
+    font-size: 19px;
+}
+
+.platform-ios .mission-result-rewarded-status {
+    min-height: 16px;
+    margin-top: 4px;
+    font-size: 10px;
+}
+
+.platform-ios .mission-result-actions {
+    margin-top: 7px;
+}
+
+.platform-ios .mission-result-actions .mission-result-button {
+    width: 210px;
+    height: 48px;
+    min-height: 48px;
+    font-size: 13px;
+}
+
+.platform-ios .mission-pause-panel {
+    width: 430px;
+    max-width: 88%;
+    max-height: 94%;
+    padding: 15px 18px 16px 18px;
+}
+
+.platform-ios .mission-pause-title {
+    margin-top: 4px;
+    font-size: 23px;
+}
+
+.platform-ios .mission-pause-summary {
+    height: 56px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.platform-ios .pause-primary-button,
+.platform-ios .pause-secondary-button,
+.platform-ios .pause-settings-button {
+    height: 48px;
+    min-height: 48px;
+    font-size: 13px;
+}
+
+.platform-ios .mission-pause-actions,
+.platform-ios .pause-settings-button {
+    margin-top: 6px;
+}
+
+.platform-ios .mission-pause-hint {
+    display: none;
+}
+
+.platform-ios .settings-panel {
+    width: 500px;
+    max-width: 92%;
+    height: 90%;
+    max-height: 90%;
+    padding: 16px 20px 18px 20px;
+}
+
+.platform-ios .settings-action-button,
+.platform-ios .settings-close-button {
+    min-height: 48px;
+    font-size: 13px;
+}
+
+.platform-ios .settings-scroll .unity-scroll-view__vertical-scroller,
+.platform-ios .settings-scroll .unity-scroll-view__horizontal-scroller {
+    display: none;
+}
+
+/* Gameplay HUD uses iOS points, not desktop-sized proportions. */
+.platform-ios .mission-top-anchor {
+    top: 10px;
+}
+
+.platform-ios .mission-top-row {
+    width: 430px;
+    height: 46px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.platform-ios .mission-hud-segment {
+    height: 44px;
+    padding: 4px 10px;
+}
+
+.platform-ios .mission-objective-card,
+.platform-ios .mission-score-card {
+    width: 164px;
+}
+
+.platform-ios .mission-timer-card {
+    width: 92px;
+}
+
+.platform-ios .mission-strip-divider {
+    height: 25px;
+}
+
+.platform-ios .mission-kicker {
+    font-size: 9px;
+    letter-spacing: 0.8px;
+}
+
+.platform-ios .mission-primary-value {
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+
+.platform-ios .mission-timer {
+    font-size: 20px;
+    letter-spacing: 0.8px;
+}
+
+.platform-ios .mission-pause-button {
+    right: 12px;
+    top: 10px;
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+}
+
+.platform-ios .mission-telemetry-stack {
+    left: 12px;
+    bottom: 12px;
+    width: 245px;
+}
+
+.platform-ios .mission-vehicle-panel {
+    width: 245px;
+    height: 100px;
+}
+
+.platform-ios .mission-speedometer {
+    width: 96px;
+    height: 96px;
+    border-top-left-radius: 48px;
+    border-top-right-radius: 48px;
+    border-bottom-left-radius: 48px;
+    border-bottom-right-radius: 48px;
+}
+
+.platform-ios .mission-speed-tick,
+.platform-ios .mission-speed-needle {
+    width: 94px;
+    height: 94px;
+}
+
+.platform-ios .mission-speed-tick-mark {
+    left: 46px;
+    top: 5px;
+    width: 2px;
+    height: 7px;
+}
+
+.platform-ios .mission-speed-needle-bar {
+    left: 46px;
+    top: 15px;
+    width: 2px;
+    height: 34px;
+}
+
+.platform-ios .mission-speed-hub {
+    left: 43px;
+    top: 43px;
+    width: 8px;
+    height: 8px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.platform-ios .mission-current-speed {
+    top: 34px;
+    font-size: 26px;
+    letter-spacing: -0.8px;
+}
+
+.platform-ios .mission-speed-unit {
+    top: 66px;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+.platform-ios .mission-run-status {
+    width: 141px;
+    min-height: 82px;
+    margin-left: 8px;
+    margin-bottom: 5px;
+    padding-left: 9px;
+}
+
+.platform-ios .mission-vehicle-name {
+    margin-bottom: 6px;
+    font-size: 11px;
+    letter-spacing: 0.7px;
+}
+
+.platform-ios .mission-health-tag {
+    font-size: 9px;
+}
+
+.platform-ios .mission-health-value {
+    font-size: 10px;
+}
+
+.platform-ios .mission-health-segments,
+.platform-ios .mission-health-segment {
+    height: 6px;
+}
+
+.platform-ios .mission-health-segments {
+    margin-top: 5px;
+}
+
+.platform-ios .mission-health-segment {
+    margin-right: 2px;
+}
+
+.platform-ios .mission-mayhem-card {
+    min-height: 31px;
+    margin-top: 9px;
+    padding-top: 5px;
+}
+
+.platform-ios .mission-mayhem-tier,
+.platform-ios .mission-mayhem-multiplier {
+    font-size: 10px;
+}
+
+.platform-ios .mission-mayhem-track,
+.platform-ios .mission-mayhem-fill {
+    height: 3px;
+}
+
+.platform-ios .mission-mayhem-track {
+    margin-top: 4px;
 }
